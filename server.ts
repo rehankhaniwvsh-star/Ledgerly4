@@ -30,6 +30,12 @@ async function startServer() {
     res.json({ status: "ok", service: "Ledgerly Server" });
   });
 
+  // Serve Google Search Console verification file directly
+  app.get("/googleacb1159f81828443.html", (req, res) => {
+    res.setHeader("Content-Type", "text/html");
+    res.send("google-site-verification: googleacb1159f81828443.html");
+  });
+
   // CMS AI Copywriting Generator
   app.post("/api/cms/generate-copy", async (req, res) => {
     try {
