@@ -54,12 +54,23 @@ export default function App() {
   const [cmsAdminOpen, setCmsAdminOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
 
-  // Synchronize browser tab title with CMS brand settings
+  // Synchronize browser tab title and Google Search Console meta tag with CMS brand settings
   useEffect(() => {
     if (cms.brand?.brandName) {
       document.title = `${cms.brand.brandName} — ${
         cms.brand.tagline || 'Branded invoicing for freelancers and agencies'
       }`;
+    }
+
+    // Dynamic Google Search Console meta tag injection
+    if (cms.brand?.googleSiteVerification) {
+      let meta = document.querySelector('meta[name="google-site-verification"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('name', 'google-site-verification');
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', cms.brand.googleSiteVerification);
     }
   }, [cms.brand]);
 

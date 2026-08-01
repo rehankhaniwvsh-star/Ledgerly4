@@ -457,6 +457,61 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                       className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
                     />
                   </div>
+
+                  {/* Google Search Console & SEO Section */}
+                  <div className="sm:col-span-2 pt-4 border-t border-[#E3DED6] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h5 className="text-xs font-bold text-[#2B2320] flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#7A1E2B]"></span>
+                        Google Search Console & SEO Verification
+                      </h5>
+                      <span className="text-[10px] bg-[#E8DCC8] text-[#7A1E2B] px-2 py-0.5 rounded font-bold">
+                        SEO Integration
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                        Google Site Verification Code / Meta Tag Content
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. google1234567890abcdef OR full meta tag"
+                        value={formData.brand.googleSiteVerification || ''}
+                        onChange={(e) => {
+                          let val = e.target.value;
+                          // Automatically extract content value if user pastes full <meta name="google-site-verification" content="..." />
+                          const match = val.match(/content=["']([^"']+)["']/i);
+                          if (match && match[1]) {
+                            val = match[1];
+                          }
+                          setFormData({
+                            ...formData,
+                            brand: { ...formData.brand, googleSiteVerification: val },
+                          });
+                        }}
+                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320] font-mono"
+                      />
+                      <p className="text-[11px] text-[#8A8177] mt-1 leading-relaxed">
+                        Paste either your Google Search Console verification code or the full HTML meta tag. Ledgerly will automatically inject: <br />
+                        <code className="text-[#7A1E2B] font-mono text-[10px]">
+                          &lt;meta name="google-site-verification" content="{formData.brand.googleSiteVerification || 'YOUR_CODE'}" /&gt;
+                        </code>
+                      </p>
+                    </div>
+
+                    <div className="bg-[#FBF9F6] border border-[#E8DCC8] p-3 rounded text-xs space-y-1.5 text-[#2B2320]">
+                      <span className="font-bold text-[#7A1E2B] block text-[11px]">
+                        💡 How to verify in Google Search Console:
+                      </span>
+                      <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#8A8177]">
+                        <li>Go to <strong>Google Search Console</strong> and select <strong>HTML Tag</strong> verification method.</li>
+                        <li>Copy the <code className="bg-white px-1 py-0.5 border border-[#E3DED6] rounded font-mono">content="..."</code> value or the full tag.</li>
+                        <li>Paste it in the box above and click <strong>Save Edits</strong>.</li>
+                        <li>Alternatively, you can open <code className="bg-white px-1 py-0.5 border border-[#E3DED6] rounded font-mono">index.html</code> in your editor and edit line 7 directly!</li>
+                      </ol>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

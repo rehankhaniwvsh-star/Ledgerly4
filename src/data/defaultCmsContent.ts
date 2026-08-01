@@ -9,6 +9,7 @@ export const defaultCmsContent: CmsContent = {
     backgroundColor: '#FBF9F6',
     contactEmail: 'hello@ledgerly.app',
     logoLetter: 'L',
+    googleSiteVerification: '',
   },
   hero: {
     eyebrow: 'Free · No card required',

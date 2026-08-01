@@ -62,6 +62,7 @@ export interface BrandSettings {
   backgroundColor: string; // e.g. #FBF9F6
   contactEmail: string;
   logoLetter: string;
+  googleSiteVerification?: string; // Google Search Console code or full meta content
 }
 
 export interface CmsContent {
