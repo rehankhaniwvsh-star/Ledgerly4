@@ -36,6 +36,42 @@ async function startServer() {
     res.send("google-site-verification: googleacb1159f81828443.html");
   });
 
+  // Dynamic Sitemap XML generator
+  app.get("/sitemap.xml", (req, res) => {
+    const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+    const host = req.get("host") || "localhost:3000";
+    const baseUrl = `${protocol}://${host}`;
+
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+
+    res.setHeader("Content-Type", "application/xml");
+    res.status(200).send(sitemapXml);
+  });
+
+  // Serve Robots.txt
+  app.get("/robots.txt", (req, res) => {
+    const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+    const host = req.get("host") || "localhost:3000";
+    const baseUrl = `${protocol}://${host}`;
+
+    const robotsTxt = `User-agent: *
+Allow: /
+
+Sitemap: ${baseUrl}/sitemap.xml
+`;
+
+    res.setHeader("Content-Type", "text/plain");
+    res.status(200).send(robotsTxt);
+  });
+
   // CMS AI Copywriting Generator
   app.post("/api/cms/generate-copy", async (req, res) => {
     try {
