@@ -207,8 +207,7 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen font-[#Poppins] text-[#2B2320] selection:bg-[#E8DCC8] selection:text-[#7A1E2B]"
-      style={{ backgroundColor: cms.brand.backgroundColor || '#FBF9F6' }}
+      className="min-h-screen text-[var(--foreground)] bg-[var(--background)] selection:bg-[var(--accent)] selection:text-[var(--primary)]"
     >
       {/* Universal Top Header Bar */}
       <Header

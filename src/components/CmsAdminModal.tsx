@@ -140,19 +140,19 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#2B2320]/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white border border-[#E3DED6] rounded-lg max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* CMS Header Bar */}
-        <div className="px-6 py-4 border-b border-[#E3DED6] bg-[#FBF9F6] flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--muted)]/50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-[#7A1E2B] text-white flex items-center justify-center font-bold text-xs">
+            <div className="w-8 h-8 rounded bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center font-bold text-xs">
               CMS
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[#2B2320]">
-                Ledgerly Brand Content Manager
+              <h3 className="font-bold text-sm text-[var(--foreground)]">
+                {formData.brand.brandName || 'Ledgerly'} Brand Content Manager
               </h3>
-              <p className="text-[11px] text-[#8A8177]">
+              <p className="text-[11px] text-[var(--muted-foreground)]">
                 Live editing, style configuration, and Gemini AI copy generation
               </p>
             </div>
@@ -160,7 +160,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
           <div className="flex items-center gap-2">
             {saveNotification && (
-              <span className="text-xs font-semibold text-[#3F7A4E] bg-[#EAF3EC] px-2.5 py-1 rounded flex items-center gap-1">
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" />
                 <span>Saved Live!</span>
               </span>
@@ -168,7 +168,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-[#7A1E2B] text-white rounded shadow-sm hover:opacity-95"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[var(--radius)] shadow-sm hover:opacity-90 cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Save Edits</span>
@@ -176,7 +176,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 text-[#8A8177] hover:text-[#2B2320] rounded hover:bg-[#EDEAE5] ml-2"
+              className="p-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded hover:bg-[var(--muted)] ml-2 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -186,13 +186,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
         {/* CMS Sidebar + Main Workspace */}
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           {/* Tabs Navigation Sidebar */}
-          <div className="w-full md:w-56 bg-[#FBF9F6] border-b md:border-b-0 md:border-r border-[#E3DED6] p-3 space-y-1 overflow-x-auto md:overflow-y-auto shrink-0 flex md:flex-col gap-1">
+          <div className="w-full md:w-56 bg-[var(--sidebar)] border-b md:border-b-0 md:border-r border-[var(--border)] p-3 space-y-1 overflow-x-auto md:overflow-y-auto shrink-0 flex md:flex-col gap-1">
             <button
               onClick={() => setActiveTab('brand')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'brand'
-                  ? 'bg-[#7A1E2B] text-white'
-                  : 'text-[#8A8177] hover:bg-[#EDEAE5] hover:text-[#2B2320]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <Palette className="w-3.5 h-3.5" />
@@ -201,10 +201,10 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={() => setActiveTab('hero')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'hero'
-                  ? 'bg-[#7A1E2B] text-white'
-                  : 'text-[#8A8177] hover:bg-[#EDEAE5] hover:text-[#2B2320]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <Layout className="w-3.5 h-3.5" />
@@ -213,10 +213,10 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={() => setActiveTab('features')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'features'
-                  ? 'bg-[#7A1E2B] text-white'
-                  : 'text-[#8A8177] hover:bg-[#EDEAE5] hover:text-[#2B2320]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <Sliders className="w-3.5 h-3.5" />
@@ -225,10 +225,10 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={() => setActiveTab('howItWorks')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'howItWorks'
-                  ? 'bg-[#7A1E2B] text-white'
-                  : 'text-[#8A8177] hover:bg-[#EDEAE5] hover:text-[#2B2320]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <BarChart className="w-3.5 h-3.5" />
@@ -237,10 +237,10 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={() => setActiveTab('about')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'about'
-                  ? 'bg-[#7A1E2B] text-white'
-                  : 'text-[#8A8177] hover:bg-[#EDEAE5] hover:text-[#2B2320]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <Type className="w-3.5 h-3.5" />
@@ -249,10 +249,10 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={() => setActiveTab('faqs')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'faqs'
-                  ? 'bg-[#7A1E2B] text-white'
-                  : 'text-[#8A8177] hover:bg-[#EDEAE5] hover:text-[#2B2320]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <HelpCircle className="w-3.5 h-3.5" />
@@ -261,10 +261,10 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={() => setActiveTab('testimonials')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === 'testimonials'
-                  ? 'bg-[#7A1E2B] text-white'
-                  : 'text-[#8A8177] hover:bg-[#EDEAE5] hover:text-[#2B2320]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
               }`}
             >
               <Quote className="w-3.5 h-3.5" />
@@ -273,26 +273,26 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={() => setActiveTab('ai')}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded text-left transition-colors whitespace-nowrap border border-[#E8DCC8] ${
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap border border-[var(--border)] cursor-pointer ${
                 activeTab === 'ai'
-                  ? 'bg-[#2B2320] text-white'
-                  : 'bg-[#FBF3E3] text-[#7A1E2B] hover:bg-[#E8DCC8]'
+                  ? 'bg-[var(--foreground)] text-[var(--background)]'
+                  : 'bg-[var(--accent)] text-[var(--primary)] hover:bg-[var(--muted)]'
               }`}
             >
-              <Bot className="w-3.5 h-3.5 text-[#7A1E2B]" />
+              <Bot className="w-3.5 h-3.5 text-[var(--primary)]" />
               <span>Gemini AI Copywriter</span>
             </button>
 
-            <div className="pt-4 mt-auto border-t border-[#E3DED6] space-y-2 hidden md:block">
+            <div className="pt-4 mt-auto border-t border-[var(--border)] space-y-2 hidden md:block">
               <button
                 onClick={handleExportJson}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#8A8177] hover:text-[#2B2320]"
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export JSON</span>
               </button>
 
-              <label className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#8A8177] hover:text-[#2B2320] cursor-pointer">
+              <label className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] cursor-pointer">
                 <Upload className="w-3.5 h-3.5" />
                 <span>Import JSON</span>
                 <input
@@ -314,7 +314,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                     onClose();
                   }
                 }}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[#7A1E2B] hover:underline"
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-red-600 dark:text-red-400 hover:underline cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset Defaults</span>
@@ -327,12 +327,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
             {/* BRAND TAB */}
             {activeTab === 'brand' && (
               <div className="space-y-4">
-                <h4 className="text-sm font-bold text-[#2B2320]">
+                <h4 className="text-sm font-bold text-[var(--foreground)]">
                   Global Brand & Color Settings
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Brand Name
                     </label>
                     <input
@@ -344,12 +344,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                           brand: { ...formData.brand, brandName: e.target.value },
                         })
                       }
-                      className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Logo Letter
                     </label>
                     <input
@@ -365,12 +365,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                           },
                         })
                       }
-                      className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Primary Theme Color
                     </label>
                     <div className="flex items-center gap-2">
@@ -386,7 +386,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-8 h-8 rounded border border-[#E3DED6] cursor-pointer"
+                        className="w-8 h-8 rounded border border-[var(--border)] cursor-pointer"
                       />
                       <input
                         type="text"
@@ -400,13 +400,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Accent Color
                     </label>
                     <div className="flex items-center gap-2">
@@ -422,7 +422,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-8 h-8 rounded border border-[#E3DED6] cursor-pointer"
+                        className="w-8 h-8 rounded border border-[var(--border)] cursor-pointer"
                       />
                       <input
                         type="text"
@@ -436,13 +436,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                       />
                     </div>
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Tagline
                     </label>
                     <input
@@ -454,24 +454,24 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                           brand: { ...formData.brand, tagline: e.target.value },
                         })
                       }
-                      className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                     />
                   </div>
 
                   {/* Google Search Console & SEO Section */}
-                  <div className="sm:col-span-2 pt-4 border-t border-[#E3DED6] space-y-3">
+                  <div className="sm:col-span-2 pt-4 border-t border-[var(--border)] space-y-3">
                     <div className="flex items-center justify-between">
-                      <h5 className="text-xs font-bold text-[#2B2320] flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#7A1E2B]"></span>
+                      <h5 className="text-xs font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[var(--primary)]"></span>
                         Google Search Console & SEO Verification
                       </h5>
-                      <span className="text-[10px] bg-[#E8DCC8] text-[#7A1E2B] px-2 py-0.5 rounded font-bold">
+                      <span className="text-[10px] bg-[var(--accent)] text-[var(--primary)] px-2 py-0.5 rounded font-bold">
                         SEO Integration
                       </span>
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                         Google Site Verification Code / Meta Tag Content
                       </label>
                       <input
@@ -480,7 +480,6 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                         value={formData.brand.googleSiteVerification || ''}
                         onChange={(e) => {
                           let val = e.target.value;
-                          // Automatically extract content value if user pastes full <meta name="google-site-verification" content="..." />
                           const match = val.match(/content=["']([^"']+)["']/i);
                           if (match && match[1]) {
                             val = match[1];
@@ -490,25 +489,24 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             brand: { ...formData.brand, googleSiteVerification: val },
                           });
                         }}
-                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320] font-mono"
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] font-mono"
                       />
-                      <p className="text-[11px] text-[#8A8177] mt-1 leading-relaxed">
+                      <p className="text-[11px] text-[var(--muted-foreground)] mt-1 leading-relaxed">
                         Paste either your Google Search Console verification code or the full HTML meta tag. Ledgerly will automatically inject: <br />
-                        <code className="text-[#7A1E2B] font-mono text-[10px]">
+                        <code className="text-[var(--primary)] font-mono text-[10px]">
                           &lt;meta name="google-site-verification" content="{formData.brand.googleSiteVerification || 'YOUR_CODE'}" /&gt;
                         </code>
                       </p>
                     </div>
 
-                    <div className="bg-[#FBF9F6] border border-[#E8DCC8] p-3 rounded text-xs space-y-1.5 text-[#2B2320]">
-                      <span className="font-bold text-[#7A1E2B] block text-[11px]">
+                    <div className="bg-[var(--muted)]/50 border border-[var(--border)] p-3 rounded text-xs space-y-1.5 text-[var(--foreground)]">
+                      <span className="font-bold text-[var(--primary)] block text-[11px]">
                         💡 How to verify in Google Search Console:
                       </span>
-                      <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#8A8177]">
+                      <ol className="list-decimal list-inside space-y-1 text-[11px] text-[var(--muted-foreground)]">
                         <li>Go to <strong>Google Search Console</strong> and select <strong>HTML Tag</strong> verification method.</li>
-                        <li>Copy the <code className="bg-white px-1 py-0.5 border border-[#E3DED6] rounded font-mono">content="..."</code> value or the full tag.</li>
+                        <li>Copy the <code className="bg-[var(--card)] px-1 py-0.5 border border-[var(--border)] rounded font-mono">content="..."</code> value or the full tag.</li>
                         <li>Paste it in the box above and click <strong>Save Edits</strong>.</li>
-                        <li>Alternatively, you can open <code className="bg-white px-1 py-0.5 border border-[#E3DED6] rounded font-mono">index.html</code> in your editor and edit line 7 directly!</li>
                       </ol>
                     </div>
                   </div>
@@ -519,12 +517,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
             {/* HERO TAB */}
             {activeTab === 'hero' && (
               <div className="space-y-4">
-                <h4 className="text-sm font-bold text-[#2B2320]">
+                <h4 className="text-sm font-bold text-[var(--foreground)]">
                   Hero Copy & Call to Action Settings
                 </h4>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Eyebrow Badge
                     </label>
                     <input
@@ -536,13 +534,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                           hero: { ...formData.hero, eyebrow: e.target.value },
                         })
                       }
-                      className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                         Main Headline Text
                       </label>
                       <input
@@ -557,12 +555,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                         Headline Accent Word (Styled in Brand Color)
                       </label>
                       <input
@@ -577,13 +575,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Subheadline
                     </label>
                     <textarea
@@ -598,13 +596,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                           },
                         })
                       }
-                      className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                     ></textarea>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                         Primary CTA Text
                       </label>
                       <input
@@ -619,12 +617,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                       />
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                      <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                         Secondary CTA Text
                       </label>
                       <input
@@ -639,7 +637,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             },
                           })
                         }
-                        className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                       />
                     </div>
                   </div>
@@ -651,7 +649,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
             {activeTab === 'features' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-[#2B2320]">
+                  <h4 className="text-sm font-bold text-[var(--foreground)]">
                     Manage Features List
                   </h4>
                   <button
@@ -670,7 +668,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                         },
                       });
                     }}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#7A1E2B] hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--primary)] hover:underline cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Feature</span>
@@ -681,7 +679,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                   {formData.features.items.map((feat, idx) => (
                     <div
                       key={feat.id}
-                      className="p-3 bg-[#FBF9F6] border border-[#E3DED6] rounded flex items-start justify-between gap-3"
+                      className="p-3 bg-[var(--background)] border border-[var(--border)] rounded flex items-start justify-between gap-3"
                     >
                       <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <input
@@ -696,12 +694,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                               features: { ...formData.features, items },
                             });
                           }}
-                          className="p-1.5 bg-white border border-[#E3DED6] rounded text-xs font-semibold text-[#2B2320]"
+                          className="p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-semibold text-[var(--foreground)]"
                         />
 
                         <input
                           type="text"
-                          placeholder="Icon (Eye, FileText, Share2, Activity, RefreshCw, LayoutDashboard, Zap)"
+                          placeholder="Icon (Rocket, Bookmark, Eye, FileText, Share2, Activity, RefreshCw, LayoutDashboard, Zap)"
                           value={feat.iconName}
                           onChange={(e) => {
                             const items = [...formData.features.items];
@@ -711,7 +709,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                               features: { ...formData.features, items },
                             });
                           }}
-                          className="p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                          className="p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                         />
 
                         <input
@@ -726,7 +724,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                               features: { ...formData.features, items },
                             });
                           }}
-                          className="sm:col-span-3 p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#8A8177]"
+                          className="sm:col-span-3 p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--muted-foreground)]"
                         />
                       </div>
 
@@ -740,7 +738,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             features: { ...formData.features, items },
                           });
                         }}
-                        className="text-[#8A8177] hover:text-[#7A1E2B] p-1"
+                        className="text-[var(--muted-foreground)] hover:text-red-600 p-1 cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -750,11 +748,134 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
               </div>
             )}
 
-            {/* FAQS TAB */}
+            {/* HOW IT WORKS TAB */}
+            {activeTab === 'howItWorks' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
+                    Section Main Title
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.howItWorks.title}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        howItWorks: {
+                          ...formData.howItWorks,
+                          title: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-bold text-[var(--foreground)]"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                    Manage Step-by-Step Execution Steps
+                  </h4>
+                  <button
+                    onClick={() => {
+                      const nextStepNum = String(
+                        formData.howItWorks.steps.length + 1
+                      ).padStart(2, '0');
+                      const newStep: StepItem = {
+                        id: `step-${Date.now()}`,
+                        stepNumber: nextStepNum,
+                        title: 'New Plan Step',
+                        description: 'Describe this execution stage.',
+                        theme: 'ruby',
+                      };
+                      setFormData({
+                        ...formData,
+                        howItWorks: {
+                          ...formData.howItWorks,
+                          steps: [...formData.howItWorks.steps, newStep],
+                        },
+                      });
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--primary)] hover:underline cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Step</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {formData.howItWorks.steps.map((step, idx) => (
+                    <div
+                      key={step.id}
+                      className="p-3 bg-[var(--background)] border border-[var(--border)] rounded space-y-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={step.stepNumber}
+                          onChange={(e) => {
+                            const steps = [...formData.howItWorks.steps];
+                            steps[idx].stepNumber = e.target.value;
+                            setFormData({
+                              ...formData,
+                              howItWorks: { ...formData.howItWorks, steps },
+                            });
+                          }}
+                          className="w-14 p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-mono font-bold text-center text-[var(--foreground)]"
+                          placeholder="01"
+                        />
+                        <input
+                          type="text"
+                          value={step.title}
+                          onChange={(e) => {
+                            const steps = [...formData.howItWorks.steps];
+                            steps[idx].title = e.target.value;
+                            setFormData({
+                              ...formData,
+                              howItWorks: { ...formData.howItWorks, steps },
+                            });
+                          }}
+                          className="flex-1 p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-semibold text-[var(--foreground)]"
+                          placeholder="Step Title"
+                        />
+                        <button
+                          onClick={() => {
+                            const steps = formData.howItWorks.steps.filter(
+                              (s) => s.id !== step.id
+                            );
+                            setFormData({
+                              ...formData,
+                              howItWorks: { ...formData.howItWorks, steps },
+                            });
+                          }}
+                          className="text-[var(--muted-foreground)] hover:text-red-600 p-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <textarea
+                        rows={2}
+                        value={step.description}
+                        onChange={(e) => {
+                          const steps = [...formData.howItWorks.steps];
+                          steps[idx].description = e.target.value;
+                          setFormData({
+                            ...formData,
+                            howItWorks: { ...formData.howItWorks, steps },
+                          });
+                        }}
+                        className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--muted-foreground)]"
+                        placeholder="Step description..."
+                      ></textarea>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {activeTab === 'faqs' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-[#2B2320]">
+                  <h4 className="text-sm font-bold text-[var(--foreground)]">
                     Manage FAQ Items
                   </h4>
                   <button
@@ -773,7 +894,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                         },
                       });
                     }}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#7A1E2B] hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--primary)] hover:underline cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add FAQ</span>
@@ -784,7 +905,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                   {formData.faqs.items.map((faq, idx) => (
                     <div
                       key={faq.id}
-                      className="p-3 bg-[#FBF9F6] border border-[#E3DED6] rounded space-y-2"
+                      className="p-3 bg-[var(--background)] border border-[var(--border)] rounded space-y-2"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <input
@@ -798,7 +919,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                               faqs: { ...formData.faqs, items },
                             });
                           }}
-                          className="w-full p-1.5 bg-white border border-[#E3DED6] rounded text-xs font-semibold text-[#2B2320]"
+                          className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-semibold text-[var(--foreground)]"
                         />
                         <button
                           onClick={() => {
@@ -810,7 +931,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                               faqs: { ...formData.faqs, items },
                             });
                           }}
-                          className="text-[#8A8177] hover:text-[#7A1E2B] p-1"
+                          className="text-[var(--muted-foreground)] hover:text-red-600 p-1 cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -827,7 +948,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                             faqs: { ...formData.faqs, items },
                           });
                         }}
-                        className="w-full p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#8A8177]"
+                        className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--muted-foreground)]"
                       ></textarea>
                     </div>
                   ))}
@@ -837,27 +958,27 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             {/* GEMINI AI TAB */}
             {activeTab === 'ai' && (
-              <div className="space-y-4 bg-[#FBF9F6] p-5 border border-[#E3DED6] rounded-md">
-                <div className="flex items-center gap-2 text-[#7A1E2B]">
+              <div className="space-y-4 bg-[var(--background)] p-5 border border-[var(--border)] rounded-md">
+                <div className="flex items-center gap-2 text-[var(--primary)]">
                   <Sparkles className="w-5 h-5" />
-                  <h4 className="text-sm font-bold text-[#2B2320]">
+                  <h4 className="text-sm font-bold text-[var(--foreground)]">
                     Gemini AI Copywriting Assistant
                   </h4>
                 </div>
-                <p className="text-xs text-[#8A8177]">
+                <p className="text-xs text-[var(--muted-foreground)]">
                   Use server-side Gemini 3.6 Flash model to refine or generate
                   high-converting copy for your website.
                 </p>
 
                 <div className="space-y-3 pt-2">
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Content Target
                     </label>
                     <select
                       value={aiContentType}
                       onChange={(e) => setAiContentType(e.target.value)}
-                      className="w-full p-2 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] cursor-pointer"
                     >
                       <option value="Hero Headline">Hero Subheadline</option>
                       <option value="Feature Description">Feature Description</option>
@@ -867,7 +988,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                       Prompt Instructions
                     </label>
                     <textarea
@@ -875,14 +996,14 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                       placeholder="e.g., Write a punchy 2-sentence subheadline for Ledgerly targeting high-end design agencies and freelancers."
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
-                      className="w-full p-2.5 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                     ></textarea>
                   </div>
 
                   <button
                     onClick={handleGenerateAiCopy}
                     disabled={aiGenerating || !aiPrompt.trim()}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#7A1E2B] rounded hover:opacity-90 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-[var(--primary-foreground)] bg-[var(--primary)] rounded hover:opacity-90 disabled:opacity-50 cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>
@@ -897,16 +1018,16 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                   )}
 
                   {aiResult && (
-                    <div className="p-4 bg-white border border-[#E8DCC8] rounded space-y-3">
-                      <h5 className="text-xs font-bold text-[#7A1E2B]">
+                    <div className="p-4 bg-[var(--card)] border border-[var(--border)] rounded space-y-3">
+                      <h5 className="text-xs font-bold text-[var(--primary)]">
                         Generated Output:
                       </h5>
-                      <p className="text-xs text-[#2B2320] leading-relaxed italic">
+                      <p className="text-xs text-[var(--foreground)] leading-relaxed italic">
                         "{aiResult}"
                       </p>
                       <button
                         onClick={applyAiToHeroSub}
-                        className="px-3 py-1.5 text-xs font-semibold bg-[#E8DCC8] text-[#7A1E2B] rounded hover:bg-[#7A1E2B] hover:text-white transition-colors"
+                        className="px-3 py-1.5 text-xs font-semibold bg-[var(--accent)] text-[var(--primary)] rounded hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)] transition-colors cursor-pointer"
                       >
                         Apply to Hero Subheadline
                       </button>

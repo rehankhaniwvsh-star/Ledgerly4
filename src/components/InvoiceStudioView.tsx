@@ -179,24 +179,24 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F6F0] text-[#2B2320] font-sans pb-16">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans pb-16">
       {/* Toast Banner */}
       {toastMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-[#2B2320] text-white text-xs px-4 py-2.5 rounded shadow-xl flex items-center gap-2 animate-bounce">
-          <CheckCircle2 className="w-4 h-4 text-[#3F7A4E]" />
+        <div className="fixed top-4 right-4 z-50 bg-[var(--foreground)] text-[var(--background)] text-xs px-4 py-2.5 rounded shadow-xl flex items-center gap-2 animate-bounce">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 space-y-6">
-        {/* Top Navigation & Action Toolbar (Matches Screenshot!) */}
-        <div className="bg-white border border-[#E3DED6] rounded-lg p-3 sm:p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
+        {/* Top Navigation & Action Toolbar */}
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-3 sm:p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Left group: Back button, Dropdown Selector, New Button */}
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             <button
               onClick={onBackToLanding}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8A8177] hover:text-[#2B2320] px-2.5 py-1.5 rounded hover:bg-[#F8F6F0] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-2.5 py-1.5 rounded hover:bg-[var(--muted)] transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Landing</span>
@@ -206,7 +206,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             <select
               value={invoice.id || invoice.invoiceNumber}
               onChange={(e) => onSelectInvoiceById(e.target.value)}
-              className="px-3 py-1.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-xs font-bold text-[#2B2320] cursor-pointer focus:outline-none focus:border-[#7A1E2B]"
+              className="px-3 py-1.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-bold text-[var(--foreground)] cursor-pointer focus:outline-none focus:border-[var(--primary)]"
             >
               {invoices.map((inv) => (
                 <option key={inv.id || inv.invoiceNumber} value={inv.id || inv.invoiceNumber}>
@@ -217,7 +217,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
 
             <button
               onClick={onCreateNew}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-[#EDEAE5] text-[#2B2320] hover:bg-[#E3DED6] rounded transition-colors"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold bg-[var(--secondary)] text-[var(--foreground)] hover:bg-[var(--muted)] rounded transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New</span>
@@ -227,24 +227,24 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
           {/* Right group: Status Badges & Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
             {/* Status Selector Pills */}
-            <div className="flex items-center gap-1 bg-[#F8F6F0] p-1 rounded border border-[#E3DED6]">
-              <span className="text-[10px] font-bold text-[#8A8177] px-1 uppercase tracking-wider hidden sm:inline">
+            <div className="flex items-center gap-1 bg-[var(--background)] p-1 rounded border border-[var(--border)]">
+              <span className="text-[10px] font-bold text-[var(--muted-foreground)] px-1 uppercase tracking-wider hidden sm:inline">
                 Status:
               </span>
               {(['Draft', 'Sent', 'Overdue', 'Paid'] as const).map((st) => (
                 <button
                   key={st}
                   onClick={() => handleStatusChange(st)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
+                  className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
                     invoice.status === st
                       ? st === 'Paid'
-                        ? 'bg-[#3F7A4E] text-white'
+                        ? 'bg-emerald-600 text-white'
                         : st === 'Sent'
-                        ? 'bg-[#2563EB] text-white'
+                        ? 'bg-blue-600 text-white'
                         : st === 'Overdue'
-                        ? 'bg-[#DC2626] text-white'
-                        : 'bg-[#7A1E2B] text-white'
-                      : 'text-[#8A8177] hover:text-[#2B2320]'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                      : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
                   }`}
                 >
                   {st}
@@ -255,19 +255,19 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             {/* Action Buttons */}
             <button
               onClick={handleShareLink}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E3DED6] rounded text-xs font-semibold text-[#2B2320] hover:bg-[#F8F6F0]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--muted)] cursor-pointer"
               title="Copy shareable invoice link"
             >
-              {copiedLink ? <Check className="w-3.5 h-3.5 text-[#3F7A4E]" /> : <Share2 className="w-3.5 h-3.5" />}
+              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
               <span>Share Link</span>
             </button>
 
             <button
               onClick={() => setIsClientViewMode(!isClientViewMode)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border cursor-pointer ${
                 isClientViewMode
-                  ? 'bg-[#7A1E2B] text-white border-[#7A1E2B]'
-                  : 'bg-white border-[#E3DED6] text-[#2B2320] hover:bg-[#F8F6F0]'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]'
+                  : 'bg-[var(--card)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]'
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -276,7 +276,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
 
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#7A1E2B] text-white rounded text-xs font-bold hover:opacity-90 shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--primary)] text-[var(--primary-foreground)] rounded text-xs font-bold hover:opacity-90 shadow-sm cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print / PDF</span>
@@ -311,15 +311,15 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
 
         {!isClientViewMode && (
           /* Form Editor Section: "Invoice Details Editor" */
-          <div className="bg-white border border-[#E3DED6] rounded-lg p-6 shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b border-[#E3DED6] pb-3">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 shadow-sm space-y-6">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[#7A1E2B]" />
-                <h2 className="font-bold text-sm text-[#2B2320]">
+                <FileText className="w-4 h-4 text-[var(--primary)]" />
+                <h2 className="font-bold text-sm text-[var(--foreground)]">
                   Invoice Details Editor
                 </h2>
               </div>
-              <span className="font-mono text-xs text-[#8A8177] font-semibold">
+              <span className="font-mono text-xs text-[var(--muted-foreground)] font-semibold">
                 {invoice.invoiceNumber}
               </span>
             </div>
@@ -327,7 +327,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             {/* Grid 1: Invoice Number, Currency, Dates */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Invoice Number
                 </label>
                 <input
@@ -336,12 +336,12 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, invoiceNumber: e.target.value })
                   }
-                  className="w-full p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded font-mono font-bold text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] font-mono font-bold"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Currency Symbol
                 </label>
                 <select
@@ -349,7 +349,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, currency: e.target.value })
                   }
-                  className="w-full p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320] font-semibold"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)] font-semibold"
                 >
                   <option value="₹">₹ (INR)</option>
                   <option value="$">$ (USD)</option>
@@ -359,7 +359,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
               </div>
 
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Issue Date
                 </label>
                 <input
@@ -368,12 +368,12 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, issueDate: e.target.value })
                   }
-                  className="w-full p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Due Date
                 </label>
                 <input
@@ -382,7 +382,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, dueDate: e.target.value })
                   }
-                  className="w-full p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                 />
               </div>
             </div>
@@ -390,7 +390,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             {/* Grid 2: Sender & Client info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="space-y-2">
-                <label className="font-semibold text-[#8A8177] block">
+                <label className="font-semibold text-[var(--muted-foreground)] block">
                   Your Company (Sender)
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -401,7 +401,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, businessName: e.target.value })
                     }
-                    className="p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                    className="p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                   />
                   <input
                     type="email"
@@ -410,13 +410,13 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, businessEmail: e.target.value })
                     }
-                    className="p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                    className="p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="font-semibold text-[#8A8177] block">
+                <label className="font-semibold text-[var(--muted-foreground)] block">
                   Client Information
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -427,7 +427,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, clientName: e.target.value })
                     }
-                    className="p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                    className="p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                   />
                   <input
                     type="email"
@@ -436,7 +436,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, clientEmail: e.target.value })
                     }
-                    className="p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                    className="p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                   />
                 </div>
               </div>
@@ -445,13 +445,13 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             {/* Line Items Editor */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <label className="font-bold text-[#8A8177] uppercase text-[11px] tracking-wider">
+                <label className="font-bold text-[var(--muted-foreground)] uppercase text-[11px] tracking-wider">
                   Line Items
                 </label>
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#7A1E2B] hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--primary)] hover:underline cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Item</span>
@@ -462,7 +462,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                 {invoice.items.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-[#F8F6F0] border border-[#E3DED6] p-3 rounded space-y-2"
+                    className="bg-[var(--background)] border border-[var(--border)] p-3 rounded space-y-2"
                   >
                     <input
                       type="text"
@@ -470,13 +470,13 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                       onChange={(e) =>
                         handleItemChange(item.id, 'description', e.target.value)
                       }
-                      className="w-full p-2 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                      className="w-full p-2 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                       placeholder="Item Description / Service Name"
                     />
 
                     <div className="grid grid-cols-3 sm:grid-cols-12 gap-2 items-center text-xs">
                       <div className="col-span-1 sm:col-span-4">
-                        <span className="text-[10px] text-[#8A8177] block">Qty</span>
+                        <span className="text-[10px] text-[var(--muted-foreground)] block">Qty</span>
                         <input
                           type="number"
                           min={1}
@@ -488,12 +488,12 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                               Number(e.target.value) || 1
                             )
                           }
-                          className="w-full p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                          className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                         />
                       </div>
 
                       <div className="col-span-1 sm:col-span-4">
-                        <span className="text-[10px] text-[#8A8177] block">
+                        <span className="text-[10px] text-[var(--muted-foreground)] block">
                           Rate ({invoice.currency})
                         </span>
                         <input
@@ -507,13 +507,13 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                               Number(e.target.value) || 0
                             )
                           }
-                          className="w-full p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                          className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                         />
                       </div>
 
                       <div className="col-span-1 sm:col-span-3 text-right">
-                        <span className="text-[10px] text-[#8A8177] block">Amount</span>
-                        <div className="font-mono font-bold text-sm text-[#2B2320]">
+                        <span className="text-[10px] text-[var(--muted-foreground)] block">Amount</span>
+                        <div className="font-mono font-bold text-sm text-[var(--foreground)]">
                           {invoice.currency}
                           {(item.quantity * item.rate).toLocaleString()}
                         </div>
@@ -523,7 +523,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(item.id)}
-                          className="p-1.5 text-[#8A8177] hover:text-[#7A1E2B] rounded hover:bg-[#E3DED6]"
+                          className="p-1.5 text-[var(--muted-foreground)] hover:text-red-600 rounded hover:bg-[var(--muted)] cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -537,7 +537,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             {/* Grid 3: Tax, Discount, Notes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Tax (%)
                 </label>
                 <input
@@ -547,12 +547,12 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, taxRate: Number(e.target.value) || 0 })
                   }
-                  className="w-full p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Discount ({invoice.currency})
                 </label>
                 <input
@@ -565,12 +565,12 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                       discountAmount: Number(e.target.value) || 0,
                     })
                   }
-                  className="w-full p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Invoice Terms / Notes
                 </label>
                 <textarea
@@ -579,47 +579,46 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, notes: e.target.value })
                   }
-                  className="w-full p-2.5 bg-[#F8F6F0] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                 ></textarea>
               </div>
             </div>
           </div>
         )}
 
-        {/* Live Printable Document Card (Matches Screenshot below form!) */}
-        <div className="bg-white border border-[#E3DED6] rounded-lg p-6 sm:p-10 shadow-md space-y-8 print-invoice-modal">
+        {/* Live Printable Document Card */}
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 sm:p-10 shadow-md space-y-8 print-invoice-modal">
           {/* Header Banner */}
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E3DED6] pb-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-6">
             <div className="flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded text-white font-extrabold flex items-center justify-center text-lg shadow-sm"
-                style={{ backgroundColor: invoice.themeColor || brand.primaryColor }}
+                className="w-10 h-10 rounded text-[var(--primary-foreground)] font-extrabold flex items-center justify-center text-lg shadow-sm bg-[var(--primary)]"
               >
-                {invoice.businessLogoLetter || 'A'}
+                {invoice.businessLogoLetter || brand.logoLetter || 'A'}
               </div>
               <div>
-                <h1 className="font-bold text-lg text-[#2B2320]">
+                <h1 className="font-bold text-lg text-[var(--foreground)]">
                   {invoice.businessName || 'Alex.sam.co'}
                 </h1>
-                <p className="text-xs text-[#8A8177]">
+                <p className="text-xs text-[var(--muted-foreground)]">
                   {invoice.businessEmail || 'hello@alex.sam.co'}
                 </p>
               </div>
             </div>
 
             <div className="text-right">
-              <div className="font-mono font-bold text-lg text-[#2B2320]">
+              <div className="font-mono font-bold text-lg text-[var(--foreground)]">
                 {invoice.invoiceNumber}
               </div>
               <span
                 className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mt-1 ${
                   invoice.status === 'Paid'
-                    ? 'bg-[#EAF3EC] text-[#3F7A4E]'
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                     : invoice.status === 'Sent'
-                    ? 'bg-[#EBF3FA] text-[#2563EB]'
+                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
                     : invoice.status === 'Overdue'
-                    ? 'bg-[#FEE2E2] text-[#DC2626]'
-                    : 'bg-[#F5F0EA] text-[#8A8177]'
+                    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
                 }`}
               >
                 {invoice.status}
@@ -630,30 +629,30 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
           {/* Billed To & Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8A8177] block mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] block mb-1">
                 BILLED TO
               </span>
-              <div className="font-bold text-[#2B2320] text-sm">
+              <div className="font-bold text-[var(--foreground)] text-sm">
                 {invoice.clientName}
               </div>
-              <div className="text-[#8A8177]">{invoice.clientEmail}</div>
+              <div className="text-[var(--muted-foreground)]">{invoice.clientEmail}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-right sm:text-right">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8A8177] block mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] block mb-1">
                   ISSUE DATE
                 </span>
-                <div className="font-mono text-[#2B2320] font-semibold">
+                <div className="font-mono text-[var(--foreground)] font-semibold">
                   {invoice.issueDate}
                 </div>
               </div>
 
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8A8177] block mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] block mb-1">
                   DUE DATE
                 </span>
-                <div className="font-mono text-[#2B2320] font-semibold">
+                <div className="font-mono text-[var(--foreground)] font-semibold">
                   {invoice.dueDate}
                 </div>
               </div>
@@ -661,9 +660,9 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
           </div>
 
           {/* Line Items Table */}
-          <div className="border border-[#E3DED6] rounded overflow-hidden">
+          <div className="border border-[var(--border)] rounded overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F8F6F0] border-b border-[#E3DED6] font-bold text-[#8A8177] uppercase text-[10px] tracking-wider">
+              <thead className="bg-[var(--muted)]/50 border-b border-[var(--border)] font-bold text-[var(--muted-foreground)] uppercase text-[10px] tracking-wider">
                 <tr>
                   <th className="p-3">DESCRIPTION</th>
                   <th className="p-3 text-center w-16">QTY</th>
@@ -671,20 +670,20 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   <th className="p-3 text-right w-32">AMOUNT</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E3DED6]">
+              <tbody className="divide-y divide-[var(--border)]">
                 {invoice.items.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#F8F6F0]/50">
-                    <td className="p-3 font-semibold text-[#2B2320]">
+                  <tr key={item.id} className="hover:bg-[var(--muted)]/30">
+                    <td className="p-3 font-semibold text-[var(--foreground)]">
                       {item.description}
                     </td>
-                    <td className="p-3 text-center text-[#8A8177]">
+                    <td className="p-3 text-center text-[var(--muted-foreground)]">
                       {item.quantity}
                     </td>
-                    <td className="p-3 text-right font-mono text-[#2B2320]">
+                    <td className="p-3 text-right font-mono text-[var(--foreground)]">
                       {invoice.currency}
                       {item.rate.toLocaleString()}
                     </td>
-                    <td className="p-3 text-right font-mono font-bold text-[#2B2320]">
+                    <td className="p-3 text-right font-mono font-bold text-[var(--foreground)]">
                       {invoice.currency}
                       {(item.quantity * item.rate).toLocaleString()}
                     </td>
@@ -697,18 +696,18 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
           {/* Totals Summary */}
           <div className="flex flex-col items-end space-y-2 text-xs pt-2">
             <div className="w-full sm:w-72 space-y-2">
-              <div className="flex justify-between text-[#8A8177]">
+              <div className="flex justify-between text-[var(--muted-foreground)]">
                 <span>Subtotal</span>
-                <span className="font-mono font-semibold text-[#2B2320]">
+                <span className="font-mono font-semibold text-[var(--foreground)]">
                   {invoice.currency}
                   {subtotal.toLocaleString()}
                 </span>
               </div>
 
               {invoice.taxRate > 0 && (
-                <div className="flex justify-between text-[#8A8177]">
+                <div className="flex justify-between text-[var(--muted-foreground)]">
                   <span>Tax ({invoice.taxRate}%)</span>
-                  <span className="font-mono text-[#2B2320]">
+                  <span className="font-mono text-[var(--foreground)]">
                     +{invoice.currency}
                     {taxAmount.toLocaleString()}
                   </span>
@@ -716,7 +715,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
               )}
 
               {discount > 0 && (
-                <div className="flex justify-between text-[#3F7A4E]">
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
                   <span>Discount</span>
                   <span className="font-mono font-semibold">
                     -{invoice.currency}
@@ -725,11 +724,11 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                 </div>
               )}
 
-              <div className="h-px bg-[#E3DED6] my-2"></div>
+              <div className="h-px bg-[var(--border)] my-2"></div>
 
-              <div className="flex justify-between text-base font-bold text-[#2B2320]">
+              <div className="flex justify-between text-base font-bold text-[var(--foreground)]">
                 <span>Total Due</span>
-                <span className="font-mono text-lg text-[#7A1E2B]">
+                <span className="font-mono text-lg text-[var(--primary)]">
                   {invoice.currency}
                   {grandTotal.toLocaleString()}
                 </span>
@@ -739,17 +738,17 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
 
           {/* Notes Card */}
           {invoice.notes && (
-            <div className="bg-[#F8F6F0] p-4 border border-[#E3DED6] rounded text-xs space-y-1">
-              <span className="font-bold text-[#8A8177] block text-[11px]">
+            <div className="bg-[var(--muted)]/50 p-4 border border-[var(--border)] rounded text-xs space-y-1">
+              <span className="font-bold text-[var(--muted-foreground)] block text-[11px]">
                 Notes & Terms:
               </span>
-              <p className="text-[#2B2320] leading-relaxed">{invoice.notes}</p>
+              <p className="text-[var(--foreground)] leading-relaxed">{invoice.notes}</p>
             </div>
           )}
 
           {/* Footer Watermark */}
-          <div className="text-center pt-4 border-t border-[#E3DED6] text-[11px] text-[#8A8177]">
-            Powered by Ledgerly • Professional Branded Invoicing
+          <div className="text-center pt-4 border-t border-[var(--border)] text-[11px] text-[var(--muted-foreground)]">
+            Powered by {brand.brandName || 'Ledgerly'} • Professional Branded Invoicing
           </div>
         </div>
       </div>

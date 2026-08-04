@@ -81,18 +81,18 @@ export const EmailModal: React.FC<EmailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#2B2320]/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white border border-[#E3DED6] rounded-lg max-w-lg w-full shadow-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#E3DED6] bg-[#FBF9F6] flex items-center justify-between">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] max-w-lg w-full shadow-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--muted)]/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Mail className="w-5 h-5 text-[#7A1E2B]" />
-            <h3 className="font-bold text-sm text-[#2B2320]">
+            <Mail className="w-5 h-5 text-[var(--primary)]" />
+            <h3 className="font-bold text-sm text-[var(--foreground)]">
               Email Invoice {invoice.invoiceNumber}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-[#8A8177] hover:text-[#2B2320] rounded hover:bg-[#EDEAE5]"
+            className="p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -101,62 +101,62 @@ export const EmailModal: React.FC<EmailModalProps> = ({
         <div className="p-6 space-y-4 text-xs">
           {sentSuccess ? (
             <div className="py-8 text-center space-y-2">
-              <div className="w-12 h-12 bg-[#EAF3EC] text-[#3F7A4E] rounded-full flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto">
                 <Check className="w-6 h-6" />
               </div>
-              <h4 className="text-base font-bold text-[#2B2320]">
+              <h4 className="text-base font-bold text-[var(--foreground)]">
                 Invoice Email Sent Successfully!
               </h4>
-              <p className="text-[#8A8177]">
+              <p className="text-[var(--muted-foreground)]">
                 Marked invoice status as <strong>Sent</strong>.
               </p>
             </div>
           ) : (
             <>
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Recipient Email
                 </label>
                 <input
                   type="email"
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Subject Line
                 </label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-[#8A8177] block mb-1">
+                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
                   Email Message Body
                 </label>
                 <textarea
                   rows={7}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full p-2.5 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320] font-sans"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] font-sans"
                 ></textarea>
               </div>
 
-              <div className="pt-3 border-t border-[#E3DED6] flex items-center justify-between">
+              <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between">
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E3DED6] rounded text-[#2B2320] hover:bg-[#EDEAE5] font-semibold"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--card)] border border-[var(--border)] rounded text-[var(--foreground)] hover:bg-[var(--muted)] font-semibold cursor-pointer"
                 >
                   {copiedLink ? (
-                    <Check className="w-3.5 h-3.5 text-[#3F7A4E]" />
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
                   ) : (
                     <Copy className="w-3.5 h-3.5" />
                   )}
@@ -167,7 +167,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({
                   type="button"
                   onClick={handleSend}
                   disabled={sending || !recipient}
-                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-white rounded bg-[#7A1E2B] shadow hover:opacity-95 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-[var(--primary-foreground)] rounded bg-[var(--primary)] shadow hover:opacity-90 disabled:opacity-50 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{sending ? 'Sending Email...' : 'Send Invoice Now'}</span>

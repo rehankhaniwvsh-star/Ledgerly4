@@ -164,28 +164,27 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#2B2320]/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-6 overflow-y-auto">
       <div
-        className={`bg-white border border-[#E3DED6] rounded-lg w-full flex flex-col shadow-2xl overflow-hidden transition-all duration-300 ${
+        className={`bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] w-full flex flex-col shadow-2xl overflow-hidden transition-all duration-300 ${
           isFullscreen
             ? 'fixed inset-0 z-50 rounded-none h-screen'
             : 'max-w-5xl h-[92vh] max-h-[92vh] my-auto'
         }`}
       >
         {/* Top Control Bar */}
-        <div className="px-6 py-3.5 border-b border-[#E3DED6] bg-[#FBF9F6] flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="px-6 py-3.5 border-b border-[var(--border)] bg-[var(--muted)] flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2">
             <div
-              className="w-7 h-7 rounded text-white font-bold flex items-center justify-center text-xs"
-              style={{ backgroundColor: invoice.themeColor || brand.primaryColor }}
+              className="w-7 h-7 rounded text-[var(--primary-foreground)] font-bold flex items-center justify-center text-xs bg-[var(--primary)]"
             >
               {invoice.businessLogoLetter}
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[#2B2320]">
+              <h3 className="font-bold text-sm text-[var(--foreground)]">
                 Invoice {invoice.invoiceNumber} — Live Editor
               </h3>
-              <p className="text-[11px] text-[#8A8177]">
+              <p className="text-[11px] text-[var(--muted-foreground)]">
                 Fully editable, customizable theme & downloadable PDF
               </p>
             </div>
@@ -193,7 +192,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
 
           <div className="flex flex-wrap items-center gap-2">
             {isSavedNotice && (
-              <span className="text-xs font-semibold text-[#3F7A4E] bg-[#EAF3EC] px-2.5 py-1 rounded flex items-center gap-1">
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Saved to Dashboard!</span>
               </span>
@@ -201,7 +200,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
 
             <button
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white rounded bg-[#7A1E2B] shadow-sm hover:opacity-95"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-[var(--primary-foreground)] rounded bg-[var(--primary)] shadow-sm hover:opacity-95 cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Save Invoice</span>
@@ -210,34 +209,34 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
             <button
               onClick={handleDownloadPdf}
               disabled={downloadingPdf}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-[#E3DED6] text-[#2B2320] rounded hover:bg-[#EDEAE5] shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] shadow-sm cursor-pointer"
               title="Download crisp PDF file"
             >
-              <Download className="w-3.5 h-3.5 text-[#3F7A4E]" />
+              <Download className="w-3.5 h-3.5 text-emerald-500" />
               <span>{downloadingPdf ? 'Generating PDF...' : 'Download PDF'}</span>
             </button>
 
             <button
               onClick={() => onOpenEmail(invoice)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-[#E3DED6] text-[#2B2320] rounded hover:bg-[#EDEAE5]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
               title="Send Invoice via Email"
             >
-              <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
+              <Mail className="w-3.5 h-3.5 text-blue-500" />
               <span>Email Invoice</span>
             </button>
 
             <button
               onClick={handleCopyLink}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-[#E3DED6] text-[#2B2320] rounded hover:bg-[#EDEAE5]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-[#3F7A4E]" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'Link Copied' : 'Share'}</span>
             </button>
 
             {/* Short vs Full Screen Toggle Button */}
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#EDEAE5] text-[#2B2320] rounded hover:bg-[#E3DED6]"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[var(--secondary)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
               title={isFullscreen ? 'Switch to Compact Short View' : 'Switch to Fullscreen View'}
             >
               {isFullscreen ? (
@@ -255,7 +254,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 text-[#8A8177] hover:text-[#2B2320] rounded hover:bg-[#EDEAE5]"
+              className="p-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -263,16 +262,16 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
         </div>
 
         {/* Modal Workspace */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#FBF9F6] space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[var(--background)] space-y-6">
           {/* Controls Bar: Theme & Style selector */}
-          <div className="bg-white border border-[#E3DED6] rounded-md p-4 grid grid-cols-1 md:grid-cols-3 gap-4 shadow-sm">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-4 grid grid-cols-1 md:grid-cols-3 gap-4 shadow-sm">
             <div>
-              <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+              <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                 Invoice Color Theme
               </label>
               <div className="flex items-center gap-2">
                 {[
-                  { name: 'Ruby', hex: '#7A1E2B' },
+                  { name: 'Primary Theme', hex: 'var(--primary)' },
                   { name: 'Blue', hex: '#2563EB' },
                   { name: 'Green', hex: '#3F7A4E' },
                   { name: 'Gold', hex: '#A67C3D' },
@@ -281,9 +280,9 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                   <button
                     key={c.hex}
                     onClick={() => setInvoice({ ...invoice, themeColor: c.hex })}
-                    className={`w-6 h-6 rounded-full border-2 transition-transform ${
+                    className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
                       invoice.themeColor === c.hex
-                        ? 'border-black scale-110'
+                        ? 'border-[var(--foreground)] scale-110'
                         : 'border-transparent'
                     }`}
                     style={{ backgroundColor: c.hex }}
@@ -294,7 +293,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+              <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                 Template Layout Style
               </label>
               <select
@@ -305,7 +304,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     templateStyle: e.target.value as InvoiceData['templateStyle'],
                   })
                 }
-                className="w-full p-1.5 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                className="w-full p-1.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] cursor-pointer"
               >
                 <option value="Modern">Modern Branded</option>
                 <option value="Classic">Classic Corporate</option>
@@ -314,7 +313,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+              <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                 Invoice Status
               </label>
               <select
@@ -325,7 +324,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     status: e.target.value as InvoiceData['status'],
                   })
                 }
-                className="w-full p-1.5 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320] font-semibold"
+                className="w-full p-1.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] font-semibold cursor-pointer"
               >
                 <option value="Paid">Paid</option>
                 <option value="Sent">Sent</option>
@@ -338,15 +337,14 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
           {/* Printable Invoice Document Preview & Form Fields */}
           <div
             ref={printableRef}
-            className="print-invoice-modal bg-white border border-[#E3DED6] rounded-lg p-6 sm:p-10 shadow-md max-w-4xl mx-auto space-y-8"
+            className="print-invoice-modal bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 sm:p-10 shadow-md max-w-4xl mx-auto space-y-8"
           >
             {/* Header / Brand Banner */}
             <div
-              className="p-6 rounded-md flex flex-wrap items-center justify-between gap-4 text-white"
-              style={{ backgroundColor: invoice.themeColor || brand.primaryColor }}
+              className="p-6 rounded-md flex flex-wrap items-center justify-between gap-4 text-[var(--primary-foreground)] bg-[var(--primary)]"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded bg-white text-[#2B2320] font-extrabold flex items-center justify-center text-base shadow">
+                <div className="w-10 h-10 rounded bg-[var(--card)] text-[var(--foreground)] font-extrabold flex items-center justify-center text-base shadow">
                   {invoice.businessLogoLetter}
                 </div>
                 <div>
@@ -356,7 +354,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, businessName: e.target.value })
                     }
-                    className="bg-transparent font-bold text-lg text-white border-b border-white/30 focus:outline-none w-full"
+                    className="bg-transparent font-bold text-lg text-current border-b border-white/30 focus:outline-none w-full"
                   />
                   <input
                     type="text"
@@ -364,13 +362,13 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, businessEmail: e.target.value })
                     }
-                    className="bg-transparent text-xs text-white/80 border-b border-white/20 focus:outline-none w-full mt-1"
+                    className="bg-transparent text-xs text-current/80 border-b border-white/20 focus:outline-none w-full mt-1"
                   />
                 </div>
               </div>
 
               <div className="text-right">
-                <span className="text-xs uppercase font-semibold text-white/70 block">
+                <span className="text-xs uppercase font-semibold text-current/70 block">
                   INVOICE
                 </span>
                 <input
@@ -379,7 +377,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, invoiceNumber: e.target.value })
                   }
-                  className="bg-transparent font-mono font-bold text-lg text-white text-right border-b border-white/30 focus:outline-none"
+                  className="bg-transparent font-mono font-bold text-lg text-current text-right border-b border-white/30 focus:outline-none"
                 />
               </div>
             </div>
@@ -387,7 +385,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
             {/* Bill To & Dates Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
               <div className="space-y-2">
-                <span className="font-bold uppercase tracking-wider text-[#8A8177] block">
+                <span className="font-bold uppercase tracking-wider text-[var(--muted-foreground)] block">
                   Billed To
                 </span>
                 <input
@@ -397,7 +395,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     setInvoice({ ...invoice, clientName: e.target.value })
                   }
                   placeholder="Client Company Name"
-                  className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded font-semibold text-[#2B2320]"
+                  className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded font-semibold text-[var(--foreground)]"
                 />
                 <input
                   type="email"
@@ -406,13 +404,13 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     setInvoice({ ...invoice, clientEmail: e.target.value })
                   }
                   placeholder="Client Email Address"
-                  className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-[#8A8177]"
+                  className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--muted-foreground)]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="font-bold uppercase tracking-wider text-[#8A8177] block mb-1">
+                  <span className="font-bold uppercase tracking-wider text-[var(--muted-foreground)] block mb-1">
                     Issue Date
                   </span>
                   <input
@@ -421,12 +419,12 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, issueDate: e.target.value })
                     }
-                    className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-[#2B2320]"
+                    className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                   />
                 </div>
 
                 <div>
-                  <span className="font-bold uppercase tracking-wider text-[#8A8177] block mb-1">
+                  <span className="font-bold uppercase tracking-wider text-[var(--muted-foreground)] block mb-1">
                     Due Date
                   </span>
                   <input
@@ -435,7 +433,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                     onChange={(e) =>
                       setInvoice({ ...invoice, dueDate: e.target.value })
                     }
-                    className="w-full p-2 bg-[#FBF9F6] border border-[#E3DED6] rounded text-[#2B2320]"
+                    className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
                   />
                 </div>
               </div>
@@ -444,22 +442,22 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
             {/* Items Table */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold uppercase text-[#8A8177] tracking-wider">
+                <span className="text-xs font-bold uppercase text-[var(--muted-foreground)] tracking-wider">
                   Services & Deliverables
                 </span>
                 <button
                   type="button"
                   onClick={handleAddItem}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#7A1E2B] hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--primary)] hover:underline cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Line Item</span>
                 </button>
               </div>
 
-              <div className="border border-[#E3DED6] rounded overflow-hidden">
+              <div className="border border-[var(--border)] rounded overflow-hidden">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FBF9F6] border-b border-[#E3DED6] font-semibold text-[#8A8177]">
+                  <thead className="bg-[var(--muted)]/50 border-b border-[var(--border)] font-semibold text-[var(--muted-foreground)]">
                     <tr>
                       <th className="p-3">Description</th>
                       <th className="p-3 w-20">Qty</th>
@@ -468,9 +466,9 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                       <th className="p-3 w-10"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E3DED6]">
+                  <tbody className="divide-y divide-[var(--border)]">
                     {invoice.items.map((item) => (
-                      <tr key={item.id} className="hover:bg-[#FBF9F6]/50">
+                      <tr key={item.id} className="hover:bg-[var(--muted)]/30">
                         <td className="p-2.5">
                           <input
                             type="text"
@@ -482,7 +480,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                                 e.target.value
                               )
                             }
-                            className="w-full p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                            className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                           />
                         </td>
                         <td className="p-2.5">
@@ -497,7 +495,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                                 Number(e.target.value) || 1
                               )
                             }
-                            className="w-full p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                            className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                           />
                         </td>
                         <td className="p-2.5">
@@ -512,10 +510,10 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                                 Number(e.target.value) || 0
                               )
                             }
-                            className="w-full p-1.5 bg-white border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                            className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                           />
                         </td>
-                        <td className="p-2.5 text-right font-mono font-bold text-[#2B2320]">
+                        <td className="p-2.5 text-right font-mono font-bold text-[var(--foreground)]">
                           {invoice.currency}
                           {(item.quantity * item.rate).toLocaleString()}
                         </td>
@@ -523,7 +521,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(item.id)}
-                            className="text-[#8A8177] hover:text-[#7A1E2B] p-1 rounded"
+                            className="text-[var(--muted-foreground)] hover:text-red-600 p-1 rounded cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -536,9 +534,9 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
             </div>
 
             {/* Math Totals & Notes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-[#E3DED6]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-[var(--border)]">
               <div>
-                <label className="text-xs font-semibold text-[#8A8177] block mb-1">
+                <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
                   Payment Terms / Notes
                 </label>
                 <textarea
@@ -547,20 +545,20 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                   onChange={(e) =>
                     setInvoice({ ...invoice, notes: e.target.value })
                   }
-                  className="w-full p-2.5 bg-[#FBF9F6] border border-[#E3DED6] rounded text-xs text-[#2B2320]"
+                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                 ></textarea>
               </div>
 
-              <div className="space-y-2 bg-[#FBF9F6] p-4 border border-[#E3DED6] rounded text-xs">
-                <div className="flex justify-between text-[#8A8177]">
+              <div className="space-y-2 bg-[var(--muted)]/50 p-4 border border-[var(--border)] rounded text-xs">
+                <div className="flex justify-between text-[var(--muted-foreground)]">
                   <span>Subtotal:</span>
-                  <span className="font-mono font-semibold text-[#2B2320]">
+                  <span className="font-mono font-semibold text-[var(--foreground)]">
                     {invoice.currency}
                     {subtotal.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-[#8A8177]">
+                <div className="flex justify-between items-center text-[var(--muted-foreground)]">
                   <span>Tax Rate (%):</span>
                   <input
                     type="number"
@@ -572,11 +570,11 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                         taxRate: Number(e.target.value) || 0,
                       })
                     }
-                    className="w-16 p-1 bg-white border border-[#E3DED6] rounded text-right text-xs"
+                    className="w-16 p-1 bg-[var(--card)] border border-[var(--border)] rounded text-right text-xs"
                   />
                 </div>
 
-                <div className="flex justify-between items-center text-[#8A8177]">
+                <div className="flex justify-between items-center text-[var(--muted-foreground)]">
                   <span>Discount:</span>
                   <input
                     type="number"
@@ -588,13 +586,13 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                         discountAmount: Number(e.target.value) || 0,
                       })
                     }
-                    className="w-20 p-1 bg-white border border-[#E3DED6] rounded text-right text-xs"
+                    className="w-20 p-1 bg-[var(--card)] border border-[var(--border)] rounded text-right text-xs"
                   />
                 </div>
 
-                <div className="h-px bg-[#E3DED6] my-2"></div>
+                <div className="h-px bg-[var(--border)] my-2"></div>
 
-                <div className="flex justify-between text-base font-bold text-[#2B2320]">
+                <div className="flex justify-between text-base font-bold text-[var(--foreground)]">
                   <span>Total Amount:</span>
                   <span className="font-mono">
                     {invoice.currency}
