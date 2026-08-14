@@ -1,6 +1,6 @@
 {
-  "name": "Ledgerly",
-  "description": "Professional brand identity website and CMS for Ledgerly invoicing platform.",
+  "name": "Invoiceify",
+  "description": "Professional brand identity website and CMS for Invoiceify invoicing platform.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -18,7 +18,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           <div className="space-y-5">
             <div className="inline-flex items-center gap-1.5 bg-[var(--accent)] text-[var(--accent-foreground)] text-xs font-semibold px-3 py-1.5 rounded-[var(--radius)]">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{about.eyebrow || 'About Ledgerly'}</span>
+              <span>{about.eyebrow || 'About Invoiceify'}</span>
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)]">

@@ -23,10 +23,10 @@ export const Footer: React.FC<FooterProps> = ({
               <div
                 className="w-6 h-6 rounded-[var(--radius)] flex items-center justify-center font-bold bg-[var(--primary)] text-[var(--primary-foreground)] text-xs"
               >
-                {brand.logoLetter || 'L'}
+                {brand.logoLetter || 'I'}
               </div>
               <span className="font-bold text-[var(--foreground)] text-base">
-                {brand.brandName || 'Ledgerly'}
+                {brand.brandName || 'Invoiceify'}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-[var(--muted-foreground)] max-w-sm leading-relaxed">
@@ -80,7 +80,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <a
-                  href={`mailto:${brand.contactEmail || 'hello@ledgerly.app'}`}
+                  href={`mailto:${brand.contactEmail || 'hello@invoiceify.app'}`}
                   className="hover:text-[var(--foreground)] transition-colors"
                 >
                   Contact
@@ -106,7 +106,7 @@ export const Footer: React.FC<FooterProps> = ({
 
         <div className="mt-12 pt-6 border-t border-[var(--border)] text-center text-xs text-[var(--muted-foreground)]">
           <p>
-            © {new Date().getFullYear()} {brand.brandName || 'Ledgerly'}. Invoicing
+            © {new Date().getFullYear()} {brand.brandName || 'Invoiceify'}. Invoicing
             for freelancers, creators, and agencies.
           </p>
         </div>

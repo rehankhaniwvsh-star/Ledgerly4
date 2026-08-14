@@ -1,6 +1,6 @@
-# Ledgerly — Branded Invoice Generator & Management Studio
+# Invoiceify — Branded Invoice Generator & Management Studio
 
-**Ledgerly** is a high-performance, elegant, full-stack invoice generation and client management platform tailored for freelancers, agencies, and small businesses.
+**Invoiceify** is a high-performance, elegant, full-stack invoice generation and client management platform tailored for freelancers, agencies, and small businesses.
 
 ---
 
@@ -48,4 +48,4 @@
 
 ---
 
-© Ledgerly • Professional Branded Invoicing
+© Invoiceify • Professional Branded Invoicing

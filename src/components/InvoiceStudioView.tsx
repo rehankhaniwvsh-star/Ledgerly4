@@ -255,10 +255,10 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             {/* Action Buttons */}
             <button
               onClick={handleShareLink}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-semibold text-[var(--foreground)] hover:bg-[var(--muted)] cursor-pointer"
+              className="btn-shader-secondary inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer"
               title="Copy shareable invoice link"
             >
-              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
+              {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500 btn-icon-hover-bounce" /> : <Share2 className="w-3.5 h-3.5 btn-icon-hover-bounce" />}
               <span>Share Link</span>
             </button>
 
@@ -266,36 +266,36 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
               onClick={() => setIsClientViewMode(!isClientViewMode)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold border cursor-pointer ${
                 isClientViewMode
-                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]'
-                  : 'bg-[var(--card)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]'
+                  ? 'btn-shader-primary'
+                  : 'btn-shader-secondary'
               }`}
             >
-              <Eye className="w-3.5 h-3.5" />
+              <Eye className="w-3.5 h-3.5 btn-icon-hover-bounce" />
               <span>{isClientViewMode ? 'Editor View' : 'Client View'}</span>
             </button>
 
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--primary)] text-[var(--primary-foreground)] rounded text-xs font-bold hover:opacity-90 shadow-sm cursor-pointer"
+              className="btn-shader-secondary inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold shadow-sm cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print / PDF</span>
+              <Printer className="w-3.5 h-3.5 text-[var(--primary)] btn-icon-hover-bounce" />
+              <span>Print</span>
             </button>
 
             <button
               onClick={handleDownloadPdf}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#3F7A4E] text-white rounded text-xs font-bold hover:opacity-90 shadow-sm"
+              className="btn-shader-emerald inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold shadow-sm cursor-pointer"
               title="Download PDF file directly"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 btn-icon-hover-bounce" />
               <span>Download PDF</span>
             </button>
 
             <button
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2563EB] text-white rounded text-xs font-bold hover:opacity-90 shadow-sm"
+              className="btn-shader-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded text-xs font-bold shadow-sm cursor-pointer"
             >
-              <Save className="w-3.5 h-3.5" />
+              <Save className="w-3.5 h-3.5 btn-icon-hover-bounce" />
               <span>Save</span>
             </button>
 
@@ -748,7 +748,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
 
           {/* Footer Watermark */}
           <div className="text-center pt-4 border-t border-[var(--border)] text-[11px] text-[var(--muted-foreground)]">
-            Powered by {brand.brandName || 'Ledgerly'} • Professional Branded Invoicing
+            Powered by {brand.brandName || 'Invoiceify'} • Professional Branded Invoicing
           </div>
         </div>
       </div>

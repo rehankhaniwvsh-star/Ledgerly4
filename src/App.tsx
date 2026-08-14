@@ -17,15 +17,35 @@ import { EmailModal } from './components/EmailModal';
 import { CmsAdminModal } from './components/CmsAdminModal';
 import { downloadInvoicePdf } from './utils/pdfExport';
 
-const LOCAL_STORAGE_CMS_KEY = 'ledgerly_cms_data_v1';
-const LOCAL_STORAGE_INVOICES_KEY = 'ledgerly_invoices_data_v1';
+const LOCAL_STORAGE_CMS_KEY = 'invoiceify_cms_data_v1';
+const LOCAL_STORAGE_INVOICES_KEY = 'invoiceify_invoices_data_v1';
 
 export default function App() {
   const [cms, setCms] = useState<CmsContent>(() => {
     try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_CMS_KEY);
+      const saved = localStorage.getItem(LOCAL_STORAGE_CMS_KEY) || localStorage.getItem('ledgerly_cms_data_v1');
       if (saved) {
-        return JSON.parse(saved);
+        let parsed = JSON.parse(saved);
+        // Clean up legacy brand name if present
+        if (parsed.brand?.brandName === 'Ledgerly') {
+          parsed.brand.brandName = 'Invoiceify';
+          if (parsed.brand.contactEmail === 'hello@ledgerly.app') {
+            parsed.brand.contactEmail = 'hello@invoiceify.app';
+          }
+          if (parsed.brand.logoLetter === 'L') {
+            parsed.brand.logoLetter = 'I';
+          }
+          if (parsed.about?.eyebrow === 'About Ledgerly') {
+            parsed.about.eyebrow = 'About Invoiceify';
+          }
+          if (typeof parsed.about?.paragraph1 === 'string') {
+            parsed.about.paragraph1 = parsed.about.paragraph1.replace(/Ledgerly/g, 'Invoiceify');
+          }
+          if (typeof parsed.faqs?.subtitle === 'string') {
+            parsed.faqs.subtitle = parsed.faqs.subtitle.replace(/Ledgerly/g, 'Invoiceify');
+          }
+        }
+        return parsed;
       }
     } catch (err) {
       console.warn('Failed to load saved CMS data from localStorage:', err);
@@ -35,9 +55,16 @@ export default function App() {
 
   const [invoices, setInvoices] = useState<InvoiceData[]>(() => {
     try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_INVOICES_KEY);
+      const saved = localStorage.getItem(LOCAL_STORAGE_INVOICES_KEY) || localStorage.getItem('ledgerly_invoices_data_v1');
       if (saved) {
-        return JSON.parse(saved);
+        let parsed: InvoiceData[] = JSON.parse(saved);
+        parsed = parsed.map((inv) => ({
+          ...inv,
+          businessName: inv.businessName === 'Ledgerly Studio' ? 'Invoiceify Studio' : inv.businessName,
+          businessEmail: inv.businessEmail === 'billing@ledgerly.app' ? 'billing@invoiceify.app' : inv.businessEmail,
+          businessLogoLetter: inv.businessLogoLetter === 'L' ? 'I' : inv.businessLogoLetter,
+        }));
+        return parsed;
       }
     } catch (err) {
       console.warn('Failed to load saved invoices from localStorage:', err);

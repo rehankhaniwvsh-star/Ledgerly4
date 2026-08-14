@@ -168,9 +168,9 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
           <div className="pt-2">
             <a
               href="#generator"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-full text-xs font-bold hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
+              className="btn-shader-primary inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold shadow-sm cursor-pointer"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 btn-icon-hover-bounce" />
               <span>Get Started Now</span>
             </a>
           </div>

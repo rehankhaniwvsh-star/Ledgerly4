@@ -27,7 +27,7 @@ async function startServer() {
 
   // Healthcheck endpoint
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", service: "Ledgerly Server" });
+    res.json({ status: "ok", service: "Invoiceify Server" });
   });
 
   // Serve Google Search Console verification file directly
@@ -82,7 +82,7 @@ Sitemap: ${baseUrl}/sitemap.xml
       }
 
       const ai = getAi();
-      const systemInstruction = `You are an expert brand strategist and UX copywriter for Ledgerly, a premium invoicing platform for freelancers, creators, and agencies.
+      const systemInstruction = `You are an expert brand strategist and UX copywriter for Invoiceify, a premium invoicing platform for freelancers, creators, and agencies.
 Your goal is to write high-converting, professional, crisp, and persuasive website copy.
 Return clean plain text without surrounding quotes or conversational meta-text.
 Content type requested: ${contentType || 'General Copy'}.

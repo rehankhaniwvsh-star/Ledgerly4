@@ -2,13 +2,13 @@ import { CmsContent } from '../types';
 
 export const defaultCmsContent: CmsContent = {
   brand: {
-    brandName: 'Ledgerly',
+    brandName: 'Invoiceify',
     tagline: 'Branded invoicing for freelancers and agencies',
     primaryColor: '#7033ff',
     accentColor: '#e2ebff',
     backgroundColor: '#fdfdfd',
-    contactEmail: 'hello@ledgerly.app',
-    logoLetter: 'L',
+    contactEmail: 'hello@invoiceify.app',
+    logoLetter: 'I',
     googleSiteVerification: 'googleacb1159f81828443',
   },
   hero: {
@@ -32,9 +32,9 @@ export const defaultCmsContent: CmsContent = {
     },
   },
   about: {
-    eyebrow: 'About Ledgerly',
+    eyebrow: 'About Invoiceify',
     title: 'Built for people who invoice on their own.',
-    paragraph1: 'Ledgerly started from a simple frustration: most free invoicing tools look like spreadsheets wearing a logo. Freelancers, creators, and small agencies deserve invoices that look like they came from a real, established business — without paying for a "professional" plan to get there.',
+    paragraph1: 'Invoiceify started from a simple frustration: most free invoicing tools look like spreadsheets wearing a logo. Freelancers, creators, and small agencies deserve invoices that look like they came from a real, established business — without paying for a "professional" plan to get there.',
     paragraph2: 'So every account gets the full toolkit — branded PDFs, share links, payment tracking, recurring billing — free, from day one. No upsells, no watermarks, no "upgrade to remove branding".',
     stats: [
       { id: '1', number: '100%', label: 'Free, always' },
@@ -127,11 +127,11 @@ export const defaultCmsContent: CmsContent = {
   },
   faqs: {
     title: 'Frequently Asked Questions',
-    subtitle: 'Everything you need to know before you get started with Ledgerly.',
+    subtitle: 'Everything you need to know before you get started with Invoiceify.',
     items: [
       {
         id: 'faq-1',
-        question: 'Is Ledgerly really free?',
+        question: 'Is Invoiceify really free?',
         answer: 'Yes. Every account gets unlimited invoices, all templates, and every feature — there are no paid tiers or locked features.',
         category: 'Pricing',
       },
@@ -173,7 +173,7 @@ export const defaultCmsContent: CmsContent = {
       author: 'Aarav Sharma',
       role: 'Founder',
       company: 'Nova Studio',
-      quote: 'Our clients constantly compliment how sleek our invoices look. Ledgerly made us look like a 50-person agency overnight.',
+      quote: 'Our clients constantly compliment how sleek our invoices look. Invoiceify made us look like a 50-person agency overnight.',
       rating: 5,
     },
     {

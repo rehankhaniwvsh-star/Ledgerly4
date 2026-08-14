@@ -50,9 +50,9 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
     if (initialInvoice) return initialInvoice;
     return {
       id: `inv-${Date.now()}`,
-      businessName: brand.brandName || 'Ledgerly Studio',
-      businessEmail: brand.contactEmail || 'billing@ledgerly.app',
-      businessLogoLetter: brand.logoLetter || 'L',
+      businessName: brand.brandName || 'Invoiceify Studio',
+      businessEmail: brand.contactEmail || 'billing@invoiceify.app',
+      businessLogoLetter: brand.logoLetter || 'I',
       clientName: 'Acme Corporation',
       clientEmail: 'billing@acme.corp',
       invoiceNumber: `INV-2026-${Math.floor(100 + Math.random() * 900)}`,
@@ -200,53 +200,53 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
 
             <button
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-[var(--primary-foreground)] rounded bg-[var(--primary)] shadow-sm hover:opacity-95 cursor-pointer"
+              className="btn-shader-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded cursor-pointer"
             >
-              <Save className="w-3.5 h-3.5" />
+              <Save className="w-3.5 h-3.5 btn-icon-hover-bounce" />
               <span>Save Invoice</span>
             </button>
 
             <button
               onClick={handleDownloadPdf}
               disabled={downloadingPdf}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] shadow-sm cursor-pointer"
+              className="btn-shader-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded cursor-pointer"
               title="Download crisp PDF file"
             >
-              <Download className="w-3.5 h-3.5 text-emerald-500" />
+              <Download className="w-3.5 h-3.5 text-emerald-500 btn-icon-hover-bounce" />
               <span>{downloadingPdf ? 'Generating PDF...' : 'Download PDF'}</span>
             </button>
 
             <button
               onClick={() => onOpenEmail(invoice)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
+              className="btn-shader-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded cursor-pointer"
               title="Send Invoice via Email"
             >
-              <Mail className="w-3.5 h-3.5 text-blue-500" />
+              <Mail className="w-3.5 h-3.5 text-blue-500 btn-icon-hover-bounce" />
               <span>Email Invoice</span>
             </button>
 
             <button
               onClick={handleCopyLink}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
+              className="btn-shader-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded cursor-pointer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 btn-icon-hover-bounce" /> : <Copy className="w-3.5 h-3.5 btn-icon-hover-bounce" />}
               <span>{copied ? 'Link Copied' : 'Share'}</span>
             </button>
 
             {/* Short vs Full Screen Toggle Button */}
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[var(--secondary)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
+              className="btn-shader inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[var(--secondary)] text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
               title={isFullscreen ? 'Switch to Compact Short View' : 'Switch to Fullscreen View'}
             >
               {isFullscreen ? (
                 <>
-                  <Minimize2 className="w-3.5 h-3.5" />
+                  <Minimize2 className="w-3.5 h-3.5 btn-icon-hover-bounce" />
                   <span className="hidden sm:inline">Short View</span>
                 </>
               ) : (
                 <>
-                  <Maximize2 className="w-3.5 h-3.5" />
+                  <Maximize2 className="w-3.5 h-3.5 btn-icon-hover-bounce" />
                   <span className="hidden sm:inline">Fullscreen</span>
                 </>
               )}

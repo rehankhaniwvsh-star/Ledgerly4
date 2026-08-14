@@ -69,18 +69,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={onOpenGenerator}
-              className="inline-flex items-center gap-2.5 px-6 py-3.5 text-sm font-semibold text-[var(--primary-foreground)] bg-[var(--primary)] rounded-[var(--radius)] transition-all shadow-sm hover:opacity-95 active:scale-[0.98] group cursor-pointer"
+              className="btn-shader-primary inline-flex items-center gap-2.5 px-6 py-3.5 text-sm font-bold rounded-[var(--radius)] cursor-pointer group"
             >
-              <RocketIcon size={18} color="var(--primary-foreground)" strokeWidth={2} />
+              <RocketIcon size={18} color="var(--primary-foreground)" strokeWidth={2} className="btn-icon-hover-bounce" />
               <span>{hero.primaryCtaText || 'Create your first invoice'}</span>
             </button>
 
             <button
               onClick={onOpenDashboard}
-              className="inline-flex items-center gap-2 px-5 py-3.5 text-sm font-semibold text-[var(--foreground)] bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] hover:bg-[var(--muted)] transition-all cursor-pointer shadow-sm"
+              className="btn-shader-secondary inline-flex items-center gap-2 px-5 py-3.5 text-sm font-semibold rounded-[var(--radius)] cursor-pointer"
             >
               <span>{hero.secondaryCtaText || 'See the dashboard'}</span>
-              <ArrowRight className="w-4 h-4 text-[var(--primary)]" />
+              <ArrowRight className="w-4 h-4 text-[var(--primary)] transition-transform group-hover:translate-x-1" />
             </button>
           </div>
 

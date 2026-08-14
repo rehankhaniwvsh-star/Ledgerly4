@@ -27,10 +27,10 @@ export const Header: React.FC<HeaderProps> = ({
           <div
             className="w-8 h-8 rounded-[var(--radius)] flex items-center justify-center font-bold text-white text-sm shadow-sm transition-transform group-hover:scale-105 bg-[var(--primary)]"
           >
-            {brand.logoLetter || 'L'}
+            {brand.logoLetter || 'I'}
           </div>
           <span className="font-bold text-[var(--foreground)] text-lg tracking-tight">
-            {brand.brandName || 'Ledgerly'}
+            {brand.brandName || 'Invoiceify'}
           </span>
         </a>
 
@@ -69,31 +69,31 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="hidden sm:flex items-center gap-3">
           <button
             onClick={onOpenDashboard}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] border bg-[var(--card)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--muted)] transition-all cursor-pointer"
+            className="btn-shader-secondary inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-[var(--radius)] cursor-pointer"
             title="Open Invoices Dashboard"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[var(--primary)]" />
+            <Sparkles className="w-3.5 h-3.5 text-[var(--primary)] btn-icon-hover-bounce" />
             <span>Dashboard</span>
           </button>
 
           <button
             onClick={onOpenCms}
-            className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] border transition-all cursor-pointer ${
+            className={`btn-shader inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-[var(--radius)] border cursor-pointer ${
               isAdminOpen
-                ? 'bg-[var(--foreground)] text-[var(--card)] border-[var(--foreground)]'
-                : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--muted)]'
+                ? 'bg-[var(--foreground)] text-[var(--card)] border-[var(--foreground)] shadow-md'
+                : 'btn-shader-secondary'
             }`}
             title="Open CMS Content Management Editor"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--primary)]" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--primary)] btn-icon-hover-bounce" />
             <span>CMS Admin</span>
           </button>
 
           <button
             onClick={onOpenGenerator}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[var(--primary-foreground)] bg-[var(--primary)] rounded-[var(--radius)] transition-all shadow-sm hover:opacity-95 active:scale-[0.98] cursor-pointer"
+            className="btn-shader-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-[var(--radius)] cursor-pointer"
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="w-3.5 h-3.5 btn-icon-hover-bounce" />
             <span>Create Invoice</span>
           </button>
         </div>

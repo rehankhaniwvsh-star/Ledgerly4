@@ -18,7 +18,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
             Loved by independent professionals
           </h2>
           <p className="text-[var(--muted-foreground)] text-sm sm:text-base">
-            Here is what freelancers and agencies say about Ledgerly.
+            Here is what freelancers and agencies say about Invoiceify.
           </p>
         </div>
 

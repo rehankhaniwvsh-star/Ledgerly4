@@ -124,11 +124,11 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({
             <div
               className="w-9 h-9 rounded text-white font-bold flex items-center justify-center text-sm shadow-sm bg-[var(--primary)]"
             >
-              {brand.logoLetter || 'L'}
+              {brand.logoLetter || 'I'}
             </div>
             <div>
               <h2 className="font-bold text-base text-[var(--foreground)]">
-                {brand.brandName || 'Ledgerly'} Invoices Dashboard
+                {brand.brandName || 'Invoiceify'} Invoices Dashboard
               </h2>
               <p className="text-xs text-[var(--muted-foreground)]">
                 Manage existing invoices, track payments, filter statuses & themes
@@ -139,15 +139,15 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onCreateNewInvoice}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[var(--primary-foreground)] rounded-[var(--radius)] shadow-sm bg-[var(--primary)] hover:opacity-90 transition-all cursor-pointer"
+              className="btn-shader-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-[var(--radius)] cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 btn-icon-hover-bounce" />
               <span>Create New Invoice</span>
             </button>
 
             <button
               onClick={onClose}
-              className="p-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer"
+              className="p-1.5 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded hover:bg-[var(--muted)] cursor-pointer transition-transform hover:scale-110"
             >
               <X className="w-5 h-5" />
             </button>

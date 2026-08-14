@@ -76,7 +76,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
     downloadAnchor.setAttribute('href', dataStr);
     downloadAnchor.setAttribute(
       'download',
-      `ledgerly_cms_backup_${new Date().toISOString().split('T')[0]}.json`
+      `invoiceify_cms_backup_${new Date().toISOString().split('T')[0]}.json`
     );
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
@@ -150,7 +150,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-sm text-[var(--foreground)]">
-                {formData.brand.brandName || 'Ledgerly'} Brand Content Manager
+                {formData.brand.brandName || 'Invoiceify'} Brand Content Manager
               </h3>
               <p className="text-[11px] text-[var(--muted-foreground)]">
                 Live editing, style configuration, and Gemini AI copy generation
@@ -168,9 +168,9 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
 
             <button
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[var(--radius)] shadow-sm hover:opacity-90 cursor-pointer"
+              className="btn-shader-primary inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-[var(--radius)] cursor-pointer"
             >
-              <Save className="w-3.5 h-3.5" />
+              <Save className="w-3.5 h-3.5 btn-icon-hover-bounce" />
               <span>Save Edits</span>
             </button>
 
@@ -492,7 +492,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                         className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] font-mono"
                       />
                       <p className="text-[11px] text-[var(--muted-foreground)] mt-1 leading-relaxed">
-                        Paste either your Google Search Console verification code or the full HTML meta tag. Ledgerly will automatically inject: <br />
+                        Paste either your Google Search Console verification code or the full HTML meta tag. Invoiceify will automatically inject: <br />
                         <code className="text-[var(--primary)] font-mono text-[10px]">
                           &lt;meta name="google-site-verification" content="{formData.brand.googleSiteVerification || 'YOUR_CODE'}" /&gt;
                         </code>
@@ -993,7 +993,7 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                     </label>
                     <textarea
                       rows={3}
-                      placeholder="e.g., Write a punchy 2-sentence subheadline for Ledgerly targeting high-end design agencies and freelancers."
+                      placeholder="e.g., Write a punchy 2-sentence subheadline for Invoiceify targeting high-end design agencies and freelancers."
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       className="w-full p-2.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
@@ -1003,9 +1003,9 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                   <button
                     onClick={handleGenerateAiCopy}
                     disabled={aiGenerating || !aiPrompt.trim()}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-[var(--primary-foreground)] bg-[var(--primary)] rounded hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                    className="btn-shader-primary inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded disabled:opacity-50 cursor-pointer"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-3.5 h-3.5 btn-icon-hover-bounce" />
                     <span>
                       {aiGenerating
                         ? 'Generating with Gemini...'

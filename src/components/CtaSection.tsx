@@ -28,9 +28,9 @@ export const CtaSection: React.FC<CtaSectionProps> = ({
         <div className="relative z-10 flex flex-wrap justify-center items-center gap-4">
           <button
             onClick={onOpenGenerator}
-            className="inline-flex items-center gap-2 px-8 py-4 text-xs sm:text-sm font-bold bg-[var(--card)] text-[var(--primary)] rounded-[var(--radius)] shadow hover:bg-opacity-95 transition-all active:scale-95 cursor-pointer"
+            className="btn-shader-accent inline-flex items-center gap-2.5 px-8 py-4 text-xs sm:text-sm font-extrabold rounded-[var(--radius)] cursor-pointer"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4 btn-icon-hover-bounce" />
             <span>{cta.buttonText || "Create invoice — it's free"}</span>
           </button>
         </div>

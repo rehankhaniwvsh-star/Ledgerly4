@@ -149,6 +149,334 @@
   }
 }
 
+/* ========================================================
+   BUTTON SHADERS & ANIMATION EFFECTS
+   ======================================================== */
+
+@keyframes shader-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  50%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes shader-sweep-fast {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-25deg);
+  }
+}
+
+@keyframes shader-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px -2px var(--primary), 0 4px 16px -2px rgba(112, 51, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 26px 4px var(--primary), 0 8px 24px -2px rgba(112, 51, 255, 0.65);
+  }
+}
+
+@keyframes shader-gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes shader-border-rotate {
+  0% {
+    --border-angle: 0deg;
+  }
+  100% {
+    --border-angle: 360deg;
+  }
+}
+
+@keyframes button-float-subtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Base Shader Button Properties */
+.btn-shader {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-shader:active {
+  transform: translateY(1px) scale(0.975);
+}
+
+/* Specular Light Ray Sheen Pseudo Element */
+.btn-shader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.38),
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shader:hover::before {
+  animation: shader-sweep-fast 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Continuous Subtle Ambient Shader Sweep for Featured CTAs */
+.btn-shader-loop::before {
+  animation: shader-sweep 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Primary Button Shader: Vibrant Gradient Flow, Glass Bevel & Glow */
+.btn-shader-primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, var(--primary) 0%, #8c4aff 50%, var(--primary) 100%);
+  background-size: 200% 200%;
+  animation: shader-gradient-flow 6s ease infinite;
+  color: var(--primary-foreground);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.18),
+    0 4px 14px -2px rgba(112, 51, 255, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-shader-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0.08) 80%,
+    transparent 100%
+  );
+  transform: translateX(-150%) skewX(-22deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shader-primary:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    0 8px 24px -2px rgba(112, 51, 255, 0.65);
+}
+
+.btn-shader-primary:hover::before {
+  animation: shader-sweep-fast 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-shader-primary:active {
+  transform: translateY(1px) scale(0.975);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.25),
+    0 2px 8px -2px rgba(112, 51, 255, 0.3);
+}
+
+/* Secondary Button Shader: Glass Frosting with Ambient Specular Rim */
+.btn-shader-secondary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 2px 6px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .btn-shader-secondary {
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.btn-shader-secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(112, 51, 255, 0.05),
+    rgba(112, 51, 255, 0.2),
+    rgba(112, 51, 255, 0.05),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shader-secondary:hover {
+  transform: translateY(-1px);
+  border-color: var(--primary);
+  background: var(--muted);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 6px 18px -2px rgba(112, 51, 255, 0.15);
+}
+
+.btn-shader-secondary:hover::before {
+  animation: shader-sweep-fast 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-shader-secondary:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Emerald Shader Button: For Saves, Success & Download actions */
+.btn-shader-emerald {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15),
+    0 4px 14px -2px rgba(16, 185, 129, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-shader-emerald::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shader-emerald:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 8px 22px -2px rgba(16, 185, 129, 0.6);
+}
+
+.btn-shader-emerald:hover::before {
+  animation: shader-sweep-fast 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-shader-emerald:active {
+  transform: translateY(1px) scale(0.975);
+}
+
+/* Accent Card Button (Inverted Theme Shader) */
+.btn-shader-accent {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--card);
+  color: var(--primary);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-shader-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(112, 51, 255, 0.12),
+    rgba(112, 51, 255, 0.3),
+    rgba(112, 51, 255, 0.12),
+    transparent
+  );
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-shader-accent:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    inset 0 1px 0 #ffffff,
+    0 10px 28px -4px rgba(0, 0, 0, 0.22);
+}
+
+.btn-shader-accent:hover::before {
+  animation: shader-sweep-fast 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-shader-accent:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Pulsing Ambient Glow effect */
+.btn-shader-glow {
+  animation: shader-pulse-glow 3s infinite ease-in-out;
+}
+
+/* Icon Animation on Button Hover */
+.btn-icon-hover-bounce {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-shader:hover .btn-icon-hover-bounce,
+.btn-shader-primary:hover .btn-icon-hover-bounce,
+.btn-shader-secondary:hover .btn-icon-hover-bounce,
+.btn-shader-emerald:hover .btn-icon-hover-bounce,
+.btn-shader-accent:hover .btn-icon-hover-bounce {
+  transform: scale(1.18) rotate(6deg);
+}
+
 @media print {
   body * {
     visibility: hidden;

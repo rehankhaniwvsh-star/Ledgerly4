@@ -19,7 +19,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({
 }) => {
   const [recipient, setRecipient] = useState(invoice?.clientEmail || '');
   const [subject, setSubject] = useState(
-    `Invoice ${invoice?.invoiceNumber || ''} from ${brand.brandName || 'Ledgerly'}`
+    `Invoice ${invoice?.invoiceNumber || ''} from ${brand.brandName || 'Invoiceify'}`
   );
   const [message, setMessage] = useState(
     `Hi ${invoice?.clientName || 'there'},\n\nPlease find attached your invoice ${
@@ -29,7 +29,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({
       .toLocaleString()}.\n\nDue Date: ${invoice?.dueDate}\n\nYou can view and pay your invoice online at:\n${
       window.location.origin
     }/#invoice-${invoice?.invoiceNumber}\n\nThank you for your business!\nBest regards,\n${
-      brand.brandName || 'Ledgerly'
+      brand.brandName || 'Invoiceify'
     }`
   );
 
@@ -153,12 +153,12 @@ export const EmailModal: React.FC<EmailModalProps> = ({
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--card)] border border-[var(--border)] rounded text-[var(--foreground)] hover:bg-[var(--muted)] font-semibold cursor-pointer"
+                  className="btn-shader-secondary inline-flex items-center gap-1.5 px-3.5 py-2 rounded font-semibold cursor-pointer"
                 >
                   {copiedLink ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <Check className="w-3.5 h-3.5 text-emerald-600 btn-icon-hover-bounce" />
                   ) : (
-                    <Copy className="w-3.5 h-3.5" />
+                    <Copy className="w-3.5 h-3.5 btn-icon-hover-bounce" />
                   )}
                   <span>{copiedLink ? 'Link Copied' : 'Copy Direct Link'}</span>
                 </button>
@@ -167,9 +167,9 @@ export const EmailModal: React.FC<EmailModalProps> = ({
                   type="button"
                   onClick={handleSend}
                   disabled={sending || !recipient}
-                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-bold text-[var(--primary-foreground)] rounded bg-[var(--primary)] shadow hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                  className="btn-shader-primary inline-flex items-center gap-2 px-5 py-2 text-xs font-bold rounded shadow disabled:opacity-50 cursor-pointer"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-3.5 h-3.5 btn-icon-hover-bounce" />
                   <span>{sending ? 'Sending Email...' : 'Send Invoice Now'}</span>
                 </button>
               </div>
