@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { HeroData, BrandSettings } from '../types';
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
-import RocketIcon from './icons/RocketIcon';
+import { ArrowRight, Check, Star, Sparkles, Zap, Shield, Search, Sliders } from 'lucide-react';
 import BookmarkIcon from './icons/BookmarkIcon';
 import MagnifierIcon from './icons/MagnifierIcon';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
@@ -35,194 +34,263 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   return (
-    <section className="px-6 pt-6 pb-16 md:pb-24">
-      <div className="max-w-6xl mx-auto bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 sm:p-10 md:p-12 shadow-sm grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
-        {/* Left Copy Column */}
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-2 bg-[var(--accent)] text-[var(--accent-foreground)] text-xs font-semibold px-3 py-1.5 rounded-[var(--radius)]">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{hero.eyebrow || 'Free · No card required'}</span>
+    <section className="relative px-6 pt-10 pb-16 md:pb-24 overflow-hidden bg-grid-mesh">
+      {/* Background radial glow */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[450px] ambient-glow-warm pointer-events-none -z-10" />
+
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-12 items-center">
+          {/* Left Hero Copy */}
+          <div className="space-y-6">
+            {/* Review pill banner matching screenshots */}
+            <div className="inline-flex items-center gap-3 bg-[var(--card)] border border-[var(--border)] rounded-full px-3.5 py-1.5 shadow-xs">
+              <div className="flex -space-x-1.5">
+                <img
+                  className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces"
+                  alt="User"
+                />
+                <img
+                  className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=faces"
+                  alt="User"
+                />
+                <img
+                  className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=faces"
+                  alt="User"
+                />
+              </div>
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-[var(--foreground)]">
+                <div className="flex text-amber-500">
+                  <Star className="w-3 h-3 fill-amber-500" />
+                </div>
+                <span>3,600+ 5-Star Reviews</span>
+              </div>
             </div>
-            
-            <div 
-              onClick={() => setIsBookmarked(!isBookmarked)}
-              className="inline-flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] text-xs font-medium px-2.5 py-1 rounded-[var(--radius)] cursor-pointer hover:bg-[var(--muted)] transition-all"
-              title="Bookmark template"
-            >
-              <BookmarkIcon size={16} color={isBookmarked ? "var(--primary)" : "var(--muted-foreground)"} strokeWidth={2} />
-              <span>{isBookmarked ? 'Bookmarked' : 'Save Template'}</span>
+
+            {/* Headline with vibrant gradient punch */}
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold text-[var(--foreground)] leading-[1.12] tracking-tight">
+              {hero.headlineMain}{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF3366] via-[#FF5722] to-[#FFA000]">
+                {hero.headlineAccent}
+              </span>
+            </h1>
+
+            <p className="text-[var(--muted-foreground)] text-base sm:text-lg leading-relaxed max-w-xl">
+              {hero.subheadline}
+            </p>
+
+            {/* Action CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <button
+                onClick={onOpenGenerator}
+                className="btn-pill-dark inline-flex items-center gap-3 pl-6 pr-3 py-3.5 text-sm font-bold cursor-pointer group"
+              >
+                <span>{hero.primaryCtaText || 'Get Started Free'}</span>
+                <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-colors">
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </button>
+
+              <button
+                onClick={onOpenDashboard}
+                className="inline-flex items-center gap-2 px-5 py-3.5 text-sm font-semibold rounded-full bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-all cursor-pointer shadow-xs"
+              >
+                <Sparkles className="w-4 h-4 text-orange-500" />
+                <span>{hero.secondaryCtaText || 'See Dashboard'}</span>
+              </button>
+            </div>
+
+            {/* Feature tick markers */}
+            <div className="pt-4 border-t border-[var(--border)]/70 flex flex-wrap items-center gap-5 text-xs text-[var(--muted-foreground)] font-medium">
+              <div className="flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                </span>
+                <span>Free · No credit card</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                  <Zap className="w-2.5 h-2.5" />
+                </span>
+                <span>Instant PDF & Share Links</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <Shield className="w-2.5 h-2.5" />
+                </span>
+                <span>100% Data Privacy</span>
+              </div>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--foreground)] leading-[1.18] tracking-tight">
-            {hero.headlineMain}{' '}
-            <span className="text-[var(--primary)]">
-              {hero.headlineAccent}
-            </span>
-          </h1>
+          {/* Right Live Invoice Preview Card with Glowing Framer Frame */}
+          <div className="relative group">
+            {/* Ambient Coral Glow Aura */}
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-orange-500/20 via-pink-500/15 to-amber-500/20 blur-xl opacity-75 group-hover:opacity-100 transition-opacity" />
 
-          <p className="text-[var(--muted-foreground)] text-base sm:text-lg leading-relaxed max-w-lg">
-            {hero.subheadline}
-          </p>
+            <div className="relative bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-7 shadow-xl">
+              {/* Quick Search & AI Audit Header */}
+              <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--border)]">
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]" />
+                  <input
+                    type="text"
+                    placeholder="Search invoice items..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-8 pr-2 py-1.5 bg-[var(--muted)] border border-[var(--border)] rounded-lg text-xs text-[var(--foreground)] focus:outline-none focus:border-orange-500 transition-colors"
+                  />
+                </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              onClick={onOpenGenerator}
-              className="btn-shader-primary inline-flex items-center gap-2.5 px-6 py-3.5 text-sm font-bold rounded-[var(--radius)] cursor-pointer group"
-            >
-              <RocketIcon size={18} color="var(--primary-foreground)" strokeWidth={2} className="btn-icon-hover-bounce" />
-              <span>{hero.primaryCtaText || 'Create your first invoice'}</span>
-            </button>
+                <button
+                  onClick={() => setAiAudited(!aiAudited)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                    aiAudited
+                      ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
+                      : 'bg-[var(--card)] text-orange-600 border-[var(--border)] hover:bg-orange-50'
+                  }`}
+                  title="Toggle AI Audit Check"
+                >
+                  <BrainCircuitIcon size={14} color={aiAudited ? '#ffffff' : '#FF5722'} strokeWidth={2} />
+                  <span>{aiAudited ? 'AI Verified' : 'AI Audit'}</span>
+                </button>
+              </div>
 
-            <button
-              onClick={onOpenDashboard}
-              className="btn-shader-secondary inline-flex items-center gap-2 px-5 py-3.5 text-sm font-semibold rounded-[var(--radius)] cursor-pointer"
-            >
-              <span>{hero.secondaryCtaText || 'See the dashboard'}</span>
-              <ArrowRight className="w-4 h-4 text-[var(--primary)] transition-transform group-hover:translate-x-1" />
-            </button>
-          </div>
+              {/* Card Client Details */}
+              <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FF3366] to-[#FFA000] text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                    {hero.previewInvoice.clientName?.charAt(0) || 'N'}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-[var(--foreground)]">
+                      {hero.previewInvoice.clientName || 'Nova Studio'}
+                    </p>
+                    <span className="text-xs text-[var(--muted-foreground)]">
+                      {hero.previewInvoice.clientEmail || 'hello@novastudio.com'}
+                    </span>
+                  </div>
+                </div>
+                <span className="font-mono text-xs font-bold text-orange-600 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-md">
+                  {hero.previewInvoice.invoiceNumber || 'INV-0042'}
+                </span>
+              </div>
 
-          {/* Micro social proof badges */}
-          <div className="pt-4 border-t border-[var(--border)] flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-[var(--muted-foreground)]">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#4ac885]" />
-              <span>Unlimited Invoices</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <MagnifierIcon size={16} color="var(--primary)" strokeWidth={2} />
-              <span>Instant Client Search</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <BrainCircuitIcon size={16} color="var(--primary)" strokeWidth={2} />
-              <span>AI Invoice Audit</span>
+              {/* Line Items */}
+              <div className="py-4 space-y-2.5">
+                {(hero.previewInvoice.items || []).map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between text-xs py-1 px-2 rounded-md hover:bg-[var(--muted)]/50 transition-colors"
+                  >
+                    <span className="font-medium text-[var(--foreground)] flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                      {item.description}
+                    </span>
+                    <span className="font-mono font-semibold text-[var(--foreground)]">
+                      {hero.previewInvoice.currencySymbol}
+                      {item.amount.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="h-px bg-[var(--border)] my-1"></div>
+
+              {/* Total Row */}
+              <div className="flex items-center justify-between pt-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
+                  Amount Due
+                </span>
+                <span className="text-2xl font-black font-mono text-[var(--foreground)] tracking-tight">
+                  {hero.previewInvoice.currencySymbol}
+                  {(hero.previewInvoice.total || 57820).toLocaleString()}
+                </span>
+              </div>
+
+              {/* Status Switcher Badge */}
+              <div className="mt-5 flex items-center justify-between bg-[var(--muted)] border border-[var(--border)] rounded-xl p-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-[var(--muted-foreground)]">Status:</span>
+                  <button
+                    onClick={toggleStatus}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all ${
+                      invoiceStatus === 'Paid'
+                        ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30'
+                        : invoiceStatus === 'Sent'
+                        ? 'bg-orange-500/15 text-orange-700 border border-orange-500/30'
+                        : 'bg-zinc-500/15 text-zinc-700 border border-zinc-500/30'
+                    }`}
+                    title="Click to toggle status demo"
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        invoiceStatus === 'Paid'
+                          ? 'bg-emerald-500 animate-pulse'
+                          : invoiceStatus === 'Sent'
+                          ? 'bg-orange-500'
+                          : 'bg-zinc-500'
+                      }`}
+                    ></span>
+                    <span>{invoiceStatus}</span>
+                  </button>
+                </div>
+
+                <button
+                  onClick={onOpenGenerator}
+                  className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors flex items-center gap-1"
+                >
+                  <span>Customize</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Invoice Card Widget */}
-        <div className="relative group">
-          {/* Subtle accent backdrop card effect */}
-          <div
-            className="absolute -inset-2 rounded-[var(--radius)] opacity-40 blur-sm transition-all group-hover:opacity-60 bg-[var(--accent)]"
-          ></div>
-
-          <div className="relative bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 sm:p-7 shadow-sm transition-transform duration-300 hover:-translate-y-1">
-            {/* Interactive Demo Search & AI Toolbar */}
-            <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--border)]">
-              <div className="relative flex-1">
-                <div className="absolute left-2.5 top-1/2 -translate-y-1/2">
-                  <MagnifierIcon size={15} color="var(--muted-foreground)" strokeWidth={2} />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Quick search items or client..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-2 py-1 bg-[var(--background)] border border-[var(--border)] rounded-[var(--radius)] text-[11px] text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]"
-                />
+        {/* Platform Core Capabilities & Trust Highlights Strip */}
+        <div className="mt-16 pt-10 border-t border-[var(--border)]/70">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 text-left transition-all duration-300 hover:border-orange-500/40 hover:-translate-y-0.5 group">
+              <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform">
+                <Zap className="w-4 h-4" />
               </div>
-
-              <button
-                onClick={() => setAiAudited(!aiAudited)}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius)] text-[11px] font-semibold transition-all cursor-pointer border ${
-                  aiAudited
-                    ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]'
-                    : 'bg-[var(--card)] text-[var(--primary)] border-[var(--border)] hover:bg-[var(--muted)]'
-                }`}
-                title="Toggle AI Audit Check"
-              >
-                <BrainCircuitIcon size={15} color={aiAudited ? 'var(--primary-foreground)' : 'var(--primary)'} strokeWidth={2} />
-                <span>{aiAudited ? 'AI Audited' : 'Run AI Audit'}</span>
-              </button>
+              <h4 className="text-xs font-bold text-[var(--foreground)] mb-0.5">0.4s Instant PDF</h4>
+              <p className="text-[11px] text-[var(--muted-foreground)] leading-snug">
+                Pixel-perfect vector rendering ready for print or email.
+              </p>
             </div>
 
-            {/* Card Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-[var(--radius)] bg-[var(--primary)] text-[var(--primary-foreground)] font-bold flex items-center justify-center text-sm shadow-sm"
-                >
-                  {hero.previewInvoice.clientName?.charAt(0) || 'N'}
-                </div>
-                <div>
-                  <p className="font-semibold text-sm text-[var(--foreground)]">
-                    {hero.previewInvoice.clientName || 'Nova Studio'}
-                  </p>
-                  <span className="text-xs text-[var(--muted-foreground)]">
-                    {hero.previewInvoice.clientEmail || 'hello@novastudio.com'}
-                  </span>
-                </div>
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 text-left transition-all duration-300 hover:border-orange-500/40 hover:-translate-y-0.5 group">
+              <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform">
+                <Shield className="w-4 h-4" />
               </div>
-              <span className="font-mono text-xs font-semibold text-[var(--muted-foreground)] bg-[var(--background)] border border-[var(--border)] px-2.5 py-1 rounded-[var(--radius)]">
-                {hero.previewInvoice.invoiceNumber || 'INV-0042'}
-              </span>
+              <h4 className="text-xs font-bold text-[var(--foreground)] mb-0.5">100% Client-Side</h4>
+              <p className="text-[11px] text-[var(--muted-foreground)] leading-snug">
+                Your client data and numbers stay private on your browser.
+              </p>
             </div>
 
-            {/* Line Items */}
-            <div className="py-4 space-y-2.5">
-              {(hero.previewInvoice.items || []).map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between text-xs text-[var(--muted-foreground)]"
-                >
-                  <span className="font-medium text-[var(--foreground)]">
-                    {item.description}
-                  </span>
-                  <span className="font-mono text-[var(--foreground)]">
-                    {hero.previewInvoice.currencySymbol}
-                    {item.amount.toLocaleString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="h-px bg-[var(--border)] my-2"></div>
-
-            {/* Total Row */}
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-sm font-semibold text-[var(--muted-foreground)]">Total</span>
-              <span className="text-xl font-bold font-mono text-[var(--foreground)]">
-                {hero.previewInvoice.currencySymbol}
-                {(hero.previewInvoice.total || 57820).toLocaleString()}
-              </span>
-            </div>
-
-            {/* Status Switcher Badge */}
-            <div className="mt-5 flex items-center justify-between bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-2">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[var(--muted-foreground)]">Status:</span>
-                <button
-                  onClick={toggleStatus}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius)] text-xs font-semibold cursor-pointer transition-colors ${
-                    invoiceStatus === 'Paid'
-                      ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
-                      : invoiceStatus === 'Sent'
-                      ? 'bg-[var(--secondary)] text-[var(--primary)]'
-                      : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
-                  }`}
-                  title="Click to toggle status demo"
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      invoiceStatus === 'Paid'
-                        ? 'bg-[var(--accent-foreground)] animate-pulse'
-                        : invoiceStatus === 'Sent'
-                        ? 'bg-[var(--primary)]'
-                        : 'bg-[var(--muted-foreground)]'
-                    }`}
-                  ></span>
-                  <span>{invoiceStatus}</span>
-                </button>
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 text-left transition-all duration-300 hover:border-orange-500/40 hover:-translate-y-0.5 group">
+              <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-4 h-4" />
               </div>
+              <h4 className="text-xs font-bold text-[var(--foreground)] mb-0.5">Zero Watermarks</h4>
+              <p className="text-[11px] text-[var(--muted-foreground)] leading-snug">
+                Purely your brand colors, your typography, your identity.
+              </p>
+            </div>
 
-              <button
-                onClick={onOpenGenerator}
-                className="text-[11px] font-semibold text-[var(--primary)] hover:underline"
-              >
-                Customise →
-              </button>
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 text-left transition-all duration-300 hover:border-orange-500/40 hover:-translate-y-0.5 group">
+              <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform">
+                <BrainCircuitIcon size={18} color="#FF5722" strokeWidth={2} />
+              </div>
+              <h4 className="text-xs font-bold text-[var(--foreground)] mb-0.5">AI Smart Copilot</h4>
+              <p className="text-[11px] text-[var(--muted-foreground)] leading-snug">
+                Auto-generate item descriptions and invoice scopes instantly.
+              </p>
             </div>
           </div>
         </div>

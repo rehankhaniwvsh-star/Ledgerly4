@@ -9,42 +9,30 @@ import { AboutSection } from './components/AboutSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { FaqSection } from './components/FaqSection';
 import { TestimonialsSection } from './components/TestimonialsSection';
+import { PricingSection } from './components/PricingSection';
 import { CtaSection } from './components/CtaSection';
 import { Footer } from './components/Footer';
 import { InvoiceStudioView } from './components/InvoiceStudioView';
 import { DashboardModal } from './components/DashboardModal';
 import { EmailModal } from './components/EmailModal';
 import { CmsAdminModal } from './components/CmsAdminModal';
+import { AdminAuthModal } from './components/AdminAuthModal';
 import { downloadInvoicePdf } from './utils/pdfExport';
 
 const LOCAL_STORAGE_CMS_KEY = 'invoiceify_cms_data_v1';
 const LOCAL_STORAGE_INVOICES_KEY = 'invoiceify_invoices_data_v1';
+const LOCAL_STORAGE_ADMIN_AUTH_KEY = 'invoiceify_admin_auth_v1';
 
 export default function App() {
   const [cms, setCms] = useState<CmsContent>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_CMS_KEY) || localStorage.getItem('ledgerly_cms_data_v1');
       if (saved) {
-        let parsed = JSON.parse(saved);
-        // Clean up legacy brand name if present
-        if (parsed.brand?.brandName === 'Ledgerly') {
-          parsed.brand.brandName = 'Invoiceify';
-          if (parsed.brand.contactEmail === 'hello@ledgerly.app') {
-            parsed.brand.contactEmail = 'hello@invoiceify.app';
-          }
-          if (parsed.brand.logoLetter === 'L') {
-            parsed.brand.logoLetter = 'I';
-          }
-          if (parsed.about?.eyebrow === 'About Ledgerly') {
-            parsed.about.eyebrow = 'About Invoiceify';
-          }
-          if (typeof parsed.about?.paragraph1 === 'string') {
-            parsed.about.paragraph1 = parsed.about.paragraph1.replace(/Ledgerly/g, 'Invoiceify');
-          }
-          if (typeof parsed.faqs?.subtitle === 'string') {
-            parsed.faqs.subtitle = parsed.faqs.subtitle.replace(/Ledgerly/g, 'Invoiceify');
-          }
-        }
+        // Universal clean up of legacy brand name in all stored strings
+        const cleansedJson = saved
+          .replace(/Ledgerly/g, 'Invoiceify')
+          .replace(/ledgerly/g, 'invoiceify');
+        const parsed = JSON.parse(cleansedJson);
         return parsed;
       }
     } catch (err) {
@@ -57,13 +45,10 @@ export default function App() {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_INVOICES_KEY) || localStorage.getItem('ledgerly_invoices_data_v1');
       if (saved) {
-        let parsed: InvoiceData[] = JSON.parse(saved);
-        parsed = parsed.map((inv) => ({
-          ...inv,
-          businessName: inv.businessName === 'Ledgerly Studio' ? 'Invoiceify Studio' : inv.businessName,
-          businessEmail: inv.businessEmail === 'billing@ledgerly.app' ? 'billing@invoiceify.app' : inv.businessEmail,
-          businessLogoLetter: inv.businessLogoLetter === 'L' ? 'I' : inv.businessLogoLetter,
-        }));
+        const cleansedJson = saved
+          .replace(/Ledgerly/g, 'Invoiceify')
+          .replace(/ledgerly/g, 'invoiceify');
+        const parsed: InvoiceData[] = JSON.parse(cleansedJson);
         return parsed;
       }
     } catch (err) {
@@ -80,6 +65,69 @@ export default function App() {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [cmsAdminOpen, setCmsAdminOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [adminAuthModalOpen, setAdminAuthModalOpen] = useState(false);
+
+  // Admin authentication state
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(LOCAL_STORAGE_ADMIN_AUTH_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Handle CMS open request with security PIN protection
+  const handleRequestOpenCms = () => {
+    if (isAdminAuthenticated) {
+      setCmsAdminOpen(true);
+    } else {
+      setAdminAuthModalOpen(true);
+    }
+  };
+
+  const handleAdminAuthSuccess = () => {
+    setIsAdminAuthenticated(true);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_ADMIN_AUTH_KEY, 'true');
+    } catch {}
+    setAdminAuthModalOpen(false);
+    setCmsAdminOpen(true);
+  };
+
+  const handleLockAdmin = () => {
+    setIsAdminAuthenticated(false);
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_ADMIN_AUTH_KEY);
+    } catch {}
+    setCmsAdminOpen(false);
+  };
+
+  // Keyboard shortcut (Ctrl+Shift+A or Cmd+Shift+A) & URL Hash #admin listener for hidden owner access
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        handleRequestOpenCms();
+      }
+    };
+
+    const handleHashChange = () => {
+      if (window.location.hash === '#admin') {
+        handleRequestOpenCms();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('hashchange', handleHashChange);
+    if (window.location.hash === '#admin') {
+      handleRequestOpenCms();
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [isAdminAuthenticated]);
 
   // Synchronize browser tab title and Google Search Console meta tag with CMS brand settings
   useEffect(() => {
@@ -115,7 +163,6 @@ export default function App() {
     const existingIndex = invoices.findIndex(
       (i) => i.id === updatedInvoice.id || i.invoiceNumber === updatedInvoice.invoiceNumber
     );
-
     let updatedList: InvoiceData[];
     if (existingIndex >= 0) {
       updatedList = [...invoices];
@@ -123,7 +170,6 @@ export default function App() {
     } else {
       updatedList = [updatedInvoice, ...invoices];
     }
-
     saveInvoicesToStorage(updatedList);
     setSelectedInvoiceId(updatedInvoice.id || updatedInvoice.invoiceNumber);
   };
@@ -239,14 +285,16 @@ export default function App() {
       {/* Universal Top Header Bar */}
       <Header
         brand={cms.brand}
-        onOpenCms={() => setCmsAdminOpen(true)}
+        onOpenCms={handleRequestOpenCms}
         onOpenGenerator={handleCreateNewInvoice}
         onOpenDashboard={() => setDashboardOpen(true)}
         isAdminOpen={cmsAdminOpen}
+        isAdminAuthenticated={isAdminAuthenticated}
+        onLockAdmin={handleLockAdmin}
       />
 
       {currentView === 'studio' ? (
-        /* Full Screen Dedicated Invoice Studio Page (Matches User Screenshot!) */
+        /* Full Screen Dedicated Invoice Studio Page */
         <InvoiceStudioView
           brand={cms.brand}
           invoices={invoices}
@@ -266,7 +314,7 @@ export default function App() {
             brand={cms.brand}
             onOpenGenerator={handleCreateNewInvoice}
             onOpenDashboard={() => setDashboardOpen(true)}
-            onOpenCms={() => setCmsAdminOpen(true)}
+            onOpenCms={handleRequestOpenCms}
           />
 
           <FeaturesSection
@@ -276,12 +324,17 @@ export default function App() {
 
           <AboutSection
             about={cms.about}
+            brandName={cms.brand?.brandName || 'Invoiceify'}
             primaryColor={cms.brand.primaryColor}
           />
 
           <HowItWorksSection
             howItWorks={cms.howItWorks}
             primaryColor={cms.brand.primaryColor}
+          />
+
+          <PricingSection
+            onOpenGenerator={handleCreateNewInvoice}
           />
 
           <FaqSection
@@ -302,8 +355,9 @@ export default function App() {
 
           <Footer
             brand={cms.brand}
-            onOpenCms={() => setCmsAdminOpen(true)}
+            onOpenCms={handleRequestOpenCms}
             onOpenGenerator={handleCreateNewInvoice}
+            isAdminAuthenticated={isAdminAuthenticated}
           />
         </>
       )}
@@ -332,13 +386,23 @@ export default function App() {
         onSendSuccess={handleEmailSuccess}
       />
 
-      {/* Live CMS Admin Modal */}
+      {/* Master Admin PIN Verification Gate Modal */}
+      <AdminAuthModal
+        isOpen={adminAuthModalOpen}
+        onClose={() => setAdminAuthModalOpen(false)}
+        onSuccess={handleAdminAuthSuccess}
+        correctPin={cms.brand.adminPin || '1234'}
+        brandName={cms.brand.brandName || 'Invoiceify'}
+      />
+
+      {/* Protected Live CMS Admin Modal */}
       <CmsAdminModal
         cms={cms}
         isOpen={cmsAdminOpen}
         onClose={() => setCmsAdminOpen(false)}
         onSave={handleSaveCms}
         onReset={handleResetCms}
+        onLockAdmin={handleLockAdmin}
       />
     </div>
   );

@@ -15,7 +15,7 @@ export const initialInvoices: InvoiceData[] = [
     currency: '₹',
     taxRate: 18,
     discountAmount: 1000,
-    themeColor: '#7A1E2B',
+    themeColor: '#FF5238',
     templateStyle: 'Modern',
     notes: 'Thank you for choosing Nova Studio for your branding project!',
     items: [

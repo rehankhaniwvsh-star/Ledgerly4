@@ -4,12 +4,14 @@ export const defaultCmsContent: CmsContent = {
   brand: {
     brandName: 'Invoiceify',
     tagline: 'Branded invoicing for freelancers and agencies',
-    primaryColor: '#7033ff',
-    accentColor: '#e2ebff',
-    backgroundColor: '#fdfdfd',
+    primaryColor: '#FF5238',
+    accentColor: '#FFF0EB',
+    backgroundColor: '#FBFBFA',
     contactEmail: 'hello@invoiceify.app',
     logoLetter: 'I',
     googleSiteVerification: 'googleacb1159f81828443',
+    adminPin: '1234',
+    showAdminButtonInHeader: false,
   },
   hero: {
     eyebrow: 'Free · No card required',

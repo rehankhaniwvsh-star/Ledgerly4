@@ -63,6 +63,8 @@ export interface BrandSettings {
   contactEmail: string;
   logoLetter: string;
   googleSiteVerification?: string; // Google Search Console code or full meta content
+  adminPin?: string; // Secret security PIN for CMS Admin panel (default: 1234)
+  showAdminButtonInHeader?: boolean; // Whether the CMS Admin button is visible publicly in the header
 }
 
 export interface CmsContent {
