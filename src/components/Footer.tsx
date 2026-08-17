@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrandSettings } from '../types';
 import { SlidersHorizontal, Sparkles, Lock, Unlock } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface FooterProps {
   brand: BrandSettings;
@@ -21,23 +22,16 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] gap-10 mb-12">
           {/* Column 1: Brand Info */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#FF3366] via-[#FF5722] to-[#FFA000] p-0.5 shadow-xs flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-white"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
-                </svg>
-              </div>
-              <span className="font-extrabold text-[var(--foreground)] text-lg tracking-tight">
-                {brand.brandName || 'Invoiceify'}
-              </span>
-            </div>
+            <BrandLogo
+              brandName={brand.brandName || 'Invoiceify'}
+              tagline={brand.tagline || 'Invoices, paid faster'}
+              size="md"
+              showTagline={true}
+            />
             <p className="text-xs sm:text-sm text-[var(--muted-foreground)] max-w-sm leading-relaxed">
-              {brand.tagline ||
-                'Branded, trackable invoicing for freelancers, creators, and agencies — built to feel like a real product.'}
+              {brand.tagline === 'Invoices, paid faster'
+                ? 'Branded, trackable invoicing for freelancers, creators, and agencies — built to feel like a real product, not a spreadsheet.'
+                : brand.tagline}
             </p>
           </div>
 

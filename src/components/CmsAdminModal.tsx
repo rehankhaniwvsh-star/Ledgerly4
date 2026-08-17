@@ -25,6 +25,7 @@ import {
   KeyRound,
   LogOut,
 } from 'lucide-react';
+import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
 
 interface CmsAdminModalProps {
   cms: CmsContent;
@@ -152,10 +153,8 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
       <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* CMS Header Bar */}
         <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--muted)]/50 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center font-bold text-xs">
-              CMS
-            </div>
+          <div className="flex items-center gap-3">
+            <ReceiptLogoIcon sizeClass="w-9 h-9 rounded-xl" showSparkle={false} />
             <div>
               <h3 className="font-bold text-sm text-[var(--foreground)]">
                 {formData.brand.brandName || 'Invoiceify'} Brand Content Manager
@@ -334,10 +333,36 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
           <div className="flex-1 p-6 overflow-y-auto space-y-6">
             {/* BRAND TAB */}
             {activeTab === 'brand' && (
-              <div className="space-y-4">
-                <h4 className="text-sm font-bold text-[var(--foreground)]">
-                  Global Brand & Color Settings
-                </h4>
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                    Global Brand & Identity Configuration
+                  </h4>
+                  <span className="text-[11px] text-[var(--muted-foreground)]">
+                    Real-time live updates
+                  </span>
+                </div>
+
+                {/* Live Brand Logo Preview Box */}
+                <div className="p-4 bg-[var(--muted)]/40 border border-[var(--border)] rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] block mb-1">
+                      Live Brand Logo & Tagline Preview
+                    </span>
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      This enchanted receipt mark and pill badge appear in your header, footer, and brand touchpoints.
+                    </p>
+                  </div>
+                  <div className="p-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xs">
+                    <BrandLogo
+                      brandName={formData.brand.brandName || 'Invoiceify'}
+                      tagline={formData.brand.tagline || 'Invoices, paid faster'}
+                      size="md"
+                      showTagline={true}
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
@@ -352,28 +377,25 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                           brand: { ...formData.brand, brandName: e.target.value },
                         })
                       }
-                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-bold text-[var(--foreground)]"
                     />
                   </div>
 
                   <div>
                     <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
-                      Logo Letter
+                      Brand Tagline (Pill Badge)
                     </label>
                     <input
                       type="text"
-                      maxLength={2}
-                      value={formData.brand.logoLetter}
+                      value={formData.brand.tagline}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          brand: {
-                            ...formData.brand,
-                            logoLetter: e.target.value.toUpperCase(),
-                          },
+                          brand: { ...formData.brand, tagline: e.target.value },
                         })
                       }
                       className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                      placeholder="Invoices, paid faster"
                     />
                   </div>
 

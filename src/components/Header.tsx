@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrandSettings } from '../types';
 import { SlidersHorizontal, Sparkles, Menu, X, ArrowRight, Lock, Unlock, LogOut } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface HeaderProps {
   brand: BrandSettings;
@@ -27,20 +28,14 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-40 bg-[var(--background)]/85 backdrop-blur-xl border-b border-[var(--border)] transition-all">
       <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
-        {/* Animated Coral Sparkle Logo */}
-        <a href="#" className="flex items-center gap-2.5 group cursor-pointer">
-          <div className="relative w-8 h-8 rounded-xl bg-gradient-to-tr from-[#FF3366] via-[#FF5722] to-[#FFA000] p-0.5 shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform flex items-center justify-center">
-            <svg
-              className="w-4 h-4 text-white sparkle-icon-animated"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
-            </svg>
-          </div>
-          <span className="font-extrabold text-[var(--foreground)] text-lg tracking-tight font-sans">
-            {brand.brandName || 'Invoiceify'}
-          </span>
+        {/* Brand Logo with Enchanted Receipt Icon & Tagline */}
+        <a href="#" className="cursor-pointer">
+          <BrandLogo
+            brandName={brand.brandName || 'Invoiceify'}
+            tagline={brand.tagline || 'Invoices, paid faster'}
+            size="md"
+            showTagline={true}
+          />
         </a>
 
         {/* Desktop Nav Links */}

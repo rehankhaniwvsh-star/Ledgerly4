@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { downloadInvoicePdf } from '../utils/pdfExport';
+import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
 
 interface InvoiceStudioViewProps {
   brand: BrandSettings;
@@ -192,15 +193,19 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
       <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 space-y-6">
         {/* Top Navigation & Action Toolbar */}
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-3 sm:p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
-          {/* Left group: Back button, Dropdown Selector, New Button */}
+          {/* Left group: Brand Icon, Back button, Dropdown Selector, New Button */}
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             <button
               onClick={onBackToLanding}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--muted-foreground)] hover:text-[var(--foreground)] px-2.5 py-1.5 rounded hover:bg-[var(--muted)] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-bold text-[var(--foreground)] hover:text-orange-600 px-2.5 py-1.5 rounded hover:bg-[var(--muted)] transition-colors cursor-pointer group"
+              title="Return to Landing Page"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Landing</span>
+              <ArrowLeft className="w-4 h-4 text-[var(--muted-foreground)] group-hover:text-orange-600" />
+              <ReceiptLogoIcon sizeClass="w-6 h-6 rounded-lg" showSparkle={false} />
+              <span className="font-extrabold">{brand.brandName || 'Invoiceify'}</span>
             </button>
+
+            <div className="h-4 w-px bg-[var(--border)] hidden sm:block" />
 
             {/* Dropdown Invoice Selector */}
             <select

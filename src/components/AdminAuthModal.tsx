@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, KeyRound, ShieldAlert, ArrowRight, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ReceiptLogoIcon } from './BrandLogo';
 
 interface AdminAuthModalProps {
   isOpen: boolean;
@@ -53,17 +54,20 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
         </button>
 
         <div className="text-center space-y-4 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-orange-500/15 text-orange-600 border border-orange-500/30 flex items-center justify-center mx-auto shadow-xs">
-            {isSuccess ? (
-              <CheckCircle2 className="w-6 h-6 text-emerald-500 animate-in zoom-in" />
-            ) : (
-              <Lock className="w-6 h-6" />
-            )}
+          <div className="relative inline-flex items-center justify-center mx-auto">
+            <ReceiptLogoIcon sizeClass="w-16 h-16 rounded-3xl" showSparkle={false} />
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md border-2 border-[var(--card)]">
+              {isSuccess ? (
+                <CheckCircle2 className="w-3.5 h-3.5 text-white animate-in zoom-in" />
+              ) : (
+                <Lock className="w-3 h-3 text-white" />
+              )}
+            </div>
           </div>
 
           <div>
             <h3 className="text-xl font-black tracking-tight text-[var(--foreground)]">
-              {isSuccess ? 'Access Granted' : 'Owner Admin Access'}
+              {isSuccess ? 'Access Granted' : `${brandName} Admin Gate`}
             </h3>
             <p className="text-xs text-[var(--muted-foreground)] mt-1">
               Enter your master security PIN to open the {brandName} CMS editor.

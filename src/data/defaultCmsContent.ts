@@ -3,7 +3,7 @@ import { CmsContent } from '../types';
 export const defaultCmsContent: CmsContent = {
   brand: {
     brandName: 'Invoiceify',
-    tagline: 'Branded invoicing for freelancers and agencies',
+    tagline: 'Invoices, paid faster',
     primaryColor: '#FF5238',
     accentColor: '#FFF0EB',
     backgroundColor: '#FBFBFA',
