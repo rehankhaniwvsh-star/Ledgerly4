@@ -209,25 +209,53 @@ export const SaveInvoicePayloadSchema = z
 
 export const EmailInvoiceSchema = z
   .object({
+    recipient: z
+      .string()
+      .trim()
+      .min(3, "Recipient email is required")
+      .max(254, "Recipient email cannot exceed 254 characters")
+      .email("Must be a valid recipient email address format (e.g. client@domain.com)")
+      .optional(),
     recipientEmail: z
       .string()
       .trim()
       .min(3, "Recipient email is required")
       .max(254, "Recipient email cannot exceed 254 characters")
-      .email("Must be a valid recipient email address format"),
+      .email("Must be a valid recipient email address format")
+      .optional(),
     subject: z
       .string()
       .trim()
-      .min(1, "Subject cannot be empty")
-      .max(200, "Subject cannot exceed 200 characters"),
+      .min(1, "Email subject cannot be empty")
+      .max(200, "Email subject cannot exceed 200 characters"),
     message: z
       .string()
       .trim()
       .max(2000, "Email message body cannot exceed 2,000 characters")
       .default(""),
-    invoiceData: InvoiceSchema,
+    invoiceNumber: z
+      .string()
+      .trim()
+      .min(2, "Invoice number must be at least 2 characters")
+      .max(40, "Invoice number cannot exceed 40 characters")
+      .regex(INVOICE_NUMBER_REGEX, "Invoice number contains invalid characters")
+      .optional(),
+    invoiceId: z
+      .string()
+      .trim()
+      .min(1, "Invoice ID cannot be empty")
+      .max(64, "Invoice ID exceeds 64 characters")
+      .optional(),
+    invoiceData: InvoiceSchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (data) => Boolean(data.recipient || data.recipientEmail),
+    {
+      message: "Recipient email must be provided and must be a valid email format.",
+      path: ["recipient"],
+    }
+  );
 
 // =================================================================
 // 3. RATE LIMITING CONFIGURATION SCHEMA
@@ -482,9 +510,24 @@ export const FullCmsContentSchema = z
 
 export const SaveCmsPayloadSchema = z
   .object({
-    cms: FullCmsContentSchema,
+    cms: FullCmsContentSchema.optional(),
+    brand: CmsBrandSchema.optional(),
+    pin: z
+      .string()
+      .trim()
+      .min(4, "PIN must be at least 4 digits")
+      .max(8, "PIN cannot exceed 8 digits")
+      .regex(PIN_REGEX, "PIN must consist strictly of 4 to 8 numeric digits")
+      .optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (data) => Boolean(data.cms || data.brand || data.pin),
+    {
+      message: "Payload must contain valid cms, brand, or pin to update.",
+      path: ["root"],
+    }
+  );
 
 export const CmsSavePayloadSchema = SaveCmsPayloadSchema;
 

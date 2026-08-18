@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { InvoiceData, InvoiceItem, BrandSettings } from '../types';
+import { validateStrict, InvoiceSchema, ValidationErrorDetail } from '../schemas/strictSchemas';
 import {
   FileText,
   Plus,
@@ -16,6 +17,7 @@ import {
   Save,
   Palette,
   CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -43,6 +45,8 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [isSavedNotice, setIsSavedNotice] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(isFullscreenInitially);
+  const [validationError, setValidationError] = useState<string>('');
+  const [validationDetails, setValidationDetails] = useState<ValidationErrorDetail[]>([]);
 
   const printableRef = useRef<HTMLDivElement>(null);
 
@@ -150,7 +154,18 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
   };
 
   const handleSave = () => {
-    onSaveInvoice(invoice);
+    setValidationError('');
+    setValidationDetails([]);
+
+    // Strict schema check on all inputs (type, length, bounds, format)
+    const validation = validateStrict(InvoiceSchema, invoice);
+    if (!validation.success) {
+      setValidationError(validation.error);
+      setValidationDetails(validation.details);
+      return;
+    }
+
+    onSaveInvoice(validation.data);
     setIsSavedNotice(true);
     setTimeout(() => setIsSavedNotice(false), 2000);
   };
@@ -263,6 +278,34 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
 
         {/* Modal Workspace */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[var(--background)] space-y-6">
+          {validationError && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-xs flex items-start gap-3 text-red-600 dark:text-red-400 animate-in fade-in">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <div className="font-bold mb-1">Strict Validation Rejection:</div>
+                <div>{validationError}</div>
+                {validationDetails.length > 1 && (
+                  <ul className="list-disc pl-4 mt-2 space-y-1 text-[11px] opacity-90">
+                    {validationDetails.map((detail, idx) => (
+                      <li key={idx}>
+                        <strong className="font-mono">{detail.field}</strong>: {detail.message}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setValidationError('');
+                  setValidationDetails([]);
+                }}
+                className="p-1 hover:bg-red-500/20 rounded cursor-pointer text-red-600 dark:text-red-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Controls Bar: Theme & Style selector */}
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-4 grid grid-cols-1 md:grid-cols-3 gap-4 shadow-sm">
             <div>

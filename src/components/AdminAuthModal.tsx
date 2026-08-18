@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, ShieldAlert, ArrowRight, X, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { ReceiptLogoIcon } from './BrandLogo';
+import { validateStrict, VerifyPinSchema } from '../schemas/strictSchemas';
 
 interface AdminAuthModalProps {
   isOpen: boolean;
@@ -52,16 +53,25 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
     setIsLoading(true);
     setError('');
 
+    // Strict schema validation (rejecting non-matching type, bounds, length or pattern)
+    const validation = validateStrict(VerifyPinSchema, {
+      pin: pin.trim(),
+      customTargetPin: correctPin.trim(),
+      account: 'admin@invoiceify.app',
+    });
+
+    if (!validation.success) {
+      setIsLoading(false);
+      setError(validation.error);
+      return;
+    }
+
     try {
       // Call server auth route protected with stricter rate limiting & exponential backoff
       const response = await fetch('/api/auth/verify-pin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pin: pin.trim(),
-          customTargetPin: correctPin.trim(),
-          account: 'admin@invoiceify.app',
-        }),
+        body: JSON.stringify(validation.data),
       });
 
       const data = await response.json();

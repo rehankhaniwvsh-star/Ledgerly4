@@ -4,6 +4,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { rateLimiterService } from "./server/rateLimiter";
 import { validateBody } from "./server/validationMiddleware";
+import { globalErrorMiddleware, handleServerError } from "./server/errorHandler";
 import {
   VerifyPinSchema,
   LoginSchema,
@@ -169,9 +170,10 @@ async function startServer() {
       }
     }
 
-    // Standard Google Search Console XML Sitemap specification
+    // Standard Google Search Console XML Sitemap specification with XSL styling for browser display
     // NOTE: URLs strictly match the requested domain and contain zero hash fragments.
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${baseUrl}/</loc>
@@ -184,6 +186,14 @@ async function startServer() {
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     res.status(200).send(sitemapXml);
+  });
+
+  // Serve Sitemap XSL Stylesheet
+  app.get("/sitemap.xsl", (req, res) => {
+    res.setHeader("Content-Type", "application/xml; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    const xslPath = path.join(process.cwd(), "public", "sitemap.xsl");
+    res.sendFile(xslPath);
   });
 
   // Serve Robots.txt for Googlebot and search crawlers
@@ -235,11 +245,13 @@ Current copy reference (if any): "${currentText || ""}".`;
         const generatedText = response.text?.trim() || "";
         res.json({ success: true, generatedText });
       } catch (error: any) {
-        console.error("Gemini API Error:", error);
-        res.status(500).json({
-          success: false,
-          error: error?.message || "Failed to generate copy using Gemini AI",
-        });
+        return handleServerError(
+          error,
+          req,
+          res,
+          "The AI copywriting service encountered an error while processing your request. Please try again.",
+          500
+        );
       }
     }
   );
@@ -484,7 +496,14 @@ Current copy reference (if any): "${currentText || ""}".`;
   });
 
   // -------------------------------------------------------------
-  // 5. STATIC ASSET SERVING & SPA FALLBACK
+  // 5. GLOBAL ERROR HANDLING MIDDLEWARE
+  // Intercepts all synchronous/asynchronous unhandled exceptions,
+  // logs full stack traces server-side, and returns clean generic errors to clients.
+  // -------------------------------------------------------------
+  app.use(globalErrorMiddleware);
+
+  // -------------------------------------------------------------
+  // 6. STATIC ASSET SERVING & SPA FALLBACK
   // -------------------------------------------------------------
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

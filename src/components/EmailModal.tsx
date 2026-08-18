@@ -111,9 +111,9 @@ export const EmailModal: React.FC<EmailModalProps> = ({
         setSentSuccess(false);
         onClose();
       }, 1500);
-    } catch (err: any) {
+    } catch {
       setSending(false);
-      setGeneralError(err?.message || 'Network error while dispatching invoice email.');
+      setGeneralError('Network error while dispatching invoice email. Please check your connection and try again.');
     }
   };
 

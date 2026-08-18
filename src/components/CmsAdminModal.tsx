@@ -50,6 +50,7 @@ import {
   validateStrict,
   ValidationErrorDetail,
 } from '../schemas/strictSchemas';
+import { validateAndParseCmsJsonFile } from '../utils/fileUploadValidator';
 
 interface CmsAdminModalProps {
   cms: CmsContent;
@@ -195,8 +196,8 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
       } else {
         setRateLimitSaveMsg(data.error || 'Failed to update thresholds.');
       }
-    } catch (e: any) {
-      setRateLimitSaveMsg(`Error saving rate limit configuration: ${e.message}`);
+    } catch {
+      setRateLimitSaveMsg('An error occurred while saving rate limit configuration. Please try again.');
     } finally {
       setRateLimitSaving(false);
     }
@@ -328,12 +329,12 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
         statusText: res.statusText,
         ...data,
       });
-    } catch (err: any) {
+    } catch {
       setSchemaTestResult({
         status: 500,
         statusText: 'Internal Server Error',
         success: false,
-        error: err?.message || 'Failed to complete test',
+        error: 'Network request failed while testing schema endpoint.',
       });
     } finally {
       setSchemaTestLoading(false);
@@ -450,28 +451,33 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
     downloadAnchor.remove();
   };
 
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-        const validation = validateStrict(FullCmsContentSchema, parsed);
-        if (!validation.success) {
-          alert(`Import rejected by strict schema:\n${validation.error}`);
-          return;
-        }
-        setFormData(validation.data);
-        alert('CMS data successfully validated against strict schema and imported!');
-      } catch (err: any) {
-        alert(`Invalid JSON format: ${err.message}`);
+
+    // Reset the input element value immediately so re-uploading the same file triggers change
+    const targetElement = e.target;
+
+    try {
+      // Complete type, size, MIME, executable pattern, JSON syntax, and strict schema validation
+      const result = await validateAndParseCmsJsonFile(file);
+
+      if (!result.valid || !result.data) {
+        alert(`File Upload Rejected:\n${result.error || 'Invalid file format or structure.'}`);
+        return;
       }
-    };
-    reader.readAsText(file);
+
+      // Safely apply parsed data to in-memory state
+      setFormData(result.data);
+      alert('CMS configuration verified and imported successfully.');
+    } catch {
+      alert('An unexpected error occurred while processing the uploaded file. Please verify the file format and try again.');
+    } finally {
+      targetElement.value = '';
+    }
   };
 
-  // Call Gemini Server Endpoint (Strictly Validated)
+  // Call Gemini Server Endpoint (Strictly Validated with Sanitized Error Handling)
   const handleGenerateAiCopy = async () => {
     if (!aiPrompt.trim()) return;
     setAiGenerating(true);
@@ -499,13 +505,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
       });
 
       const data = await res.json();
-      if (data.success && data.generatedText) {
+      if (res.ok && data.success && data.generatedText) {
         setAiResult(data.generatedText);
       } else {
-        setAiError(data.error || 'Failed to generate copy.');
+        setAiError(data.error || 'The AI copywriting service is temporarily unavailable. Please try again.');
       }
-    } catch (err: any) {
-      setAiError(err.message || 'Error connecting to Gemini API server.');
+    } catch {
+      setAiError('Unable to connect to the copywriting service. Please check your connection and try again.');
     } finally {
       setAiGenerating(false);
     }
