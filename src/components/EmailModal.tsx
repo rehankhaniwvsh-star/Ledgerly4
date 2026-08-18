@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { InvoiceData, BrandSettings } from '../types';
-import { X, Mail, Send, Check, Copy, Sparkles } from 'lucide-react';
+import { X, Mail, Send, Check, Copy, AlertCircle } from 'lucide-react';
+import { EmailInvoiceSchema, validateStrict, ValidationErrorDetail } from '../schemas/strictSchemas';
 
 interface EmailModalProps {
   isOpen: boolean;
@@ -36,6 +37,8 @@ export const EmailModal: React.FC<EmailModalProps> = ({
   const [sending, setSending] = useState(false);
   const [sentSuccess, setSentSuccess] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrorDetail[]>([]);
+  const [generalError, setGeneralError] = useState<string>('');
 
   // Sync state when invoice changes
   React.useEffect(() => {
@@ -54,14 +57,53 @@ export const EmailModal: React.FC<EmailModalProps> = ({
           brand.brandName
         }`
       );
+      setValidationErrors([]);
+      setGeneralError('');
     }
   }, [invoice, brand]);
 
   if (!isOpen || !invoice) return null;
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    setValidationErrors([]);
+    setGeneralError('');
+
+    const payload = {
+      recipient: recipient.trim(),
+      subject: subject.trim(),
+      message: message.trim(),
+      invoiceNumber: invoice.invoiceNumber.trim(),
+      invoiceId: invoice.id || invoice.invoiceNumber,
+    };
+
+    // Strict schema check on client
+    const validation = validateStrict(EmailInvoiceSchema, payload);
+    if (!validation.success) {
+      setValidationErrors(validation.details);
+      setGeneralError(validation.error);
+      return;
+    }
+
     setSending(true);
-    setTimeout(() => {
+
+    try {
+      const res = await fetch('/api/invoices/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validation.data),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        if (data.details && Array.isArray(data.details)) {
+          setValidationErrors(data.details);
+        }
+        setGeneralError(data.error || 'Failed to dispatch email. Request rejected by server schema.');
+        setSending(false);
+        return;
+      }
+
       setSending(false);
       setSentSuccess(true);
       onSendSuccess(invoice.id || invoice.invoiceNumber);
@@ -69,7 +111,10 @@ export const EmailModal: React.FC<EmailModalProps> = ({
         setSentSuccess(false);
         onClose();
       }, 1500);
-    }, 1000);
+    } catch (err: any) {
+      setSending(false);
+      setGeneralError(err?.message || 'Network error while dispatching invoice email.');
+    }
   };
 
   const handleCopyLink = () => {
@@ -78,6 +123,10 @@ export const EmailModal: React.FC<EmailModalProps> = ({
     );
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const getFieldError = (field: string) => {
+    return validationErrors.find((e) => e.field === field)?.message;
   };
 
   return (
@@ -113,39 +162,94 @@ export const EmailModal: React.FC<EmailModalProps> = ({
             </div>
           ) : (
             <>
+              {generalError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded text-red-600 dark:text-red-400 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div className="text-xs leading-relaxed">
+                    <span className="font-semibold block">Schema Validation Rejected:</span>
+                    {generalError}
+                  </div>
+                </div>
+              )}
+
               <div>
-                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
-                  Recipient Email
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-semibold text-[var(--muted-foreground)]">
+                    Recipient Email <span className="text-red-500">*</span>
+                  </label>
+                  {getFieldError('recipient') && (
+                    <span className="text-[11px] text-red-500 font-medium">
+                      {getFieldError('recipient')}
+                    </span>
+                  )}
+                </div>
                 <input
                   type="email"
                   value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                  onChange={(e) => {
+                    setRecipient(e.target.value);
+                    if (validationErrors.length > 0) setValidationErrors([]);
+                  }}
+                  className={`w-full p-2.5 bg-[var(--background)] border rounded text-xs text-[var(--foreground)] ${
+                    getFieldError('recipient')
+                      ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+                      : 'border-[var(--border)] focus:border-[var(--primary)]'
+                  }`}
+                  placeholder="client@company.com"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
-                  Subject Line
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-semibold text-[var(--muted-foreground)]">
+                    Subject Line <span className="text-red-500">*</span>
+                  </label>
+                  {getFieldError('subject') && (
+                    <span className="text-[11px] text-red-500 font-medium">
+                      {getFieldError('subject')}
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                  maxLength={200}
+                  onChange={(e) => {
+                    setSubject(e.target.value);
+                    if (validationErrors.length > 0) setValidationErrors([]);
+                  }}
+                  className={`w-full p-2.5 bg-[var(--background)] border rounded text-xs text-[var(--foreground)] ${
+                    getFieldError('subject')
+                      ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+                      : 'border-[var(--border)] focus:border-[var(--primary)]'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
-                  Email Message Body
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-semibold text-[var(--muted-foreground)]">
+                    Email Message Body <span className="text-red-500">*</span>
+                  </label>
+                  {getFieldError('message') && (
+                    <span className="text-[11px] text-red-500 font-medium">
+                      {getFieldError('message')}
+                    </span>
+                  )}
+                </div>
                 <textarea
                   rows={7}
+                  maxLength={5000}
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] font-sans"
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    if (validationErrors.length > 0) setValidationErrors([]);
+                  }}
+                  className={`w-full p-2.5 bg-[var(--background)] border rounded text-xs text-[var(--foreground)] font-sans ${
+                    getFieldError('message')
+                      ? 'border-red-500 focus:ring-1 focus:ring-red-500'
+                      : 'border-[var(--border)] focus:border-[var(--primary)]'
+                  }`}
                 ></textarea>
               </div>
 
@@ -166,11 +270,11 @@ export const EmailModal: React.FC<EmailModalProps> = ({
                 <button
                   type="button"
                   onClick={handleSend}
-                  disabled={sending || !recipient}
+                  disabled={sending || !recipient.trim()}
                   className="btn-shader-primary inline-flex items-center gap-2 px-5 py-2 text-xs font-bold rounded shadow disabled:opacity-50 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5 btn-icon-hover-bounce" />
-                  <span>{sending ? 'Sending Email...' : 'Send Invoice Now'}</span>
+                  <span>{sending ? 'Validating & Sending...' : 'Send Invoice Now'}</span>
                 </button>
               </div>
             </>

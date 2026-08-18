@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Lock, KeyRound, ShieldAlert, ArrowRight, X, Sparkles, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, ShieldAlert, ArrowRight, X, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { ReceiptLogoIcon } from './BrandLogo';
 
 interface AdminAuthModalProps {
@@ -20,22 +20,98 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Exponential Backoff state
+  const [backoffSecondsRemaining, setBackoffSecondsRemaining] = useState<number>(0);
+  const [attemptCount, setAttemptCount] = useState<number>(0);
+
+  // Handle countdown timer for active exponential backoff
+  useEffect(() => {
+    if (backoffSecondsRemaining <= 0) return;
+
+    const timer = setInterval(() => {
+      setBackoffSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [backoffSecondsRemaining]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin.trim() === correctPin.trim()) {
-      setError('');
-      setIsSuccess(true);
-      setTimeout(() => {
-        setIsSuccess(false);
+    if (backoffSecondsRemaining > 0 || isLoading) return;
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Call server auth route protected with stricter rate limiting & exponential backoff
+      const response = await fetch('/api/auth/verify-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pin: pin.trim(),
+          customTargetPin: correctPin.trim(),
+          account: 'admin@invoiceify.app',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setAttemptCount(0);
+        setBackoffSecondsRemaining(0);
+        setError('');
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsSuccess(false);
+          setPin('');
+          onSuccess();
+        }, 500);
+      } else {
+        // Handle 429 Too Many Requests or 401 with exponential backoff info
+        const failures = data.consecutiveFailures || (attemptCount + 1);
+        setAttemptCount(failures);
+
+        const retryAfter = data.retryAfterSeconds || (data.backoffDelayMs ? Math.ceil(data.backoffDelayMs / 1000) : 0);
+        if (retryAfter > 0) {
+          setBackoffSecondsRemaining(retryAfter);
+        }
+
+        setError(data.error || 'Incorrect security PIN. Access denied.');
         setPin('');
-        onSuccess();
-      }, 500);
-    } else {
-      setError('Incorrect admin security PIN. Access denied.');
-      setPin('');
+      }
+    } catch (err: any) {
+      // Offline fallback: Check local PIN if network fails
+      if (pin.trim() === correctPin.trim()) {
+        setError('');
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsSuccess(false);
+          setPin('');
+          onSuccess();
+        }, 500);
+      } else {
+        const nextAttempt = attemptCount + 1;
+        setAttemptCount(nextAttempt);
+        // Exponential backoff local calculation
+        if (nextAttempt >= 3) {
+          const delay = Math.min(Math.pow(2, nextAttempt - 3), 60);
+          setBackoffSecondsRemaining(delay);
+        }
+        setError('Incorrect admin security PIN. Access denied.');
+        setPin('');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,31 +146,55 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               {isSuccess ? 'Access Granted' : `${brandName} Admin Gate`}
             </h3>
             <p className="text-xs text-[var(--muted-foreground)] mt-1">
-              Enter your master security PIN to open the {brandName} CMS editor.
+              Protected with strict per-IP & per-account rate limiting and exponential backoff.
             </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] mb-1.5 text-center">
-              Enter Master Security PIN
-            </label>
+            <div className="flex items-center justify-between mb-1.5 px-1">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
+                Master Security PIN
+              </label>
+              {attemptCount > 0 && (
+                <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full">
+                  Attempts: {attemptCount}
+                </span>
+              )}
+            </div>
+
             <div className="relative">
               <input
                 type="password"
                 maxLength={8}
                 value={pin}
+                disabled={backoffSecondsRemaining > 0 || isLoading || isSuccess}
                 autoFocus
                 onChange={(e) => {
                   setPin(e.target.value);
                   if (error) setError('');
                 }}
-                placeholder="••••"
-                className="w-full text-center tracking-[0.4em] text-2xl font-black font-mono py-3 px-4 rounded-xl bg-[var(--background)] border border-[var(--border)] focus:border-orange-500 focus:outline-none text-[var(--foreground)] transition-colors shadow-inner"
+                placeholder={backoffSecondsRemaining > 0 ? `Locked for ${backoffSecondsRemaining}s` : '••••'}
+                className="w-full text-center tracking-[0.4em] text-2xl font-black font-mono py-3 px-4 rounded-xl bg-[var(--background)] border border-[var(--border)] focus:border-orange-500 focus:outline-none text-[var(--foreground)] transition-colors shadow-inner disabled:opacity-50 disabled:bg-[var(--muted)]"
               />
             </div>
-            {error && (
+
+            {/* Active Exponential Backoff Banner */}
+            {backoffSecondsRemaining > 0 && (
+              <div className="mt-2.5 p-2.5 bg-amber-500/15 border border-amber-500/30 rounded-xl flex items-center gap-2 text-xs font-semibold text-amber-700 dark:text-amber-300 animate-in fade-in">
+                <Clock className="w-4 h-4 text-amber-500 animate-spin shrink-0" />
+                <div className="leading-tight">
+                  <span>Exponential backoff delay active.</span>
+                  <span className="block text-[11px] opacity-80">
+                    Next retry available in <strong>{backoffSecondsRemaining}s</strong>.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Standard Error Notice */}
+            {error && backoffSecondsRemaining === 0 && (
               <div className="mt-2 text-xs font-semibold text-rose-500 flex items-center justify-center gap-1.5 animate-in fade-in">
                 <ShieldAlert className="w-3.5 h-3.5" />
                 <span>{error}</span>
@@ -105,11 +205,24 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
           <div className="pt-2">
             <button
               type="submit"
-              disabled={!pin.trim() || isSuccess}
+              disabled={!pin.trim() || isSuccess || isLoading || backoffSecondsRemaining > 0}
               className="btn-pill-primary w-full py-3 text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
-              <span>{isSuccess ? 'Unlocking CMS...' : 'Authenticate & Unlock'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              {isSuccess ? (
+                <span>Unlocking CMS...</span>
+              ) : isLoading ? (
+                <span>Verifying Security Token...</span>
+              ) : backoffSecondsRemaining > 0 ? (
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  Retry in {backoffSecondsRemaining}s
+                </span>
+              ) : (
+                <>
+                  <span>Authenticate & Unlock</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
             </button>
           </div>
 

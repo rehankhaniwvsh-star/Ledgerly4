@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CmsContent, FeatureItem, FaqItem, StepItem } from '../types';
 import {
   X,
@@ -24,8 +24,32 @@ import {
   EyeOff,
   KeyRound,
   LogOut,
+  Globe,
+  Copy,
+  ExternalLink,
+  FileCode,
+  CheckCheck,
+  Search,
+  ShieldCheck,
+  Activity,
+  Gauge,
+  Zap,
+  RefreshCw,
+  SlidersHorizontal,
+  AlertCircle,
+  Key,
+  Timer,
+  Clock,
+  CheckCircle2,
 } from 'lucide-react';
 import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
+import {
+  RateLimitConfigSchema,
+  GenerateCopySchema,
+  FullCmsContentSchema,
+  validateStrict,
+  ValidationErrorDetail,
+} from '../schemas/strictSchemas';
 
 interface CmsAdminModalProps {
   cms: CmsContent;
@@ -53,10 +77,13 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
     | 'faqs'
     | 'testimonials'
     | 'ai'
+    | 'seo'
+    | 'security'
   >('brand');
 
   const [formData, setFormData] = useState<CmsContent>(cms);
   const [saveNotification, setSaveNotification] = useState(false);
+  const [copiedSitemap, setCopiedSitemap] = useState(false);
 
   // Gemini AI Copywriting State
   const [aiPrompt, setAiPrompt] = useState('');
@@ -65,11 +92,342 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
   const [aiResult, setAiResult] = useState('');
   const [aiError, setAiError] = useState('');
 
+  // -----------------------------------------------------------------
+  // RATE LIMITING & SECURITY STATE
+  // -----------------------------------------------------------------
+  const [rateLimitConfig, setRateLimitConfig] = useState({
+    public: {
+      windowMs: 60000,
+      maxRequests: 100,
+    },
+    authenticatedUser: {
+      windowMs: 60000,
+      maxRequests: 300,
+    },
+    authRoutes: {
+      ipWindowMs: 900000,
+      ipMaxRequests: 20,
+      accountMaxAttempts: 5,
+      baseBackoffMs: 1000,
+      maxBackoffMs: 300000,
+      backoffFactor: 2,
+      failureDecayMs: 1800000,
+    },
+  });
+
+  const [rateLimitMetrics, setRateLimitMetrics] = useState<any>(null);
+  const [rateLimitSaving, setRateLimitSaving] = useState(false);
+  const [rateLimitSaveMsg, setRateLimitSaveMsg] = useState('');
+
+  // Rate Limiter Simulator State
+  const [simEmail, setSimEmail] = useState('developer@example.com');
+  const [simPassword, setSimPassword] = useState('wrong-pass');
+  const [simLogs, setSimLogs] = useState<
+    Array<{
+      time: string;
+      status: number;
+      action: string;
+      message: string;
+      backoffDelay?: number;
+      retryAfter?: number;
+      limit?: string;
+      remaining?: string;
+    }>
+  >([]);
+  const [simLoading, setSimLoading] = useState(false);
+
+  // Schema Validation Playground State
+  const [schemaTestEndpoint, setSchemaTestEndpoint] = useState<string>('/api/auth/login');
+  const [schemaTestPayload, setSchemaTestPayload] = useState<string>(
+    JSON.stringify({ email: 'bad-email-format', password: '123' }, null, 2)
+  );
+  const [schemaTestResult, setSchemaTestResult] = useState<any>(null);
+  const [schemaTestLoading, setSchemaTestLoading] = useState(false);
+
+  const [cmsValidationErrors, setCmsValidationErrors] = useState<ValidationErrorDetail[]>([]);
+
+  const fetchRateLimits = async () => {
+    try {
+      const res = await fetch('/api/admin/rate-limit/status');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.metrics) {
+          setRateLimitMetrics(data.metrics);
+          if (data.metrics.config) {
+            setRateLimitConfig(data.metrics.config);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch rate limit metrics:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && (activeTab === 'security' || !rateLimitMetrics)) {
+      fetchRateLimits();
+    }
+  }, [isOpen, activeTab]);
+
+  const handleSaveRateLimits = async () => {
+    setRateLimitSaving(true);
+    setRateLimitSaveMsg('');
+
+    // Strict schema validation check
+    const validation = validateStrict(RateLimitConfigSchema, { config: rateLimitConfig });
+    if (!validation.success) {
+      setRateLimitSaveMsg(`Schema Rejected: ${validation.error}`);
+      setRateLimitSaving(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/rate-limit/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validation.data),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setRateLimitSaveMsg('Rate limiting thresholds strictly validated and updated successfully!');
+        fetchRateLimits();
+        setTimeout(() => setRateLimitSaveMsg(''), 3500);
+      } else {
+        setRateLimitSaveMsg(data.error || 'Failed to update thresholds.');
+      }
+    } catch (e: any) {
+      setRateLimitSaveMsg(`Error saving rate limit configuration: ${e.message}`);
+    } finally {
+      setRateLimitSaving(false);
+    }
+  };
+
+  const handleResetRateLimitStores = async () => {
+    if (!confirm('Are you sure you want to reset all rate limit stores and backoff penalties?')) return;
+    try {
+      const res = await fetch('/api/admin/rate-limit/reset', { method: 'POST' });
+      if (res.ok) {
+        alert('All rate-limiting caches and backoff states cleared!');
+        fetchRateLimits();
+        setSimLogs([]);
+      }
+    } catch (e) {
+      alert('Failed to reset rate limiter stores.');
+    }
+  };
+
+  // Run Auth Rate Limiter Test Simulator
+  const handleSimulateAuth = async (isCorrectPassword = false) => {
+    setSimLoading(true);
+    const timeStr = new Date().toLocaleTimeString();
+    try {
+      const targetPass = isCorrectPassword ? 'admin1234' : simPassword;
+      const targetEmail = isCorrectPassword ? 'admin@invoiceify.app' : simEmail;
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: targetEmail,
+          password: targetPass,
+        }),
+      });
+
+      const data = await res.json();
+      const limitHdr = res.headers.get('x-ratelimit-limit') || '-';
+      const remHdr = res.headers.get('x-ratelimit-remaining') || '-';
+      const retryHdr = res.headers.get('retry-after');
+
+      setSimLogs((prev) => [
+        {
+          time: timeStr,
+          status: res.status,
+          action: isCorrectPassword ? 'Success Login' : 'Failed Login Attempt',
+          message: data.error || data.message || (res.ok ? 'Authentication Succeeded' : 'Request failed'),
+          backoffDelay: data.backoffDelayMs,
+          retryAfter: retryHdr ? parseInt(retryHdr, 10) : data.retryAfterSeconds,
+          limit: limitHdr,
+          remaining: remHdr,
+        },
+        ...prev.slice(0, 19),
+      ]);
+
+      fetchRateLimits();
+    } catch (err: any) {
+      setSimLogs((prev) => [
+        {
+          time: timeStr,
+          status: 500,
+          action: 'Network Failure',
+          message: err?.message || 'Request failed',
+        },
+        ...prev.slice(0, 19),
+      ]);
+    } finally {
+      setSimLoading(false);
+    }
+  };
+
+  // Run Burst Traffic Test on Public Endpoint
+  const handleSimulateBurst = async () => {
+    setSimLoading(true);
+    const timeStr = new Date().toLocaleTimeString();
+    try {
+      let passed = 0;
+      let blocked = 0;
+      for (let i = 0; i < 5; i++) {
+        const res = await fetch('/api/health');
+        if (res.ok) passed++;
+        else blocked++;
+      }
+      setSimLogs((prev) => [
+        {
+          time: timeStr,
+          status: blocked > 0 ? 429 : 200,
+          action: 'Public Burst (5 reqs)',
+          message: `Burst test completed: ${passed} passed, ${blocked} throttled (429).`,
+        },
+        ...prev.slice(0, 19),
+      ]);
+      fetchRateLimits();
+    } finally {
+      setSimLoading(false);
+    }
+  };
+
+  // Run Interactive Schema Validation Test on selected endpoint
+  const handleRunSchemaTest = async () => {
+    setSchemaTestLoading(true);
+    setSchemaTestResult(null);
+
+    let parsedBody: any;
+    try {
+      parsedBody = JSON.parse(schemaTestPayload);
+    } catch (e: any) {
+      setSchemaTestResult({
+        status: 400,
+        statusText: 'Bad Request',
+        success: false,
+        error: `Client-side JSON syntax error: ${e.message}`,
+        details: [{ field: 'root', message: 'Malformed JSON payload' }],
+      });
+      setSchemaTestLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(schemaTestEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(parsedBody),
+      });
+
+      const data = await res.json();
+      setSchemaTestResult({
+        status: res.status,
+        statusText: res.statusText,
+        ...data,
+      });
+    } catch (err: any) {
+      setSchemaTestResult({
+        status: 500,
+        statusText: 'Internal Server Error',
+        success: false,
+        error: err?.message || 'Failed to complete test',
+      });
+    } finally {
+      setSchemaTestLoading(false);
+    }
+  };
+
+  const handleSelectPresetSchemaTest = (type: 'valid_login' | 'invalid_email' | 'short_password' | 'invalid_pin' | 'invalid_invoice' | 'valid_invoice') => {
+    if (type === 'valid_login') {
+      setSchemaTestEndpoint('/api/auth/login');
+      setSchemaTestPayload(
+        JSON.stringify({ email: 'admin@invoiceify.app', password: 'admin1234' }, null, 2)
+      );
+    } else if (type === 'invalid_email') {
+      setSchemaTestEndpoint('/api/auth/login');
+      setSchemaTestPayload(
+        JSON.stringify({ email: 'not-an-email-address', password: 'validpassword123' }, null, 2)
+      );
+    } else if (type === 'short_password') {
+      setSchemaTestEndpoint('/api/auth/signup');
+      setSchemaTestPayload(
+        JSON.stringify({ email: 'newuser@example.com', password: '123', name: 'A' }, null, 2)
+      );
+    } else if (type === 'invalid_pin') {
+      setSchemaTestEndpoint('/api/auth/verify-pin');
+      setSchemaTestPayload(
+        JSON.stringify({ pin: 'abc', account: 'admin' }, null, 2)
+      );
+    } else if (type === 'invalid_invoice') {
+      setSchemaTestEndpoint('/api/invoices/save');
+      setSchemaTestPayload(
+        JSON.stringify(
+          {
+            invoice: {
+              invoiceNumber: 'INV-1234',
+              clientName: '',
+              clientEmail: 'bad-email',
+              taxRate: -15,
+              discountAmount: -50,
+              items: [],
+            },
+          },
+          null,
+          2
+        )
+      );
+    } else if (type === 'valid_invoice') {
+      setSchemaTestEndpoint('/api/invoices/save');
+      setSchemaTestPayload(
+        JSON.stringify(
+          {
+            invoice: {
+              invoiceNumber: 'INV-9901',
+              businessName: 'Invoiceify Studio',
+              businessEmail: 'billing@invoiceify.app',
+              clientName: 'Acme Corp',
+              clientEmail: 'finance@acmeworks.com',
+              issueDate: '2026-08-01',
+              dueDate: '2026-08-15',
+              currency: '₹',
+              status: 'Draft',
+              taxRate: 5,
+              discountAmount: 0,
+              items: [
+                {
+                  id: 'item-1',
+                  description: 'Design System Engineering',
+                  quantity: 1,
+                  rate: 25000,
+                },
+              ],
+            },
+          },
+          null,
+          2
+        )
+      );
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleSave = () => {
+    setCmsValidationErrors([]);
+
+    // Strict schema check on full CMS payload
+    const validation = validateStrict(FullCmsContentSchema, formData);
+    if (!validation.success) {
+      setCmsValidationErrors(validation.details);
+      alert(`CMS settings rejected by strict schema:\n${validation.error}`);
+      return;
+    }
+
     const updated = {
-      ...formData,
+      ...validation.data,
       lastUpdated: new Date().toISOString(),
     };
     onSave(updated);
@@ -99,31 +457,45 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        setFormData(parsed);
-        alert('CMS data successfully imported!');
-      } catch (err) {
-        alert('Invalid JSON file format.');
+        const validation = validateStrict(FullCmsContentSchema, parsed);
+        if (!validation.success) {
+          alert(`Import rejected by strict schema:\n${validation.error}`);
+          return;
+        }
+        setFormData(validation.data);
+        alert('CMS data successfully validated against strict schema and imported!');
+      } catch (err: any) {
+        alert(`Invalid JSON format: ${err.message}`);
       }
     };
     reader.readAsText(file);
   };
 
-  // Call Gemini Server Endpoint
+  // Call Gemini Server Endpoint (Strictly Validated)
   const handleGenerateAiCopy = async () => {
     if (!aiPrompt.trim()) return;
     setAiGenerating(true);
     setAiError('');
     setAiResult('');
 
+    const payload = {
+      prompt: aiPrompt.trim(),
+      contentType: aiContentType,
+      currentText: formData.hero.subheadline,
+    };
+
+    const validation = validateStrict(GenerateCopySchema, payload);
+    if (!validation.success) {
+      setAiError(`Input rejected by schema: ${validation.error}`);
+      setAiGenerating(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/cms/generate-copy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: aiPrompt,
-          contentType: aiContentType,
-          currentText: formData.hero.subheadline,
-        }),
+        body: JSON.stringify(validation.data),
       });
 
       const data = await res.json();
@@ -276,6 +648,30 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
             >
               <Quote className="w-3.5 h-3.5" />
               <span>Testimonials</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('seo')}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap border border-[var(--border)] cursor-pointer ${
+                activeTab === 'seo'
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>SEO & Google Sitemap</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('security')}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-[var(--radius)] text-left transition-colors whitespace-nowrap border border-[var(--border)] cursor-pointer ${
+                activeTab === 'security'
+                  ? 'bg-amber-600 text-white dark:bg-amber-500 dark:text-neutral-950 font-bold shadow-xs'
+                  : 'text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Rate Limiting & Security</span>
             </button>
 
             <button
@@ -1299,6 +1695,927 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                       </button>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* SEO & GOOGLE SITEMAP TAB */}
+            {activeTab === 'seo' && (
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                    Google Search Console & XML Sitemap
+                  </h4>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                    Submit your real-time XML sitemap and verify your site with Google Search Console for rapid indexing.
+                  </p>
+                </div>
+
+                {/* Primary Sitemap Submission Card */}
+                <div className="p-5 bg-gradient-to-br from-orange-500/10 via-[var(--card)] to-amber-500/5 border border-orange-500/30 rounded-2xl space-y-4 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-xs">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-[var(--foreground)] block">
+                          Your Dynamic Google XML Sitemap
+                        </span>
+                        <span className="text-[11px] text-[var(--muted-foreground)]">
+                          Automatically synchronized and updated on every deployment
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = `${window.location.origin}/sitemap.xml`;
+                          navigator.clipboard.writeText(url);
+                          setCopiedSitemap(true);
+                          setTimeout(() => setCopiedSitemap(false), 2500);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[var(--card)] border border-[var(--border)] hover:border-orange-500 rounded-lg text-[var(--foreground)] hover:text-orange-600 transition-all shadow-2xs cursor-pointer"
+                        title="Copy full Sitemap URL"
+                      >
+                        {copiedSitemap ? (
+                          <>
+                            <CheckCheck className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="text-emerald-600 font-bold">Copied URL!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy URL</span>
+                          </>
+                        )}
+                      </button>
+
+                      <a
+                        href="/sitemap.xml"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[var(--primary)] text-[var(--primary-foreground)] rounded-lg hover:opacity-90 transition-all shadow-2xs"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Open Sitemap</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Sitemap URL Display Field */}
+                  <div className="flex items-center gap-2 p-2.5 bg-[var(--background)] border border-[var(--border)] rounded-xl text-xs font-mono text-[var(--foreground)] break-all select-all">
+                    <FileCode className="w-4 h-4 text-orange-500 shrink-0" />
+                    <span>{typeof window !== 'undefined' ? `${window.location.origin}/sitemap.xml` : 'https://yourdomain.com/sitemap.xml'}</span>
+                  </div>
+
+                  {/* Quick Action to Google Search Console */}
+                  <div className="pt-2 border-t border-[var(--border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="text-xs text-[var(--muted-foreground)]">
+                      Ready to submit? Paste <code className="px-1.5 py-0.5 bg-[var(--muted)] rounded font-mono font-bold text-[var(--foreground)]">sitemap.xml</code> into Google Search Console.
+                    </div>
+                    <a
+                      href="https://search.google.com/search-console/sitemaps"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>Open Google Search Console Sitemaps ↗</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* 4-Step Instructions on How to Add to Google */}
+                <div className="p-4 bg-[var(--card)] border border-[var(--border)] rounded-2xl space-y-3">
+                  <h5 className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider flex items-center gap-2">
+                    <span>How to Add this Sitemap in Google Search Console</span>
+                  </h5>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="p-3 bg-[var(--muted)]/40 rounded-xl border border-[var(--border)] space-y-1">
+                      <span className="font-bold text-orange-600 dark:text-orange-400">Step 1: Select Property</span>
+                      <p className="text-[var(--muted-foreground)] text-[11px] leading-relaxed">
+                        Log in to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="underline font-semibold text-[var(--foreground)]">Google Search Console</a> and choose your verified domain or URL prefix property.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-[var(--muted)]/40 rounded-xl border border-[var(--border)] space-y-1">
+                      <span className="font-bold text-orange-600 dark:text-orange-400">Step 2: Go to Sitemaps</span>
+                      <p className="text-[var(--muted-foreground)] text-[11px] leading-relaxed">
+                        Click on <strong>"Sitemaps"</strong> under the <em>Indexing</em> section in the left-hand navigation sidebar.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-[var(--muted)]/40 rounded-xl border border-[var(--border)] space-y-1">
+                      <span className="font-bold text-orange-600 dark:text-orange-400">Step 3: Enter sitemap.xml</span>
+                      <p className="text-[var(--muted-foreground)] text-[11px] leading-relaxed">
+                        In the "Add a new sitemap" box, enter <code className="font-mono bg-[var(--card)] px-1 rounded font-bold text-orange-600">sitemap.xml</code> and click <strong>Submit</strong>.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-[var(--muted)]/40 rounded-xl border border-[var(--border)] space-y-1">
+                      <span className="font-bold text-orange-600 dark:text-orange-400">Step 4: Verify Success</span>
+                      <p className="text-[var(--muted-foreground)] text-[11px] leading-relaxed">
+                        Googlebot will crawl your sitemap immediately. The status will display a green <strong>"Success"</strong> badge with 0 errors and discover your homepage and verified pages.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Google Site Verification Meta Tag Settings */}
+                <div className="p-4 bg-[var(--card)] border border-[var(--border)] rounded-2xl space-y-4">
+                  <div>
+                    <h5 className="text-xs font-bold text-[var(--foreground)]">
+                      Google Search Console Site Verification
+                    </h5>
+                    <p className="text-[11px] text-[var(--muted-foreground)] mt-0.5">
+                      Your HTML verification file and HTML meta tag are configured and active.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
+                      Verification Tag / Code
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.brand.googleSiteVerification || 'googleacb1159f81828443'}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          brand: {
+                            ...formData.brand,
+                            googleSiteVerification: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded-lg text-xs font-mono text-[var(--foreground)]"
+                      placeholder="e.g. googleacb1159f81828443"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="p-3 bg-[var(--muted)]/30 rounded-xl border border-[var(--border)] flex items-center justify-between">
+                      <div>
+                        <span className="font-semibold block text-[var(--foreground)]">Verification File Route</span>
+                        <code className="text-[11px] text-orange-600 font-mono">/googleacb1159f81828443.html</code>
+                      </div>
+                      <a
+                        href="/googleacb1159f81828443.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold text-orange-600 hover:underline"
+                      >
+                        Verify ↗
+                      </a>
+                    </div>
+
+                    <div className="p-3 bg-[var(--muted)]/30 rounded-xl border border-[var(--border)] flex items-center justify-between">
+                      <div>
+                        <span className="font-semibold block text-[var(--foreground)]">Robots.txt Route</span>
+                        <code className="text-[11px] text-orange-600 font-mono">/robots.txt</code>
+                      </div>
+                      <a
+                        href="/robots.txt"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold text-orange-600 hover:underline"
+                      >
+                        Check ↗
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live XML Sitemap Contents & URLs */}
+                <div className="p-4 bg-[var(--card)] border border-[var(--border)] rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-xs font-bold text-[var(--foreground)]">
+                      Indexed URLs in this Sitemap (8 Pages)
+                    </h5>
+                    <span className="text-[10px] font-mono text-[var(--muted-foreground)]">
+                      Protocol: Sitemaps XML 0.9
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-[var(--border)] text-xs font-mono">
+                    {[
+                      { loc: '/', name: 'Homepage / Main Landing', priority: '1.0', freq: 'daily' },
+                      { loc: '/#studio', name: 'Invoice Studio & Generator', priority: '0.9', freq: 'weekly' },
+                      { loc: '/#features', name: 'Key Features & Capabilities', priority: '0.8', freq: 'weekly' },
+                      { loc: '/#how-it-works', name: 'How It Works 3-Step Guide', priority: '0.8', freq: 'weekly' },
+                      { loc: '/#pricing', name: 'Pricing Tiers & Options', priority: '0.8', freq: 'weekly' },
+                      { loc: '/#about', name: 'Brand Story & Creator Mission', priority: '0.7', freq: 'monthly' },
+                      { loc: '/#faqs', name: 'Frequently Asked Questions', priority: '0.7', freq: 'monthly' },
+                      { loc: '/#testimonials', name: 'Client Reviews & Social Proof', priority: '0.7', freq: 'monthly' },
+                    ].map((item, idx) => (
+                      <div key={idx} className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span className="font-semibold text-[var(--foreground)]">{item.name}</span>
+                          <span className="text-[11px] text-[var(--muted-foreground)]">({item.loc})</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-[11px] text-[var(--muted-foreground)]">
+                          <span>Change: <strong className="text-[var(--foreground)]">{item.freq}</strong></span>
+                          <span>Priority: <strong className="text-orange-600">{item.priority}</strong></span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* RATE LIMITING & SECURITY TAB */}
+            {activeTab === 'security' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-[var(--foreground)] flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                      <span>Adaptive Tiered Rate Limiting & Security</span>
+                    </h4>
+                    <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                      Stricter per-IP & per-account exponential backoff on auth routes, moderate public limits, and looser authenticated user quotas.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={fetchRateLimits}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--card)] border border-[var(--border)] hover:border-amber-500 rounded-lg text-[var(--foreground)] transition-all cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Refresh Metrics</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleResetRateLimitStores}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-lg transition-all cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset Backoffs</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Real-time Diagnostics Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 bg-[var(--card)] border border-[var(--border)] rounded-2xl">
+                    <span className="text-[11px] font-semibold text-[var(--muted-foreground)] block">Total Checked</span>
+                    <span className="text-xl font-mono font-black text-[var(--foreground)] block mt-0.5">
+                      {rateLimitMetrics?.totalRequestsChecked ?? 0}
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">All API routes</span>
+                  </div>
+
+                  <div className="p-3.5 bg-[var(--card)] border border-[var(--border)] rounded-2xl">
+                    <span className="text-[11px] font-semibold text-[var(--muted-foreground)] block">Total Throttled (429)</span>
+                    <span className="text-xl font-mono font-black text-rose-600 dark:text-rose-400 block mt-0.5">
+                      {rateLimitMetrics?.totalThrottled ?? 0}
+                    </span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">
+                      Auth: {rateLimitMetrics?.throttledAuthAccount ?? 0} acc / {rateLimitMetrics?.throttledAuthIp ?? 0} ip
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 bg-[var(--card)] border border-[var(--border)] rounded-2xl">
+                    <span className="text-[11px] font-semibold text-[var(--muted-foreground)] block">Active Auth Backoffs</span>
+                    <span className="text-xl font-mono font-black text-amber-600 dark:text-amber-400 block mt-0.5">
+                      {(rateLimitMetrics?.activeAuthAccountBackoffs || 0) + (rateLimitMetrics?.activeAuthIpBackoffs || 0)}
+                    </span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">Exponential delays</span>
+                  </div>
+
+                  <div className="p-3.5 bg-[var(--card)] border border-[var(--border)] rounded-2xl">
+                    <span className="text-[11px] font-semibold text-[var(--muted-foreground)] block">Public Tracked IPs</span>
+                    <span className="text-xl font-mono font-black text-[var(--foreground)] block mt-0.5">
+                      {rateLimitMetrics?.activePublicTracked ?? 0}
+                    </span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">Sliding window active</span>
+                  </div>
+                </div>
+
+                {/* Tier 1: Authentication Routes (Strictest — Per-IP & Per-Account with Exponential Backoff) */}
+                <div className="p-5 bg-gradient-to-br from-amber-500/10 via-[var(--card)] to-orange-500/5 border border-amber-500/30 rounded-2xl space-y-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                        <Lock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[var(--foreground)]">
+                            Tier 1: Authentication Routes
+                          </span>
+                          <span className="text-[10px] uppercase font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">
+                            Strictest Tier
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-[var(--muted-foreground)]">
+                          Protected routes: <code className="font-mono text-amber-600">/api/auth/login</code>, <code className="font-mono text-amber-600">/api/auth/signup</code>, <code className="font-mono text-amber-600">/api/auth/password-reset</code>, <code className="font-mono text-amber-600">/api/auth/verify-pin</code>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-[var(--background)]/80 border border-[var(--border)] rounded-xl text-xs space-y-1.5">
+                    <span className="font-bold text-[var(--foreground)] block flex items-center gap-1.5">
+                      <Activity className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Exponential Backoff vs Hard Lockout</span>
+                    </span>
+                    <p className="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+                      Rather than permanently locking out accounts after N attempts, this algorithm implements exponential backoff (<code className="font-mono font-bold text-amber-600">delay = base × factor^(failures - threshold)</code>). Legitimate users who mistyped credentials only wait a few seconds (e.g. 1s → 2s → 4s → 8s), while brute-force bots are throttled exponentially up to the maximum delay cap.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Max Account Attempts Before Backoff
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={rateLimitConfig.authRoutes.accountMaxAttempts}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authRoutes: {
+                              ...rateLimitConfig.authRoutes,
+                              accountMaxAttempts: parseInt(e.target.value, 10) || 5,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">e.g. 5 attempts (per-account)</span>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Base Backoff Delay (ms)
+                      </label>
+                      <input
+                        type="number"
+                        step={100}
+                        min={500}
+                        max={10000}
+                        value={rateLimitConfig.authRoutes.baseBackoffMs}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authRoutes: {
+                              ...rateLimitConfig.authRoutes,
+                              baseBackoffMs: parseInt(e.target.value, 10) || 1000,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">1st penalty (e.g. 1000ms = 1s)</span>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Exponential Multiplier Factor
+                      </label>
+                      <input
+                        type="number"
+                        step={0.5}
+                        min={1.5}
+                        max={4}
+                        value={rateLimitConfig.authRoutes.backoffFactor}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authRoutes: {
+                              ...rateLimitConfig.authRoutes,
+                              backoffFactor: parseFloat(e.target.value) || 2,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">e.g. 2x (1s → 2s → 4s → 8s...)</span>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Max Backoff Delay Cap (ms)
+                      </label>
+                      <input
+                        type="number"
+                        step={10000}
+                        min={10000}
+                        max={3600000}
+                        value={rateLimitConfig.authRoutes.maxBackoffMs}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authRoutes: {
+                              ...rateLimitConfig.authRoutes,
+                              maxBackoffMs: parseInt(e.target.value, 10) || 300000,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">Max cap (e.g. 300,000ms = 5 mins)</span>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Per-IP Auth Limit (Requests)
+                      </label>
+                      <input
+                        type="number"
+                        min={5}
+                        max={100}
+                        value={rateLimitConfig.authRoutes.ipMaxRequests}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authRoutes: {
+                              ...rateLimitConfig.authRoutes,
+                              ipMaxRequests: parseInt(e.target.value, 10) || 20,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">Total attempts allowed per IP</span>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Per-IP Auth Window (ms)
+                      </label>
+                      <input
+                        type="number"
+                        step={60000}
+                        min={60000}
+                        max={3600000}
+                        value={rateLimitConfig.authRoutes.ipWindowMs}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authRoutes: {
+                              ...rateLimitConfig.authRoutes,
+                              ipWindowMs: parseInt(e.target.value, 10) || 900000,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">e.g. 900,000ms = 15 minutes</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tier 2: Public Endpoints (Moderate Limits) */}
+                <div className="p-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl space-y-4 shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-xs">
+                      <Globe className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[var(--foreground)]">
+                          Tier 2: Public Endpoints
+                        </span>
+                        <span className="text-[10px] uppercase font-mono font-bold bg-blue-500/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                          Moderate Tier
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-[var(--muted-foreground)]">
+                        Protected routes: <code className="font-mono text-blue-600">/api/health</code>, <code className="font-mono text-blue-600">/sitemap.xml</code>, <code className="font-mono text-blue-600">/robots.txt</code>, <code className="font-mono text-blue-600">/api/cms/generate-copy</code>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Max Requests per Window
+                      </label>
+                      <input
+                        type="number"
+                        min={10}
+                        max={1000}
+                        value={rateLimitConfig.public.maxRequests}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            public: {
+                              ...rateLimitConfig.public,
+                              maxRequests: parseInt(e.target.value, 10) || 100,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">Default: 100 requests per IP</span>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Window Duration (ms)
+                      </label>
+                      <input
+                        type="number"
+                        step={10000}
+                        min={10000}
+                        max={600000}
+                        value={rateLimitConfig.public.windowMs}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            public: {
+                              ...rateLimitConfig.public,
+                              windowMs: parseInt(e.target.value, 10) || 60000,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">Default: 60,000ms (1 minute)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tier 3: Authenticated User Actions (Looser Limits) */}
+                <div className="p-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl space-y-4 shadow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[var(--foreground)]">
+                          Tier 3: Authenticated User Actions
+                        </span>
+                        <span className="text-[10px] uppercase font-mono font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">
+                          Loosest Tier
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-[var(--muted-foreground)]">
+                        Protected routes: <code className="font-mono text-emerald-600">/api/invoices/save</code>, <code className="font-mono text-emerald-600">/api/cms/save</code>, <code className="font-mono text-emerald-600">/api/user/profile</code>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Max User Requests per Window
+                      </label>
+                      <input
+                        type="number"
+                        min={50}
+                        max={5000}
+                        value={rateLimitConfig.authenticatedUser.maxRequests}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authenticatedUser: {
+                              ...rateLimitConfig.authenticatedUser,
+                              maxRequests: parseInt(e.target.value, 10) || 300,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">High capacity for authenticated sessions (e.g. 300 req/min)</span>
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Window Duration (ms)
+                      </label>
+                      <input
+                        type="number"
+                        step={10000}
+                        min={10000}
+                        max={600000}
+                        value={rateLimitConfig.authenticatedUser.windowMs}
+                        onChange={(e) =>
+                          setRateLimitConfig({
+                            ...rateLimitConfig,
+                            authenticatedUser: {
+                              ...rateLimitConfig.authenticatedUser,
+                              windowMs: parseInt(e.target.value, 10) || 60000,
+                            },
+                          })
+                        }
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                      />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">Default: 60,000ms (1 minute)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save Thresholds Button Bar */}
+                <div className="flex items-center justify-between p-4 bg-[var(--card)] border border-[var(--border)] rounded-2xl">
+                  <div>
+                    {rateLimitSaveMsg && (
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-in fade-in">
+                        <CheckCheck className="w-4 h-4" />
+                        <span>{rateLimitSaveMsg}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveRateLimits}
+                    disabled={rateLimitSaving}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-xl font-bold text-xs hover:opacity-90 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{rateLimitSaving ? 'Saving Thresholds...' : 'Save Rate Limit Thresholds'}</span>
+                  </button>
+                </div>
+
+                {/* Interactive Live Testing Sandbox */}
+                <div className="p-5 bg-[var(--card)] border border-[var(--border)] rounded-2xl space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <SlidersHorizontal className="w-4 h-4 text-orange-500" />
+                      <h5 className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider">
+                        Interactive Live Rate Limit & Backoff Simulator
+                      </h5>
+                    </div>
+                    <span className="text-[11px] text-[var(--muted-foreground)]">
+                      Tests live endpoint headers and exponential penalties
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Test Account Email
+                      </label>
+                      <input
+                        type="email"
+                        value={simEmail}
+                        onChange={(e) => setSimEmail(e.target.value)}
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                        placeholder="e.g. user@example.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
+                        Test Password
+                      </label>
+                      <input
+                        type="text"
+                        value={simPassword}
+                        onChange={(e) => setSimPassword(e.target.value)}
+                        className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg font-mono text-[var(--foreground)]"
+                        placeholder="e.g. wrong-pass"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={simLoading}
+                      onClick={() => handleSimulateAuth(false)}
+                      className="px-3.5 py-2 text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-xl hover:bg-amber-500/25 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <span>Simulate Failed Login (Triggers Backoff)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={simLoading}
+                      onClick={() => handleSimulateAuth(true)}
+                      className="px-3.5 py-2 text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-xl hover:bg-emerald-500/25 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <span>Simulate Valid Login (Resets Backoff)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={simLoading}
+                      onClick={handleSimulateBurst}
+                      className="px-3.5 py-2 text-xs font-bold bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded-xl hover:bg-blue-500/25 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <span>Simulate Public Burst (5 Requests)</span>
+                    </button>
+                  </div>
+
+                  {/* Simulator Event Stream */}
+                  {simLogs.length > 0 && (
+                    <div className="mt-3 space-y-1.5 max-h-56 overflow-y-auto p-3 bg-[var(--background)] border border-[var(--border)] rounded-xl font-mono text-[11px]">
+                      {simLogs.map((log, i) => (
+                        <div
+                          key={i}
+                          className={`p-2 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 ${
+                            log.status === 200 || log.status === 201
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                              : log.status === 429
+                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'
+                              : 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold px-1.5 py-0.5 rounded bg-[var(--card)] text-[10px]">
+                              HTTP {log.status}
+                            </span>
+                            <span className="font-semibold">{log.action}:</span>
+                            <span className="truncate max-w-xs sm:max-w-md">{log.message}</span>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-[10px] shrink-0 opacity-90">
+                            {log.backoffDelay !== undefined && log.backoffDelay > 0 && (
+                              <span className="font-bold text-amber-600 dark:text-amber-400">
+                                Backoff: {log.backoffDelay}ms
+                              </span>
+                            )}
+                            {log.retryAfter !== undefined && (
+                              <span className="font-bold text-rose-600 dark:text-rose-400">
+                                Retry-After: {log.retryAfter}s
+                              </span>
+                            )}
+                            <span className="text-[var(--muted-foreground)]">{log.time}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Strict Schema Validation Inspector & Live Tester */}
+                <div className="p-5 bg-gradient-to-br from-indigo-500/10 via-[var(--card)] to-purple-500/5 border border-indigo-500/30 rounded-2xl space-y-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                        <ShieldCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[var(--foreground)]">
+                            Strict Schema Validation & Input Inspector
+                          </span>
+                          <span className="text-[10px] uppercase font-mono font-bold bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full">
+                            Zero-Tolerance Reject
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-[var(--muted-foreground)]">
+                          All endpoints strictly reject mismatches in data type, string length, regex format, or boundary limits with structured HTTP 400 Bad Request responses (never simply sanitizing or escaping bad input).
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span className="text-[11px] font-bold text-[var(--muted-foreground)] mr-1">Load Preset Payload:</span>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectPresetSchemaTest('invalid_email')}
+                      className="px-2.5 py-1 bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 rounded-lg font-semibold text-[11px] hover:bg-red-500/25 transition-all cursor-pointer"
+                    >
+                      Invalid Email Format (Reject)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectPresetSchemaTest('short_password')}
+                      className="px-2.5 py-1 bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 rounded-lg font-semibold text-[11px] hover:bg-red-500/25 transition-all cursor-pointer"
+                    >
+                      Short Password / Min Length (Reject)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectPresetSchemaTest('invalid_pin')}
+                      className="px-2.5 py-1 bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 rounded-lg font-semibold text-[11px] hover:bg-red-500/25 transition-all cursor-pointer"
+                    >
+                      Non-Numeric PIN (Reject)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectPresetSchemaTest('invalid_invoice')}
+                      className="px-2.5 py-1 bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 rounded-lg font-semibold text-[11px] hover:bg-red-500/25 transition-all cursor-pointer"
+                    >
+                      Negative Invoice Rate / Empty Items (Reject)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectPresetSchemaTest('valid_login')}
+                      className="px-2.5 py-1 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-lg font-semibold text-[11px] hover:bg-emerald-500/25 transition-all cursor-pointer"
+                    >
+                      Valid Auth Payload (Pass)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectPresetSchemaTest('valid_invoice')}
+                      className="px-2.5 py-1 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-lg font-semibold text-[11px] hover:bg-emerald-500/25 transition-all cursor-pointer"
+                    >
+                      Valid Invoice Payload (Pass)
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-xs">
+                    <div className="md:col-span-4 space-y-2">
+                      <label className="font-semibold text-[var(--muted-foreground)] block">
+                        Target API Route
+                      </label>
+                      <select
+                        value={schemaTestEndpoint}
+                        onChange={(e) => setSchemaTestEndpoint(e.target.value)}
+                        className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded-xl font-mono text-[var(--foreground)] font-bold text-xs"
+                      >
+                        <option value="/api/auth/login">POST /api/auth/login (LoginSchema)</option>
+                        <option value="/api/auth/signup">POST /api/auth/signup (SignupSchema)</option>
+                        <option value="/api/auth/verify-pin">POST /api/auth/verify-pin (VerifyPinSchema)</option>
+                        <option value="/api/auth/password-reset">POST /api/auth/password-reset (PasswordResetSchema)</option>
+                        <option value="/api/invoices/save">POST /api/invoices/save (SaveInvoicePayloadSchema)</option>
+                        <option value="/api/invoices/send-email">POST /api/invoices/send-email (EmailInvoiceSchema)</option>
+                        <option value="/api/cms/generate-copy">POST /api/cms/generate-copy (GenerateCopySchema)</option>
+                        <option value="/api/admin/rate-limit/config">POST /api/admin/rate-limit/config (RateLimitConfigSchema)</option>
+                      </select>
+
+                      <div className="p-3 bg-[var(--background)] border border-[var(--border)] rounded-xl text-[11px] text-[var(--muted-foreground)] space-y-1">
+                        <span className="font-bold text-[var(--foreground)] block">Schema Defense Rule:</span>
+                        <p>Requests are intercepted and evaluated against strict Zod type constraints. Any violation halts execution before route logic runs.</p>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={schemaTestLoading}
+                        onClick={handleRunSchemaTest}
+                        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        <Zap className="w-3.5 h-3.5" />
+                        <span>{schemaTestLoading ? 'Validating Payload...' : 'Send Test Request to Server'}</span>
+                      </button>
+                    </div>
+
+                    <div className="md:col-span-8 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="font-semibold text-[var(--muted-foreground)] block">
+                          Request JSON Payload
+                        </label>
+                        <span className="text-[10px] text-[var(--muted-foreground)] font-mono">Editable JSON</span>
+                      </div>
+                      <textarea
+                        rows={6}
+                        value={schemaTestPayload}
+                        onChange={(e) => setSchemaTestPayload(e.target.value)}
+                        className="w-full p-3 bg-[var(--background)] border border-[var(--border)] rounded-xl font-mono text-xs text-[var(--foreground)] leading-relaxed focus:outline-none focus:border-indigo-500"
+                      />
+
+                      {schemaTestResult && (
+                        <div
+                          className={`p-3.5 rounded-xl border font-mono text-xs space-y-2 animate-in fade-in ${
+                            schemaTestResult.status === 200 || schemaTestResult.status === 201
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                              : 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between font-bold border-b border-current/15 pb-1.5">
+                            <span className="flex items-center gap-1.5">
+                              {schemaTestResult.status === 200 || schemaTestResult.status === 201 ? (
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                              ) : (
+                                <AlertCircle className="w-4 h-4 text-rose-500" />
+                              )}
+                              <span>
+                                HTTP {schemaTestResult.status} {schemaTestResult.statusText || (schemaTestResult.status === 400 ? 'Schema Validation Failed' : 'Success')}
+                              </span>
+                            </span>
+                            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-black/10">
+                              {schemaTestResult.status === 400 ? 'REJECTED' : 'ACCEPTED'}
+                            </span>
+                          </div>
+
+                          <div className="text-[11px] leading-relaxed">
+                            <div className="font-semibold">{schemaTestResult.error || schemaTestResult.message}</div>
+                            {schemaTestResult.details && Array.isArray(schemaTestResult.details) && (
+                              <div className="mt-2 space-y-1 pt-1.5 border-t border-current/15">
+                                <span className="font-bold block text-[10px] uppercase tracking-wider">Field Violations:</span>
+                                {schemaTestResult.details.map((d: any, idx: number) => (
+                                  <div key={idx} className="bg-black/10 dark:bg-white/10 px-2 py-1 rounded text-[11px] flex items-center gap-1.5">
+                                    <span className="font-bold text-rose-600 dark:text-rose-400">[{d.field}]:</span>
+                                    <span>{d.message}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

@@ -17,9 +17,11 @@ import {
   Check,
   Mail,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 import { downloadInvoicePdf } from '../utils/pdfExport';
 import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
+import { InvoiceSchema, validateStrict, ValidationErrorDetail } from '../schemas/strictSchemas';
 
 interface InvoiceStudioViewProps {
   brand: BrandSettings;
@@ -76,6 +78,8 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isClientViewMode, setIsClientViewMode] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrorDetail[]>([]);
+  const [generalError, setGeneralError] = useState<string>('');
 
   // Sync state when selected invoice ID changes or external list updates
   useEffect(() => {
@@ -119,6 +123,10 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
     field: keyof InvoiceItem,
     value: string | number
   ) => {
+    if (validationErrors.length > 0) {
+      setValidationErrors([]);
+      setGeneralError('');
+    }
     setInvoice({
       ...invoice,
       items: invoice.items.map((i) => (i.id === id ? { ...i, [field]: value } : i)),
@@ -137,9 +145,42 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
   };
 
   // Actions
-  const handleSave = () => {
-    onSaveInvoice(invoice);
-    showToast('Invoice saved successfully!');
+  const handleSave = async () => {
+    setValidationErrors([]);
+    setGeneralError('');
+
+    // Strict schema validation (rejecting any mismatches in type, length, bounds, or format)
+    const validation = validateStrict(InvoiceSchema, invoice);
+    if (!validation.success) {
+      setValidationErrors(validation.details);
+      setGeneralError(validation.error);
+      showToast('Validation Error: Input rejected by strict schema.');
+      return;
+    }
+
+    try {
+      // Also persist to server endpoint protected with strict validation middleware
+      const res = await fetch('/api/invoices/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoice: validation.data }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        if (data.details && Array.isArray(data.details)) {
+          setValidationErrors(data.details);
+        }
+        setGeneralError(data.error || 'Server rejected invoice payload.');
+        return;
+      }
+
+      onSaveInvoice(validation.data);
+      showToast('Invoice strictly validated & saved successfully!');
+    } catch (e: any) {
+      onSaveInvoice(validation.data);
+      showToast('Invoice saved locally.');
+    }
   };
 
   const handleDownloadPdf = () => {
@@ -167,6 +208,12 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
 
   const handleStatusChange = (newStatus: InvoiceData['status']) => {
     const updated = { ...invoice, status: newStatus };
+    const validation = validateStrict(InvoiceSchema, updated);
+    if (!validation.success) {
+      setValidationErrors(validation.details);
+      setGeneralError(validation.error);
+      return;
+    }
     setInvoice(updated);
     onSaveInvoice(updated);
     showToast(`Status updated to ${newStatus}`);
@@ -313,6 +360,38 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Strict Schema Validation Rejection Alert Banner */}
+        {validationErrors.length > 0 && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-[var(--radius)] p-4 text-xs text-red-600 dark:text-red-400 space-y-2 animate-in fade-in">
+            <div className="flex items-center justify-between font-bold">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500" />
+                <span>Strict Schema Validation Failure: Request Rejected</span>
+              </div>
+              <button
+                onClick={() => {
+                  setValidationErrors([]);
+                  setGeneralError('');
+                }}
+                className="text-red-500 hover:text-red-700 font-bold px-2 py-0.5"
+              >
+                Dismiss
+              </button>
+            </div>
+            <p className="text-[11px] opacity-90">
+              {generalError || 'The provided invoice data failed strict schema checks (type, format, length, or boundary). Input was not persisted.'}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+              {validationErrors.map((err, idx) => (
+                <div key={idx} className="bg-red-500/10 rounded px-2.5 py-1 font-mono text-[11px] flex items-center gap-1.5">
+                  <span className="font-bold text-red-700 dark:text-red-300">[{err.field}]:</span>
+                  <span>{err.message}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {!isClientViewMode && (
           /* Form Editor Section: "Invoice Details Editor" */
