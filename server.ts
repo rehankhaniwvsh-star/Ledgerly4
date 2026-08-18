@@ -119,14 +119,55 @@ async function startServer() {
     res.status(200).send("google-site-verification: googleacb1159f81828443.html");
   });
 
-  // Dynamic Sitemap XML generator for Google Search Console (100% compliant, zero fragment URLs)
-  app.get("/sitemap.xml", (req, res) => {
+  // Dynamic Sitemap XML generator and alias routes (100% compliant with Google Search Console)
+  app.get(["/sitemap.xml", "/sitemap", "/sitemaps.xml", "/sitemap.html", "/site-map"], (req, res) => {
     const rawProto = (req.headers["x-forwarded-proto"] as string) || req.protocol || "https";
     const proto = rawProto.split(",")[0].trim() || "https";
     const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "localhost:3000";
     const host = rawHost.split(",")[0].trim();
     const baseUrl = `${proto}://${host}`;
     const today = new Date().toISOString().split("T")[0];
+
+    // Check if user requested via browser expecting human-readable HTML representation on /sitemap
+    if (req.path === "/sitemap" || req.path === "/sitemap.html" || req.path === "/site-map") {
+      if (req.headers.accept && req.headers.accept.includes("text/html")) {
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        return res.status(200).send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoiceify — XML Sitemap</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; }
+    .card { max-width: 680px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 1rem; padding: 2rem; }
+    h1 { font-size: 1.5rem; margin-top: 0; color: #f97316; }
+    p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; }
+    .url-box { background: #0f172a; border: 1px solid #334155; padding: 1rem; border-radius: 0.5rem; font-family: monospace; font-size: 0.9rem; margin: 1rem 0; word-break: break-all; }
+    a.btn { display: inline-block; background: #f97316; color: #fff; padding: 0.6rem 1.2rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+    a.btn:hover { background: #ea580c; }
+    .xml-link { color: #38bdf8; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>📄 Invoiceify XML Sitemap</h1>
+    <p>This is the official search-engine crawlable sitemap for Google Search Console and web indexers.</p>
+    <div class="url-box">
+      <strong>Canonical URL:</strong> <a href="${baseUrl}/" class="xml-link">${baseUrl}/</a><br>
+      <strong>Sitemap XML:</strong> <a href="${baseUrl}/sitemap.xml" class="xml-link">${baseUrl}/sitemap.xml</a><br>
+      <strong>Last Modified:</strong> ${today}<br>
+      <strong>Priority:</strong> 1.0 (Daily)
+    </div>
+    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+      <a href="/sitemap.xml" class="btn">View Raw XML Feed</a>
+      <a href="/" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem;">← Back to Home</a>
+    </div>
+  </div>
+</body>
+</html>`);
+      }
+    }
 
     // Standard Google Search Console XML Sitemap specification
     // NOTE: URLs strictly match the requested domain and contain zero hash fragments.

@@ -1,0 +1,6 @@
+# Robots.txt for Googlebot and search crawlers
+User-agent: *
+Allow: /
+
+# Google Search Console XML Sitemap Location
+Sitemap: https://ais-pre-szekk26t6bwtkzi4ui7hdg-557182007664.asia-southeast1.run.app/sitemap.xml
