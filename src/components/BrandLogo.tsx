@@ -12,74 +12,75 @@ interface BrandLogoProps {
 export const ReceiptLogoIcon: React.FC<{
   className?: string;
   sizeClass?: string;
-  showSparkle?: boolean;
-}> = ({ className = '', sizeClass = 'w-10 h-10', showSparkle = true }) => {
+}> = ({ className = '', sizeClass = 'w-10 h-10' }) => {
   return (
     <div
-      className={`relative ${sizeClass} rounded-2xl bg-gradient-to-tr from-[#FF3366] via-[#FF5722] to-[#FFA000] border border-white/25 flex items-center justify-center shadow-md shadow-orange-500/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-orange-500/40 shrink-0 ${className}`}
+      className={`relative ${sizeClass} rounded-[26%] bg-gradient-to-b from-[#FFA726] via-[#FF6D00] to-[#FF3D00] shadow-md shadow-orange-500/20 flex items-center justify-center transition-all duration-300 shrink-0 select-none overflow-hidden ${className}`}
     >
-      {/* Exquisite Receipt Vector with Orange Gradient Theme & Wavy Bottom */}
+      {/* Mathematically exact SVG vector reproducing the uploaded logo */}
       <svg
-        viewBox="0 0 40 40"
+        viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-[72%] h-[72%] text-white transition-transform duration-300 drop-shadow-xs"
+        className="w-[84%] h-[84%] drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.18)]"
       >
-        {/* Receipt Paper Silhouette with Crisp White Outline and Translucent White Paper Fill */}
+        {/* Top bar with smooth top-left curve, horizontal edge, and top-right leaf curl */}
         <path
-          d="M10 8.5C10 7.11929 11.1193 6 12.5 6H27.5C28.8807 6 30 7.11929 30 8.5V30.5C29 32 27.5 32 26.5 30.5C25.5 29 24 29 23 30.5C22 32 20.5 32 19.5 30.5C18.5 29 17 29 16 30.5C15 32 13.5 32 12.5 30.5C11.5 29 10.5 29.5 10 30.5V8.5Z"
+          d="M 20.5 32 C 20.5 23 25.5 19 34 19 H 72 C 75 19 77 18 78.5 16.5"
           stroke="#FFFFFF"
-          strokeWidth="2.5"
+          strokeWidth="6"
           strokeLinecap="round"
           strokeLinejoin="round"
-          fill="rgba(255, 255, 255, 0.16)"
+          fill="none"
         />
 
-        {/* Currency Symbol: Dollar Sign with Crisp White Contrast */}
+        {/* Main receipt body: Right vertical wall (with top notch), 3 identical smooth downward wave scallops, and left vertical wall */}
+        <path
+          d="M 78.5 25 V 59 C 75 67.5 62.5 67.5 59 59 C 55.5 67.5 42.5 67.5 39 59 C 35.5 67.5 23.5 67.5 20.5 59 V 32"
+          stroke="#FFFFFF"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+
+        {/* Bold crisp dollar currency symbol */}
         <text
-          x="20"
-          y="15"
+          x="49"
+          y="34.5"
           textAnchor="middle"
           dominantBaseline="central"
           fill="#FFFFFF"
-          fontSize="9"
+          fontSize="18"
           fontWeight="900"
-          fontFamily="system-ui, -apple-system, sans-serif"
+          fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
           letterSpacing="-0.5px"
         >
           $
         </text>
 
-        {/* Invoice Item Dash Line 1 */}
+        {/* Upper horizontal data bar */}
         <line
-          x1="14"
-          y1="20"
-          x2="26"
-          y2="20"
+          x1="32"
+          y1="48"
+          x2="66"
+          y2="48"
           stroke="#FFFFFF"
-          strokeWidth="2.2"
+          strokeWidth="5.5"
           strokeLinecap="round"
         />
 
-        {/* Invoice Item Dash Line 2 */}
+        {/* Lower shorter horizontal data bar */}
         <line
-          x1="14"
-          y1="24.5"
-          x2="21"
-          y2="24.5"
-          stroke="rgba(255, 255, 255, 0.85)"
-          strokeWidth="2.2"
+          x1="32"
+          y1="58"
+          x2="51"
+          y2="58"
+          stroke="#FFFFFF"
+          strokeWidth="5.5"
           strokeLinecap="round"
         />
       </svg>
-
-      {/* Enchantment: Subtle animated micro-sparkle accent on top-right */}
-      {showSparkle && (
-        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-white shadow-xs border border-orange-200"></span>
-        </span>
-      )}
     </div>
   );
 };
@@ -92,31 +93,31 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   className = '',
   iconOnly = false,
 }) => {
-  // Size configurations
+  // Sizing configurations matching the exact uploaded logo composition
   const sizeMap = {
     sm: {
-      icon: 'w-8 h-8 rounded-xl',
-      title: 'text-base font-black tracking-tight',
-      tagline: 'text-[10px] px-2 py-0.5 mt-0.5',
+      icon: 'w-8 h-8',
+      title: 'text-xl font-black tracking-[-0.03em]',
+      tagline: 'text-[10px] px-2.5 py-0.5 mt-0.5',
       gap: 'gap-2.5',
     },
     md: {
-      icon: 'w-11 h-11 rounded-2xl',
-      title: 'text-xl font-black tracking-tight',
-      tagline: 'text-[11px] px-2.5 py-0.5 mt-1',
-      gap: 'gap-3',
-    },
-    lg: {
-      icon: 'w-14 h-14 rounded-3xl',
-      title: 'text-2xl sm:text-3xl font-black tracking-tight',
-      tagline: 'text-xs font-semibold px-3 py-1 mt-1.5',
+      icon: 'w-11 h-11 sm:w-12 sm:h-12',
+      title: 'text-2xl sm:text-[28px] font-black tracking-[-0.035em]',
+      tagline: 'text-xs font-bold px-3.5 py-0.5 mt-1',
       gap: 'gap-3.5',
     },
-    xl: {
-      icon: 'w-18 h-18 rounded-[28px]',
-      title: 'text-3xl sm:text-4xl font-black tracking-tight',
-      tagline: 'text-sm font-semibold px-4 py-1.5 mt-2',
+    lg: {
+      icon: 'w-14 h-14 sm:w-16 sm:h-16',
+      title: 'text-3xl sm:text-4xl font-black tracking-[-0.035em]',
+      tagline: 'text-sm font-bold px-4 py-1 mt-1.5',
       gap: 'gap-4',
+    },
+    xl: {
+      icon: 'w-20 h-20',
+      title: 'text-4xl sm:text-5xl font-black tracking-[-0.04em]',
+      tagline: 'text-base font-bold px-5 py-1.5 mt-2',
+      gap: 'gap-5',
     },
   };
 
@@ -127,21 +128,23 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   }
 
   return (
-    <div className={`inline-flex items-center ${currentSize.gap} group cursor-pointer select-none ${className}`}>
-      {/* Orange Gradient Enchanted Receipt Icon */}
+    <div
+      className={`inline-flex items-center ${currentSize.gap} group cursor-pointer select-none transition-transform active:scale-[0.98] ${className}`}
+    >
+      {/* Exact Gradient Squircle Receipt Icon */}
       <ReceiptLogoIcon sizeClass={currentSize.icon} />
 
-      {/* Brand Title & Tagline Pill Badge */}
+      {/* Typography: Solid Dark Midnight Brand Name + Soft Peach Tagline Pill */}
       <div className="flex flex-col items-start justify-center">
         <span
-          className={`${currentSize.title} text-[var(--foreground)] leading-none transition-colors group-hover:text-orange-600 font-sans`}
+          className={`${currentSize.title} text-[#0A1128] dark:text-[#F3F4F6] leading-none font-sans font-black transition-colors group-hover:text-[#FF5722]`}
         >
           {brandName}
         </span>
 
         {showTagline && tagline && (
           <div
-            className={`inline-flex items-center rounded-full bg-orange-500/10 dark:bg-orange-500/20 border border-orange-500/30 text-orange-600 dark:text-orange-400 font-bold tracking-normal whitespace-nowrap shadow-2xs ${currentSize.tagline}`}
+            className={`inline-flex items-center justify-center rounded-full bg-[#FFF0E6] dark:bg-[#2A1712] text-[#E65100] dark:text-[#FF8A65] font-bold tracking-normal whitespace-nowrap ${currentSize.tagline}`}
           >
             <span>{tagline}</span>
           </div>
@@ -150,3 +153,5 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     </div>
   );
 };
+
+

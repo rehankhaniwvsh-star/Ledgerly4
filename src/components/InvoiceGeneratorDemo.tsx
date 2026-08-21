@@ -18,6 +18,7 @@ import {
   Palette,
   CheckCircle2,
   AlertCircle,
+  Landmark,
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -576,6 +577,136 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
               </div>
             </div>
 
+            {/* Bank Details Card */}
+            <div className="bg-[var(--muted)]/40 border border-[var(--border)] rounded-lg p-4 text-xs space-y-3">
+              <div className="flex items-center gap-2 font-bold text-[var(--foreground)]">
+                <Landmark className="w-4 h-4 text-orange-500" />
+                <span className="text-xs uppercase tracking-wide">Bank & Remittance Details</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1">
+                    Bank Name
+                  </label>
+                  <input
+                    type="text"
+                    value={invoice.bankDetails?.bankName || ''}
+                    onChange={(e) =>
+                      setInvoice({
+                        ...invoice,
+                        bankDetails: {
+                          ...invoice.bankDetails,
+                          bankName: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="e.g. HDFC / Chase Bank"
+                    className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1">
+                    Account Holder Name
+                  </label>
+                  <input
+                    type="text"
+                    value={invoice.bankDetails?.accountName || ''}
+                    onChange={(e) =>
+                      setInvoice({
+                        ...invoice,
+                        bankDetails: {
+                          ...invoice.bankDetails,
+                          accountName: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="e.g. Acme Corp"
+                    className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1">
+                    Account Number
+                  </label>
+                  <input
+                    type="text"
+                    value={invoice.bankDetails?.accountNumber || ''}
+                    onChange={(e) =>
+                      setInvoice({
+                        ...invoice,
+                        bankDetails: {
+                          ...invoice.bankDetails,
+                          accountNumber: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="e.g. 50200084729103"
+                    className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1">
+                    Routing / IFSC / SWIFT
+                  </label>
+                  <input
+                    type="text"
+                    value={invoice.bankDetails?.routingCode || ''}
+                    onChange={(e) =>
+                      setInvoice({
+                        ...invoice,
+                        bankDetails: {
+                          ...invoice.bankDetails,
+                          routingCode: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="e.g. HDFC0001234"
+                    className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1">
+                    UPI / Payment ID
+                  </label>
+                  <input
+                    type="text"
+                    value={invoice.bankDetails?.upiId || ''}
+                    onChange={(e) =>
+                      setInvoice({
+                        ...invoice,
+                        bankDetails: {
+                          ...invoice.bankDetails,
+                          upiId: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="e.g. acme@upi"
+                    className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-semibold text-[var(--muted-foreground)] block mb-1">
+                    IBAN (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={invoice.bankDetails?.iban || ''}
+                    onChange={(e) =>
+                      setInvoice({
+                        ...invoice,
+                        bankDetails: {
+                          ...invoice.bankDetails,
+                          iban: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="e.g. IN50HDFC..."
+                    className="w-full p-1.5 bg-[var(--card)] border border-[var(--border)] rounded text-xs font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Math Totals & Notes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-[var(--border)]">
               <div>
@@ -602,23 +733,28 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
                 </div>
 
                 <div className="flex justify-between items-center text-[var(--muted-foreground)]">
-                  <span>Tax Rate (%):</span>
-                  <input
-                    type="number"
-                    min={0}
-                    value={invoice.taxRate}
-                    onChange={(e) =>
-                      setInvoice({
-                        ...invoice,
-                        taxRate: Number(e.target.value) || 0,
-                      })
-                    }
-                    className="w-16 p-1 bg-[var(--card)] border border-[var(--border)] rounded text-right text-xs"
-                  />
+                  <span>Tax (+ %):</span>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={0}
+                      value={invoice.taxRate}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          taxRate: Number(e.target.value) || 0,
+                        })
+                      }
+                      className="w-16 p-1 bg-[var(--card)] border border-[var(--border)] rounded text-right text-xs"
+                    />
+                    <span className="text-[11px] font-mono text-[var(--muted-foreground)]">
+                      +{invoice.currency}{taxAmount.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center text-[var(--muted-foreground)]">
-                  <span>Discount:</span>
+                  <span>Discount (- {invoice.currency}):</span>
                   <input
                     type="number"
                     min={0}
@@ -637,7 +773,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
 
                 <div className="flex justify-between text-base font-bold text-[var(--foreground)]">
                   <span>Total Amount:</span>
-                  <span className="font-mono">
+                  <span className="font-mono text-[var(--primary)]">
                     {invoice.currency}
                     {grandTotal.toLocaleString()}
                   </span>

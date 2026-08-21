@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { InvoiceData, InvoiceItem, BrandSettings } from '../types';
+import { InvoiceData, InvoiceItem, BrandSettings, BankDetails } from '../types';
 import {
   ArrowLeft,
   Plus,
@@ -18,6 +18,9 @@ import {
   Mail,
   Sparkles,
   ShieldCheck,
+  Landmark,
+  Building2,
+  CreditCard,
 } from 'lucide-react';
 import { downloadInvoicePdf } from '../utils/pdfExport';
 import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
@@ -65,9 +68,18 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
       status: 'Paid',
       taxRate: 5,
       discountAmount: 10,
-      themeColor: brand.primaryColor || '#7A1E2B',
+      themeColor: brand.primaryColor || '#FF5238',
       templateStyle: 'Modern',
-      notes: 'Thank you for choosing Payment received with thanks.',
+      notes: 'Thank you for choosing Invoiceify. Payment received with thanks.',
+      bankDetails: brand.defaultBankDetails || {
+        bankName: 'HDFC Bank Ltd',
+        accountName: brand.brandName || 'Invoiceify Studio',
+        accountNumber: '50200084729103',
+        routingCode: 'HDFC0001234',
+        iban: 'IN50HDFC00012345020008472',
+        upiId: 'invoiceify@hdfcbank',
+        paymentInstructions: 'Please include invoice number in wire transfer narration.',
+      },
       items: [
         { id: 'item-1', description: 'Management & marketing', quantity: 1, rate: 31999 },
         { id: 'item-2', description: 'Landing page dev & responsive setup', quantity: 1, rate: 29999 },
@@ -622,22 +634,24 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
               <div>
                 <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
-                  Tax (%)
+                  Tax Rate (+ %) <span className="text-[10px] text-emerald-600 font-normal">Adds to subtotal</span>
                 </label>
                 <input
                   type="number"
                   min={0}
+                  max={100}
                   value={invoice.taxRate}
                   onChange={(e) =>
                     setInvoice({ ...invoice, taxRate: Number(e.target.value) || 0 })
                   }
                   className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
+                  placeholder="e.g. 18"
                 />
               </div>
 
               <div>
                 <label className="font-semibold text-[var(--muted-foreground)] block mb-1">
-                  Discount ({invoice.currency})
+                  Discount (- {invoice.currency}) <span className="text-[10px] text-amber-600 font-normal">Subtracts from total</span>
                 </label>
                 <input
                   type="number"
@@ -650,7 +664,165 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                     })
                   }
                   className="w-full p-2.5 bg-[var(--background)] border border-[var(--border)] rounded text-[var(--foreground)]"
+                  placeholder="e.g. 500"
                 />
+              </div>
+
+              {/* Bank & Payment Details Section in Form */}
+              <div className="sm:col-span-2 p-3.5 bg-[var(--muted)]/40 border border-[var(--border)] rounded-lg space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-[var(--foreground)]">
+                  <Landmark className="w-4 h-4 text-orange-500" />
+                  <span>Bank & Remittance Details (Essential for Invoicing)</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
+                      Bank Name
+                    </label>
+                    <input
+                      type="text"
+                      value={invoice.bankDetails?.bankName || ''}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          bankDetails: {
+                            ...invoice.bankDetails,
+                            bankName: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                      placeholder="e.g. HDFC Bank, Chase, Standard Chartered"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
+                      Account Holder / Beneficiary Name
+                    </label>
+                    <input
+                      type="text"
+                      value={invoice.bankDetails?.accountName || ''}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          bankDetails: {
+                            ...invoice.bankDetails,
+                            accountName: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                      placeholder="e.g. Acme Corp Pvt Ltd"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
+                      Account Number
+                    </label>
+                    <input
+                      type="text"
+                      value={invoice.bankDetails?.accountNumber || ''}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          bankDetails: {
+                            ...invoice.bankDetails,
+                            accountNumber: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-mono text-[var(--foreground)]"
+                      placeholder="e.g. 50200084729103"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
+                      Routing / IFSC / Sort Code / SWIFT
+                    </label>
+                    <input
+                      type="text"
+                      value={invoice.bankDetails?.routingCode || ''}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          bankDetails: {
+                            ...invoice.bankDetails,
+                            routingCode: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-mono text-[var(--foreground)]"
+                      placeholder="e.g. HDFC0001234 or CHASUS33"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
+                      IBAN / International Wire Code
+                    </label>
+                    <input
+                      type="text"
+                      value={invoice.bankDetails?.iban || ''}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          bankDetails: {
+                            ...invoice.bankDetails,
+                            iban: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-mono text-[var(--foreground)]"
+                      placeholder="e.g. IN50HDFC0001234..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
+                      UPI ID / Payment Link (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={invoice.bankDetails?.upiId || ''}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          bankDetails: {
+                            ...invoice.bankDetails,
+                            upiId: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                      placeholder="e.g. business@upi or link"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
+                      Payment / Wire Transfer Instructions
+                    </label>
+                    <input
+                      type="text"
+                      value={invoice.bankDetails?.paymentInstructions || ''}
+                      onChange={(e) =>
+                        setInvoice({
+                          ...invoice,
+                          bankDetails: {
+                            ...invoice.bankDetails,
+                            paymentInstructions: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                      placeholder="e.g. Please specify invoice number in wire reference note."
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="sm:col-span-2">
@@ -790,7 +962,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
 
               {invoice.taxRate > 0 && (
                 <div className="flex justify-between text-[var(--muted-foreground)]">
-                  <span>Tax ({invoice.taxRate}%)</span>
+                  <span>Tax (+{invoice.taxRate}%)</span>
                   <span className="font-mono text-[var(--foreground)]">
                     +{invoice.currency}
                     {taxAmount.toLocaleString()}
@@ -819,6 +991,107 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Bank & Payment Details Card on Invoice Document */}
+          {invoice.bankDetails && (invoice.bankDetails.bankName || invoice.bankDetails.accountNumber || invoice.bankDetails.accountName || invoice.bankDetails.routingCode || invoice.bankDetails.upiId) && (
+            <div className="bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-orange-500/20 rounded-lg p-4 text-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 font-bold text-[var(--foreground)]">
+                  <Landmark className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  <span className="uppercase text-[11px] tracking-wide text-orange-700 dark:text-orange-300">
+                    Payment & Bank Wire Details
+                  </span>
+                </div>
+                {invoice.bankDetails.accountNumber && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(invoice.bankDetails?.accountNumber || '');
+                      showToast('Bank Account Number copied to clipboard!');
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] text-orange-600 hover:text-orange-700 font-medium px-2 py-0.5 rounded bg-orange-100 dark:bg-orange-950/50 hover:bg-orange-200 transition-colors cursor-pointer"
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>Copy A/C</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                {invoice.bankDetails.bankName && (
+                  <div>
+                    <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold block">
+                      Bank Name
+                    </span>
+                    <span className="font-medium text-[var(--foreground)]">
+                      {invoice.bankDetails.bankName}
+                    </span>
+                  </div>
+                )}
+
+                {invoice.bankDetails.accountName && (
+                  <div>
+                    <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold block">
+                      Account Name
+                    </span>
+                    <span className="font-medium text-[var(--foreground)]">
+                      {invoice.bankDetails.accountName}
+                    </span>
+                  </div>
+                )}
+
+                {invoice.bankDetails.accountNumber && (
+                  <div>
+                    <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold block">
+                      Account Number
+                    </span>
+                    <span className="font-mono font-bold text-[var(--foreground)]">
+                      {invoice.bankDetails.accountNumber}
+                    </span>
+                  </div>
+                )}
+
+                {invoice.bankDetails.routingCode && (
+                  <div>
+                    <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold block">
+                      IFSC / Routing / SWIFT
+                    </span>
+                    <span className="font-mono font-medium text-[var(--foreground)]">
+                      {invoice.bankDetails.routingCode}
+                    </span>
+                  </div>
+                )}
+
+                {invoice.bankDetails.iban && (
+                  <div>
+                    <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold block">
+                      IBAN
+                    </span>
+                    <span className="font-mono font-medium text-[var(--foreground)]">
+                      {invoice.bankDetails.iban}
+                    </span>
+                  </div>
+                )}
+
+                {invoice.bankDetails.upiId && (
+                  <div>
+                    <span className="text-[10px] text-[var(--muted-foreground)] uppercase font-semibold block">
+                      UPI / Quick Pay
+                    </span>
+                    <span className="font-medium text-orange-600 dark:text-orange-400">
+                      {invoice.bankDetails.upiId}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {invoice.bankDetails.paymentInstructions && (
+                <div className="pt-1 border-t border-orange-500/15 text-[11px] text-[var(--muted-foreground)] italic">
+                  Note: {invoice.bankDetails.paymentInstructions}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Notes Card */}
           {invoice.notes && (

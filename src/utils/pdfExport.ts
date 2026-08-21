@@ -134,7 +134,7 @@ export const downloadInvoicePdf = (invoice: InvoiceData, brandName: string) => {
   doc.text(`${invoice.currency || '₹'}${grandTotal.toLocaleString()}`, 190, y, { align: 'right' });
 
   if (invoice.notes) {
-    y += 15;
+    y += 14;
     doc.setFillColor(251, 249, 246);
     doc.rect(15, y, 180, 16, 'F');
     doc.setFontSize(8);
@@ -144,6 +144,45 @@ export const downloadInvoicePdf = (invoice: InvoiceData, brandName: string) => {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(43, 35, 32);
     doc.text(invoice.notes, 18, y + 11);
+    y += 16;
+  }
+
+  // Bank & Payment Details
+  const bank = invoice.bankDetails;
+  if (bank && (bank.bankName || bank.accountNumber || bank.accountName || bank.routingCode || bank.iban || bank.upiId || bank.paymentInstructions)) {
+    y += 10;
+    doc.setFillColor(248, 247, 245);
+    doc.setDrawColor(230, 225, 218);
+    doc.roundedRect(15, y, 180, 26, 2, 2, 'FD');
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(r, g, b);
+    doc.text('PAYMENT & BANK DETAILS', 19, y + 5.5);
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 75, 70);
+
+    let line1 = [];
+    if (bank.bankName) line1.push(`Bank: ${bank.bankName}`);
+    if (bank.accountName) line1.push(`Beneficiary: ${bank.accountName}`);
+    if (bank.accountNumber) line1.push(`A/C No: ${bank.accountNumber}`);
+
+    let line2 = [];
+    if (bank.routingCode) line2.push(`Routing/IFSC: ${bank.routingCode}`);
+    if (bank.iban) line2.push(`IBAN: ${bank.iban}`);
+    if (bank.upiId) line2.push(`UPI / Payment ID: ${bank.upiId}`);
+
+    doc.text(line1.join('  •  ') || 'Direct Bank Wire Transfer', 19, y + 11);
+    if (line2.length > 0) {
+      doc.text(line2.join('  •  '), 19, y + 16);
+    }
+    if (bank.paymentInstructions) {
+      doc.setFontSize(7.5);
+      doc.setTextColor(120, 115, 110);
+      doc.text(`Instructions: ${bank.paymentInstructions}`, 19, y + 21);
+    }
   }
 
   // Footer branding tag

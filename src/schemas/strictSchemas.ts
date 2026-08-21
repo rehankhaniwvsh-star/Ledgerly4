@@ -109,8 +109,21 @@ export const InvoiceItemSchema = z
   })
   .strict();
 
+export const BankDetailsSchema = z
+  .object({
+    bankName: z.string().trim().max(100, "Bank name cannot exceed 100 characters").optional().default(""),
+    accountName: z.string().trim().max(120, "Account name cannot exceed 120 characters").optional().default(""),
+    accountNumber: z.string().trim().max(60, "Account number cannot exceed 60 characters").optional().default(""),
+    routingCode: z.string().trim().max(60, "Routing/IFSC code cannot exceed 60 characters").optional().default(""),
+    iban: z.string().trim().max(60, "IBAN cannot exceed 60 characters").optional().default(""),
+    upiId: z.string().trim().max(80, "UPI ID cannot exceed 80 characters").optional().default(""),
+    paymentInstructions: z.string().trim().max(500, "Payment instructions cannot exceed 500 characters").optional().default(""),
+  })
+  .strict();
+
 export const InvoiceSchema = z
   .object({
+    id: z.string().optional(),
     invoiceNumber: z
       .string()
       .trim()
@@ -131,15 +144,18 @@ export const InvoiceSchema = z
         "Business email must be a valid email address if provided"
       )
       .default(""),
+    businessLogoLetter: z.string().optional().default("I"),
     businessPhone: z
       .string()
       .trim()
       .max(30, "Business phone cannot exceed 30 characters")
+      .optional()
       .default(""),
     businessAddress: z
       .string()
       .trim()
       .max(300, "Business address cannot exceed 300 characters")
+      .optional()
       .default(""),
     clientName: z
       .string()
@@ -159,6 +175,7 @@ export const InvoiceSchema = z
       .string()
       .trim()
       .max(300, "Client address cannot exceed 300 characters")
+      .optional()
       .default(""),
     issueDate: z
       .string()
@@ -198,6 +215,10 @@ export const InvoiceSchema = z
       .array(InvoiceItemSchema)
       .min(1, "Invoice must contain at least one item")
       .max(200, "Invoice cannot exceed 200 line items"),
+    themeColor: z.string().optional(),
+    templateStyle: z.enum(["Classic", "Modern", "Minimal"]).optional(),
+    bankDetails: BankDetailsSchema.optional(),
+    createdAt: z.string().optional(),
   })
   .strict();
 

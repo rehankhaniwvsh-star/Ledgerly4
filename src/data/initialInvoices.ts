@@ -18,6 +18,15 @@ export const initialInvoices: InvoiceData[] = [
     themeColor: '#FF5238',
     templateStyle: 'Modern',
     notes: 'Thank you for choosing Nova Studio for your branding project!',
+    bankDetails: {
+      bankName: 'HDFC Bank Ltd',
+      accountName: 'Invoiceify Studio Private Limited',
+      accountNumber: '50200084729103',
+      routingCode: 'HDFC0001234',
+      iban: 'IN50HDFC00012345020008472',
+      upiId: 'invoiceify@hdfcbank',
+      paymentInstructions: 'Please include Invoice #INV-2026-001 in payment reference.',
+    },
     items: [
       { id: 'item-1', description: 'Brand Identity & Guidelines', quantity: 1, rate: 25000 },
       { id: 'item-2', description: 'Custom Web Development', quantity: 1, rate: 24000 },
@@ -40,6 +49,15 @@ export const initialInvoices: InvoiceData[] = [
     themeColor: '#2563EB',
     templateStyle: 'Classic',
     notes: 'Payment due within 15 business days.',
+    bankDetails: {
+      bankName: 'Standard Chartered Bank',
+      accountName: 'Invoiceify Studio Global',
+      accountNumber: '987654321098',
+      routingCode: 'SCBL0036001',
+      iban: 'IN88SCBL0036001987654321',
+      upiId: 'invoiceify@scb',
+      paymentInstructions: 'NEFT / RTGS / Wire transfers accepted.',
+    },
     items: [
       { id: 'item-3', description: 'Q3 Product Strategy Consulting', quantity: 10, rate: 3500 },
       { id: 'item-4', description: 'UI Design System Architecture', quantity: 1, rate: 18000 },
@@ -62,6 +80,14 @@ export const initialInvoices: InvoiceData[] = [
     themeColor: '#3F7A4E',
     templateStyle: 'Minimal',
     notes: 'Draft invoice for upcoming design retainer.',
+    bankDetails: {
+      bankName: 'Silicon Valley Bank / First Republic',
+      accountName: 'Invoiceify Studio LLC',
+      accountNumber: '1234876590',
+      routingCode: '121000358',
+      iban: 'US64SVB012100035812348765',
+      paymentInstructions: 'ACH or Direct Wire preferred.',
+    },
     items: [
       { id: 'item-5', description: 'Monthly Creative Retainer - August', quantity: 1, rate: 30000 },
     ],
@@ -83,6 +109,14 @@ export const initialInvoices: InvoiceData[] = [
     themeColor: '#DC2626',
     templateStyle: 'Classic',
     notes: 'Overdue balance notice. Please process immediately.',
+    bankDetails: {
+      bankName: 'HDFC Bank Ltd',
+      accountName: 'Invoiceify Studio Private Limited',
+      accountNumber: '50200084729103',
+      routingCode: 'HDFC0001234',
+      upiId: 'invoiceify@hdfcbank',
+      paymentInstructions: 'Please settle pending invoices via IMPS or RTGS.',
+    },
     items: [
       { id: 'item-6', description: 'Mobile App Wireframes & Figma Prototypes', quantity: 1, rate: 42000 },
     ],

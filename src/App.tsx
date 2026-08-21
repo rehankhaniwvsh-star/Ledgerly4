@@ -217,9 +217,9 @@ export default function App() {
   const handleCreateNewInvoice = () => {
     const newInv: InvoiceData = {
       id: `inv-${Date.now()}`,
-      businessName: cms.brand.brandName || 'Alex.sam.co',
-      businessEmail: cms.brand.contactEmail || 'hello@alex.sam.co',
-      businessLogoLetter: cms.brand.logoLetter || 'A',
+      businessName: cms.brand.brandName || 'Invoiceify Studio',
+      businessEmail: cms.brand.contactEmail || 'billing@invoiceify.app',
+      businessLogoLetter: cms.brand.logoLetter || 'I',
       clientName: 'New Client',
       clientEmail: 'client@example.com',
       invoiceNumber: `INV-00${Math.floor(50 + Math.random() * 45)}`,
@@ -229,9 +229,18 @@ export default function App() {
       status: 'Draft',
       taxRate: 5,
       discountAmount: 0,
-      themeColor: cms.brand.primaryColor || '#7A1E2B',
+      themeColor: cms.brand.primaryColor || '#FF5238',
       templateStyle: 'Modern',
       notes: 'Thank you for your business.',
+      bankDetails: cms.brand.defaultBankDetails || {
+        bankName: 'HDFC Bank Ltd',
+        accountName: cms.brand.brandName || 'Invoiceify Studio',
+        accountNumber: '50200084729103',
+        routingCode: 'HDFC0001234',
+        iban: 'IN50HDFC00012345020008472',
+        upiId: 'invoiceify@hdfcbank',
+        paymentInstructions: 'Please specify invoice number in wire transfer reference.',
+      },
       items: [
         { id: `item-${Date.now()}`, description: 'Web design & Development', quantity: 1, rate: 25000 },
       ],

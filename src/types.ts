@@ -54,6 +54,16 @@ export interface TestimonialItem {
   rating: number;
 }
 
+export interface BankDetails {
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
+  routingCode?: string; // Routing / IFSC / Sort Code / SWIFT / BIC
+  iban?: string;
+  upiId?: string;
+  paymentInstructions?: string;
+}
+
 export interface BrandSettings {
   brandName: string;
   tagline: string;
@@ -65,6 +75,7 @@ export interface BrandSettings {
   googleSiteVerification?: string; // Google Search Console code or full meta content
   adminPin?: string; // Secret security PIN for CMS Admin panel (default: 1234)
   showAdminButtonInHeader?: boolean; // Whether the CMS Admin button is visible publicly in the header
+  defaultBankDetails?: BankDetails;
 }
 
 export interface CmsContent {
@@ -124,5 +135,6 @@ export interface InvoiceData {
   currency: string;
   themeColor?: string;
   templateStyle?: 'Classic' | 'Modern' | 'Minimal';
+  bankDetails?: BankDetails;
   createdAt?: string;
 }
