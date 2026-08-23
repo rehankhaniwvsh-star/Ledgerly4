@@ -47,8 +47,8 @@ export const Footer: React.FC<FooterProps> = ({
                 </a>
               </li>
               <li>
-                <a href="#pricing" className="hover:text-[var(--foreground)] transition-colors">
-                  Pricing
+                <a href="#how-it-works" className="hover:text-[var(--foreground)] transition-colors">
+                  How It Works
                 </a>
               </li>
               <li>

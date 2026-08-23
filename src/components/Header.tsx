@@ -54,12 +54,6 @@ export const Header: React.FC<HeaderProps> = ({
             How it works
           </a>
           <a
-            href="#pricing"
-            className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
-          >
-            Pricing
-          </a>
-          <a
             href="#faq"
             className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
@@ -168,13 +162,6 @@ export const Header: React.FC<HeaderProps> = ({
             className="block text-sm font-medium text-[var(--foreground)] py-1.5"
           >
             How it works
-          </a>
-          <a
-            href="#pricing"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[var(--foreground)] py-1.5"
-          >
-            Pricing
           </a>
           <a
             href="#faq"

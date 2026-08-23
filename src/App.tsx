@@ -9,7 +9,6 @@ import { AboutSection } from './components/AboutSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { FaqSection } from './components/FaqSection';
 import { TestimonialsSection } from './components/TestimonialsSection';
-import { PricingSection } from './components/PricingSection';
 import { CtaSection } from './components/CtaSection';
 import { Footer } from './components/Footer';
 import { InvoiceStudioView } from './components/InvoiceStudioView';
@@ -17,7 +16,7 @@ import { DashboardModal } from './components/DashboardModal';
 import { EmailModal } from './components/EmailModal';
 import { CmsAdminModal } from './components/CmsAdminModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
-import { WebsiteEntranceAnimation } from './components/WebsiteEntranceAnimation';
+import { SplashEntranceAnimation } from './components/SplashEntranceAnimation';
 import { downloadInvoicePdf } from './utils/pdfExport';
 
 const LOCAL_STORAGE_CMS_KEY = 'invoiceify_cms_data_v1';
@@ -292,10 +291,10 @@ export default function App() {
     <div
       className="min-h-screen text-[var(--foreground)] bg-[var(--background)] selection:bg-[var(--accent)] selection:text-[var(--primary)]"
     >
-      {/* Website Entrance Animated Mascot Widget */}
-      <WebsiteEntranceAnimation
+      {/* Full-Screen Website Entrance Splash Intro Animation */}
+      <SplashEntranceAnimation
         brandName={cms.brand.brandName || 'Invoiceify'}
-        onExploreClick={handleCreateNewInvoice}
+        tagline={cms.brand.tagline || 'Invoices, paid faster'}
       />
 
       {/* Universal Top Header Bar */}
@@ -347,10 +346,6 @@ export default function App() {
           <HowItWorksSection
             howItWorks={cms.howItWorks}
             primaryColor={cms.brand.primaryColor}
-          />
-
-          <PricingSection
-            onOpenGenerator={handleCreateNewInvoice}
           />
 
           <FaqSection
