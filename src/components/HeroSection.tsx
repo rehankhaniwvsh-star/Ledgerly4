@@ -4,6 +4,7 @@ import { ArrowRight, Check, Star, Sparkles, Zap, Shield, Search, Sliders } from 
 import BookmarkIcon from './icons/BookmarkIcon';
 import MagnifierIcon from './icons/MagnifierIcon';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
+import { MorphingMascot, MascotMode } from './MorphingMascot';
 
 interface HeroSectionProps {
   hero: HeroData;
@@ -26,11 +27,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [aiAudited, setAiAudited] = useState(false);
+  const [mascotMode, setMascotMode] = useState<MascotMode>('blob');
 
   const toggleStatus = () => {
-    if (invoiceStatus === 'Paid') setInvoiceStatus('Sent');
-    else if (invoiceStatus === 'Sent') setInvoiceStatus('Draft');
-    else setInvoiceStatus('Paid');
+    if (invoiceStatus === 'Paid') {
+      setInvoiceStatus('Sent');
+      setMascotMode('dots');
+    } else if (invoiceStatus === 'Sent') {
+      setInvoiceStatus('Draft');
+      setMascotMode('exclamation');
+    } else {
+      setInvoiceStatus('Paid');
+      setMascotMode('atom');
+    }
   };
 
   return (
@@ -42,30 +51,42 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-12 items-center">
           {/* Left Hero Copy */}
           <div className="space-y-6">
-            {/* Review pill banner matching screenshots */}
-            <div className="inline-flex items-center gap-3 bg-[var(--card)] border border-[var(--border)] rounded-full px-3.5 py-1.5 shadow-xs">
-              <div className="flex -space-x-1.5">
-                <img
-                  className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces"
-                  alt="User"
-                />
-                <img
-                  className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=faces"
-                  alt="User"
-                />
-                <img
-                  className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=faces"
-                  alt="User"
-                />
-              </div>
-              <div className="flex items-center gap-1 text-[11px] font-semibold text-[var(--foreground)]">
-                <div className="flex text-amber-500">
-                  <Star className="w-3 h-3 fill-amber-500" />
+            {/* Review pill banner & Animated Micro Mascot */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="inline-flex items-center gap-3 bg-[var(--card)] border border-[var(--border)] rounded-full px-3.5 py-1.5 shadow-xs">
+                <div className="flex -space-x-1.5">
+                  <img
+                    className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=faces"
+                    alt="User"
+                  />
+                  <img
+                    className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=faces"
+                    alt="User"
+                  />
+                  <img
+                    className="w-5 h-5 rounded-full ring-2 ring-[var(--card)] object-cover"
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&fit=crop&crop=faces"
+                    alt="User"
+                  />
                 </div>
-                <span>3,600+ 5-Star Reviews</span>
+                <div className="flex items-center gap-1 text-[11px] font-semibold text-[var(--foreground)]">
+                  <div className="flex text-amber-500">
+                    <Star className="w-3 h-3 fill-amber-500" />
+                  </div>
+                  <span>3,600+ 5-Star Reviews</span>
+                </div>
+              </div>
+
+              {/* Animated Companion Chip */}
+              <div
+                onClick={() => setMascotMode((prev) => prev === 'blob' ? 'atom' : prev === 'atom' ? 'dots' : prev === 'dots' ? 'rainbow' : 'blob')}
+                className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/25 rounded-full text-[11px] font-bold text-orange-600 dark:text-orange-400 cursor-pointer hover:scale-105 transition-transform"
+                title="Click mascot to morph!"
+              >
+                <MorphingMascot mode={mascotMode} size="custom" customSizeClass="w-5 h-5" interactive={false} />
+                <span>Animated Copilot Live</span>
               </div>
             </div>
 
@@ -131,7 +152,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-orange-500/20 via-pink-500/15 to-amber-500/20 blur-xl opacity-75 group-hover:opacity-100 transition-opacity" />
 
             <div className="relative bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-7 shadow-xl">
-              {/* Quick Search & AI Audit Header */}
+              {/* Quick Search & AI Audit Header with Morphing Mascot */}
               <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[var(--border)]">
                 <div className="relative flex-1">
                   <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]" />
@@ -144,18 +165,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   />
                 </div>
 
-                <button
-                  onClick={() => setAiAudited(!aiAudited)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
-                    aiAudited
-                      ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
-                      : 'bg-[var(--card)] text-orange-600 border-[var(--border)] hover:bg-orange-50'
-                  }`}
-                  title="Toggle AI Audit Check"
-                >
-                  <BrainCircuitIcon size={14} color={aiAudited ? '#ffffff' : '#FF5722'} strokeWidth={2} />
-                  <span>{aiAudited ? 'AI Verified' : 'AI Audit'}</span>
-                </button>
+                {/* Interactive Mascot Reacting to Audit */}
+                <div className="flex items-center gap-1.5">
+                  <MorphingMascot
+                    mode={mascotMode}
+                    size="custom"
+                    customSizeClass="w-8 h-8"
+                    interactive={true}
+                    onModeChange={(m) => setMascotMode(m)}
+                  />
+
+                  <button
+                    onClick={() => {
+                      setAiAudited(!aiAudited);
+                      setMascotMode(aiAudited ? 'blob' : 'atom');
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                      aiAudited
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
+                        : 'bg-[var(--card)] text-orange-600 border-[var(--border)] hover:bg-orange-50 dark:hover:bg-neutral-800'
+                    }`}
+                    title="Toggle AI Audit Check"
+                  >
+                    <BrainCircuitIcon size={14} color={aiAudited ? '#ffffff' : '#FF5722'} strokeWidth={2} />
+                    <span>{aiAudited ? 'AI Verified' : 'AI Audit'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Card Client Details */}

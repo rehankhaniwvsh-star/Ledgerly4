@@ -159,11 +159,11 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({
         {/* Bottom CTA Card */}
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 text-center max-w-3xl mx-auto space-y-3 shadow-md relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-rose-500" />
-          <h3 className="text-lg font-bold text-[var(--foreground)]">
+          <h3 className="text-lg sm:text-xl font-bold text-[var(--foreground)]">
             Ready to generate your first invoice?
           </h3>
-          <p className="text-xs sm:text-sm text-[var(--muted-foreground)]">
-            No credit card required. Experience live editing, custom PDF exports, and instant sharing.
+          <p className="text-xs sm:text-sm text-[var(--muted-foreground)] max-w-lg mx-auto">
+            No credit card required. Experience real-time editing, custom PDF exports, and instant sharing in seconds.
           </p>
           <div className="pt-2">
             <a

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrandSettings } from '../types';
 import { SlidersHorizontal, Sparkles, Menu, X, ArrowRight, Lock, Unlock, LogOut } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
+import { MorphingMascot } from './MorphingMascot';
 
 interface HeaderProps {
   brand: BrandSettings;
@@ -112,6 +113,11 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )
           )}
+
+          {/* Interactive Micro Mascot in Header */}
+          <div className="hidden lg:flex items-center" title="Invoiceify Animated Mascot">
+            <MorphingMascot mode="cycle" size="custom" customSizeClass="w-7 h-7" interactive={true} />
+          </div>
 
           {/* Signature Dark Pill Button with Circular Arrow */}
           <button

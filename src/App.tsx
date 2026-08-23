@@ -17,6 +17,7 @@ import { DashboardModal } from './components/DashboardModal';
 import { EmailModal } from './components/EmailModal';
 import { CmsAdminModal } from './components/CmsAdminModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
+import { WebsiteEntranceAnimation } from './components/WebsiteEntranceAnimation';
 import { downloadInvoicePdf } from './utils/pdfExport';
 
 const LOCAL_STORAGE_CMS_KEY = 'invoiceify_cms_data_v1';
@@ -291,6 +292,12 @@ export default function App() {
     <div
       className="min-h-screen text-[var(--foreground)] bg-[var(--background)] selection:bg-[var(--accent)] selection:text-[var(--primary)]"
     >
+      {/* Website Entrance Animated Mascot Widget */}
+      <WebsiteEntranceAnimation
+        brandName={cms.brand.brandName || 'Invoiceify'}
+        onExploreClick={handleCreateNewInvoice}
+      />
+
       {/* Universal Top Header Bar */}
       <Header
         brand={cms.brand}

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { downloadInvoicePdf } from '../utils/pdfExport';
 import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
+import { MorphingMascot } from './MorphingMascot';
 import { InvoiceSchema, validateStrict, ValidationErrorDetail } from '../schemas/strictSchemas';
 
 interface InvoiceStudioViewProps {
@@ -409,11 +410,16 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
           /* Form Editor Section: "Invoice Details Editor" */
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] p-6 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[var(--primary)]" />
-                <h2 className="font-bold text-sm text-[var(--foreground)]">
-                  Invoice Details Editor
-                </h2>
+              <div className="flex items-center gap-2.5">
+                <MorphingMascot mode="cycle" size="custom" customSizeClass="w-7 h-7" interactive={true} />
+                <div>
+                  <h2 className="font-bold text-sm text-[var(--foreground)] flex items-center gap-2">
+                    <span>Invoice Details Editor</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                      Live Sync
+                    </span>
+                  </h2>
+                </div>
               </div>
               <span className="font-mono text-xs text-[var(--muted-foreground)] font-semibold">
                 {invoice.invoiceNumber}
