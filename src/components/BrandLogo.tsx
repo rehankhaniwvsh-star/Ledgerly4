@@ -7,6 +7,7 @@ interface BrandLogoProps {
   showTagline?: boolean;
   className?: string;
   iconOnly?: boolean;
+  layout?: 'horizontal' | 'vertical';
 }
 
 export const ReceiptLogoIcon: React.FC<{
@@ -86,12 +87,13 @@ export const ReceiptLogoIcon: React.FC<{
 };
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({
-  brandName = 'Invoiceify',
+  brandName = 'Billnest',
   tagline = 'Invoices, paid faster',
   size = 'md',
   showTagline = true,
   className = '',
   iconOnly = false,
+  layout = 'horizontal',
 }) => {
   // Sizing configurations matching the exact uploaded logo composition
   const sizeMap = {
@@ -127,15 +129,19 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return <ReceiptLogoIcon sizeClass={currentSize.icon} className={className} />;
   }
 
+  const isVertical = layout === 'vertical';
+
   return (
     <div
-      className={`inline-flex items-center ${currentSize.gap} group cursor-pointer select-none transition-transform active:scale-[0.98] ${className}`}
+      className={`inline-flex ${
+        isVertical ? 'flex-col items-center text-center gap-2.5' : `items-center ${currentSize.gap}`
+      } group cursor-pointer select-none transition-transform active:scale-[0.98] ${className}`}
     >
       {/* Exact Gradient Squircle Receipt Icon */}
       <ReceiptLogoIcon sizeClass={currentSize.icon} />
 
       {/* Typography: Solid Dark Midnight Brand Name + Soft Peach Tagline Pill */}
-      <div className="flex flex-col items-start justify-center">
+      <div className={`flex flex-col ${isVertical ? 'items-center' : 'items-start'} justify-center`}>
         <span
           className={`${currentSize.title} text-[#0A1128] dark:text-[#F3F4F6] leading-none font-sans font-black transition-colors group-hover:text-[#FF5722]`}
         >

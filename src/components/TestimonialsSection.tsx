@@ -21,13 +21,15 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
             Loved by independent professionals
           </h2>
           <p className="text-[var(--muted-foreground)] text-sm sm:text-base">
-            Here is what freelancers and modern agencies say about Invoiceify.
+            Here is what freelancers and modern agencies say about Billnest.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {(testimonials || []).map((t) => {
-            const cleanQuote = (t.quote || '').replace(/Ledgerly/g, 'Invoiceify');
+            const cleanQuote = (t.quote || '')
+              .replace(/Invoiceify/g, 'Billnest')
+              .replace(/Ledgerly/g, 'Billnest');
             return (
               <div
                 key={t.id}

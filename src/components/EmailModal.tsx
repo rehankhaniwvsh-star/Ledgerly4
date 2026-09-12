@@ -20,7 +20,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({
 }) => {
   const [recipient, setRecipient] = useState(invoice?.clientEmail || '');
   const [subject, setSubject] = useState(
-    `Invoice ${invoice?.invoiceNumber || ''} from ${brand.brandName || 'Invoiceify'}`
+    `Invoice ${invoice?.invoiceNumber || ''} from ${brand.brandName || 'Billnest'}`
   );
   const [message, setMessage] = useState(
     `Hi ${invoice?.clientName || 'there'},\n\nPlease find attached your invoice ${
@@ -30,7 +30,7 @@ export const EmailModal: React.FC<EmailModalProps> = ({
       .toLocaleString()}.\n\nDue Date: ${invoice?.dueDate}\n\nYou can view and pay your invoice online at:\n${
       window.location.origin
     }/#invoice-${invoice?.invoiceNumber}\n\nThank you for your business!\nBest regards,\n${
-      brand.brandName || 'Invoiceify'
+      brand.brandName || 'Billnest'
     }`
   );
 

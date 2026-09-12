@@ -11,7 +11,7 @@ interface SplashEntranceAnimationProps {
 }
 
 export const SplashEntranceAnimation: React.FC<SplashEntranceAnimationProps> = ({
-  brandName = 'Invoiceify',
+  brandName = 'Billnest',
   tagline = 'Invoices, paid faster',
   onComplete,
 }) => {
@@ -109,20 +109,20 @@ export const SplashEntranceAnimation: React.FC<SplashEntranceAnimationProps> = (
               </AnimatePresence>
             </div>
 
-            {/* Typography Entrance */}
+            {/* Typography Entrance matching uploaded brand lockup */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="space-y-3 flex flex-col items-center"
+              className="space-y-1.5 flex flex-col items-center"
             >
-              <h1 className="text-3xl sm:text-4xl font-black tracking-[-0.035em] text-[#0A1128] dark:text-[#F9FAFB]">
+              <h1 className="text-3xl sm:text-5xl font-black tracking-[-0.035em] text-[#11192E] dark:text-[#F9FAFB]">
                 {brandName}
               </h1>
 
-              <div className="inline-flex items-center justify-center rounded-full bg-[#FFF0E6] dark:bg-[#2A1712] text-[#E65100] dark:text-[#FF8A65] font-bold px-4 py-1 text-xs sm:text-sm tracking-normal shadow-xs">
-                <span>{tagline}</span>
-              </div>
+              <p className="text-[#E65100] dark:text-[#FB923C] font-bold text-sm sm:text-lg tracking-tight">
+                {tagline}
+              </p>
 
               {/* Progress Indicator Dots */}
               <div className="flex items-center gap-1.5 pt-4">

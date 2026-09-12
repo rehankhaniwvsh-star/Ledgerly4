@@ -19,19 +19,24 @@ import { AdminAuthModal } from './components/AdminAuthModal';
 import { SplashEntranceAnimation } from './components/SplashEntranceAnimation';
 import { downloadInvoicePdf } from './utils/pdfExport';
 
-const LOCAL_STORAGE_CMS_KEY = 'invoiceify_cms_data_v1';
-const LOCAL_STORAGE_INVOICES_KEY = 'invoiceify_invoices_data_v1';
-const LOCAL_STORAGE_ADMIN_AUTH_KEY = 'invoiceify_admin_auth_v1';
+const LOCAL_STORAGE_CMS_KEY = 'billnest_cms_data_v1';
+const LOCAL_STORAGE_INVOICES_KEY = 'billnest_invoices_data_v1';
+const LOCAL_STORAGE_ADMIN_AUTH_KEY = 'billnest_admin_auth_v1';
 
 export default function App() {
   const [cms, setCms] = useState<CmsContent>(() => {
     try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_CMS_KEY) || localStorage.getItem('ledgerly_cms_data_v1');
+      const saved =
+        localStorage.getItem(LOCAL_STORAGE_CMS_KEY) ||
+        localStorage.getItem('invoiceify_cms_data_v1') ||
+        localStorage.getItem('ledgerly_cms_data_v1');
       if (saved) {
         // Universal clean up of legacy brand name in all stored strings
         const cleansedJson = saved
-          .replace(/Ledgerly/g, 'Invoiceify')
-          .replace(/ledgerly/g, 'invoiceify');
+          .replace(/Invoiceify/g, 'Billnest')
+          .replace(/invoiceify/g, 'billnest')
+          .replace(/Ledgerly/g, 'Billnest')
+          .replace(/ledgerly/g, 'billnest');
         const parsed = JSON.parse(cleansedJson);
         return parsed;
       }
@@ -43,11 +48,16 @@ export default function App() {
 
   const [invoices, setInvoices] = useState<InvoiceData[]>(() => {
     try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_INVOICES_KEY) || localStorage.getItem('ledgerly_invoices_data_v1');
+      const saved =
+        localStorage.getItem(LOCAL_STORAGE_INVOICES_KEY) ||
+        localStorage.getItem('invoiceify_invoices_data_v1') ||
+        localStorage.getItem('ledgerly_invoices_data_v1');
       if (saved) {
         const cleansedJson = saved
-          .replace(/Ledgerly/g, 'Invoiceify')
-          .replace(/ledgerly/g, 'invoiceify');
+          .replace(/Invoiceify/g, 'Billnest')
+          .replace(/invoiceify/g, 'billnest')
+          .replace(/Ledgerly/g, 'Billnest')
+          .replace(/ledgerly/g, 'billnest');
         const parsed: InvoiceData[] = JSON.parse(cleansedJson);
         return parsed;
       }
@@ -217,9 +227,9 @@ export default function App() {
   const handleCreateNewInvoice = () => {
     const newInv: InvoiceData = {
       id: `inv-${Date.now()}`,
-      businessName: cms.brand.brandName || 'Invoiceify Studio',
-      businessEmail: cms.brand.contactEmail || 'billing@invoiceify.app',
-      businessLogoLetter: cms.brand.logoLetter || 'I',
+      businessName: cms.brand.brandName || 'Billnest Studio',
+      businessEmail: cms.brand.contactEmail || 'billing@billnest.app',
+      businessLogoLetter: cms.brand.logoLetter || 'B',
       clientName: 'New Client',
       clientEmail: 'client@example.com',
       invoiceNumber: `INV-00${Math.floor(50 + Math.random() * 45)}`,
@@ -234,11 +244,11 @@ export default function App() {
       notes: 'Thank you for your business.',
       bankDetails: cms.brand.defaultBankDetails || {
         bankName: 'HDFC Bank Ltd',
-        accountName: cms.brand.brandName || 'Invoiceify Studio',
+        accountName: cms.brand.brandName || 'Billnest Studio',
         accountNumber: '50200084729103',
         routingCode: 'HDFC0001234',
         iban: 'IN50HDFC00012345020008472',
-        upiId: 'invoiceify@hdfcbank',
+        upiId: 'billnest@hdfcbank',
         paymentInstructions: 'Please specify invoice number in wire transfer reference.',
       },
       items: [
@@ -293,7 +303,7 @@ export default function App() {
     >
       {/* Full-Screen Website Entrance Splash Intro Animation */}
       <SplashEntranceAnimation
-        brandName={cms.brand.brandName || 'Invoiceify'}
+        brandName={cms.brand.brandName || 'Billnest'}
         tagline={cms.brand.tagline || 'Invoices, paid faster'}
       />
 
@@ -339,7 +349,7 @@ export default function App() {
 
           <AboutSection
             about={cms.about}
-            brandName={cms.brand?.brandName || 'Invoiceify'}
+            brandName={cms.brand?.brandName || 'Billnest'}
             primaryColor={cms.brand.primaryColor}
           />
 
@@ -403,7 +413,7 @@ export default function App() {
         onClose={() => setAdminAuthModalOpen(false)}
         onSuccess={handleAdminAuthSuccess}
         correctPin={cms.brand.adminPin || '1234'}
-        brandName={cms.brand.brandName || 'Invoiceify'}
+        brandName={cms.brand.brandName || 'Billnest'}
       />
 
       {/* Protected Live CMS Admin Modal */}

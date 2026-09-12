@@ -23,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Column 1: Brand Info */}
           <div className="space-y-4">
             <BrandLogo
-              brandName={brand.brandName || 'Invoiceify'}
+              brandName={brand.brandName || 'Billnest'}
               tagline={brand.tagline || 'Invoices, paid faster'}
               size="md"
               showTagline={true}
@@ -80,7 +80,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <a
-                  href={`mailto:${brand.contactEmail || 'hello@invoiceify.app'}`}
+                  href={`mailto:${brand.contactEmail || 'hello@billnest.app'}`}
                   className="hover:text-[var(--foreground)] transition-colors"
                 >
                   Contact Support
@@ -119,7 +119,7 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--muted-foreground)]">
-          <p>© {new Date().getFullYear()} {brand.brandName || 'Invoiceify'}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {brand.brandName || 'Billnest'}. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>

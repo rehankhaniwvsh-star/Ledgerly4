@@ -40,10 +40,10 @@ async function startServer() {
 
   // In-memory demo account store for auth verification
   const demoUsers: Record<string, { email: string; passwordHash: string; name: string; createdAt: string }> = {
-    "admin@invoiceify.app": {
-      email: "admin@invoiceify.app",
+    "admin@billnest.app": {
+      email: "admin@billnest.app",
       passwordHash: "admin1234",
-      name: "Invoiceify Admin",
+      name: "Billnest Admin",
       createdAt: new Date().toISOString(),
     },
     "user@example.com": {
@@ -82,7 +82,7 @@ async function startServer() {
   app.get("/api/health", publicLimiter, (req, res) => {
     res.json({
       status: "ok",
-      service: "Invoiceify Server",
+      service: "Billnest Server",
       timestamp: new Date().toISOString(),
     });
   });
@@ -138,7 +138,7 @@ async function startServer() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoiceify — XML Sitemap</title>
+  <title>Billnest — XML Sitemap</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; }
     .card { max-width: 680px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 1rem; padding: 2rem; }
@@ -152,7 +152,7 @@ async function startServer() {
 </head>
 <body>
   <div class="card">
-    <h1>📄 Invoiceify XML Sitemap</h1>
+    <h1>📄 Billnest XML Sitemap</h1>
     <p>This is the official search-engine crawlable sitemap for Google Search Console and web indexers.</p>
     <div class="url-box">
       <strong>Canonical URL:</strong> <a href="${baseUrl}/" class="xml-link">${baseUrl}/</a><br>
@@ -227,7 +227,7 @@ Sitemap: ${baseUrl}/sitemap.xml
         const { prompt, contentType, currentText } = req.body;
 
         const ai = getAi();
-        const systemInstruction = `You are an expert brand strategist and UX copywriter for Invoiceify, a premium invoicing platform for freelancers, creators, and agencies.
+        const systemInstruction = `You are an expert brand strategist and UX copywriter for Billnest, a premium invoicing platform for freelancers, creators, and agencies.
 Your goal is to write high-converting, professional, crisp, and persuasive website copy.
 Return clean plain text without surrounding quotes or conversational meta-text.
 Content type requested: ${contentType || "General Copy"}.
@@ -404,7 +404,7 @@ Current copy reference (if any): "${currentText || ""}".`;
       success: true,
       user: {
         role: "owner",
-        organization: "Invoiceify Studio",
+        organization: "Billnest Studio",
         status: "active",
       },
     });

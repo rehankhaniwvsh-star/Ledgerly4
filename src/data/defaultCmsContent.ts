@@ -2,13 +2,13 @@ import { CmsContent } from '../types';
 
 export const defaultCmsContent: CmsContent = {
   brand: {
-    brandName: 'Invoiceify',
+    brandName: 'Billnest',
     tagline: 'Invoices, paid faster',
     primaryColor: '#FF5238',
     accentColor: '#FFF0EB',
     backgroundColor: '#FBFBFA',
-    contactEmail: 'hello@invoiceify.app',
-    logoLetter: 'I',
+    contactEmail: 'hello@billnest.app',
+    logoLetter: 'B',
     googleSiteVerification: 'googleacb1159f81828443',
     adminPin: '1234',
     showAdminButtonInHeader: false,
@@ -34,9 +34,9 @@ export const defaultCmsContent: CmsContent = {
     },
   },
   about: {
-    eyebrow: 'About Invoiceify',
+    eyebrow: 'About Billnest',
     title: 'Built for people who invoice on their own.',
-    paragraph1: 'Invoiceify started from a simple frustration: most free invoicing tools look like spreadsheets wearing a logo. Freelancers, creators, and small agencies deserve invoices that look like they came from a real, established business — without paying for a "professional" plan to get there.',
+    paragraph1: 'Billnest started from a simple frustration: most free invoicing tools look like spreadsheets wearing a logo. Freelancers, creators, and small agencies deserve invoices that look like they came from a real, established business — without paying for a "professional" plan to get there.',
     paragraph2: 'So every account gets the full toolkit — branded PDFs, share links, payment tracking, recurring billing — free, from day one. No upsells, no watermarks, no "upgrade to remove branding".',
     stats: [
       { id: '1', number: '100%', label: 'Free, always' },
@@ -129,11 +129,11 @@ export const defaultCmsContent: CmsContent = {
   },
   faqs: {
     title: 'Frequently Asked Questions',
-    subtitle: 'Everything you need to know before you get started with Invoiceify.',
+    subtitle: 'Everything you need to know before you get started with Billnest.',
     items: [
       {
         id: 'faq-1',
-        question: 'Is Invoiceify really free?',
+        question: 'Is Billnest really free?',
         answer: 'Yes. Every account gets unlimited invoices, all templates, and every feature — there are no paid tiers or locked features.',
         category: 'Pricing',
       },
@@ -175,7 +175,7 @@ export const defaultCmsContent: CmsContent = {
       author: 'Aarav Sharma',
       role: 'Founder',
       company: 'Nova Studio',
-      quote: 'Our clients constantly compliment how sleek our invoices look. Invoiceify made us look like a 50-person agency overnight.',
+      quote: 'Our clients constantly compliment how sleek our invoices look. Billnest made us look like a 50-person agency overnight.',
       rating: 5,
     },
     {

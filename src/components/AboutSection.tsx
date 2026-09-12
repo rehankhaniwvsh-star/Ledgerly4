@@ -10,12 +10,14 @@ interface AboutSectionProps {
 
 export const AboutSection: React.FC<AboutSectionProps> = ({
   about,
-  brandName = 'Invoiceify',
+  brandName = 'Billnest',
 }) => {
   // Sanitize any legacy names from previous localStorage states
   const sanitizeText = (text?: string) => {
     if (!text) return '';
-    return text.replace(/Ledgerly/g, brandName);
+    return text
+      .replace(/Invoiceify/g, brandName)
+      .replace(/Ledgerly/g, brandName);
   };
 
   const eyebrowText = about.eyebrow

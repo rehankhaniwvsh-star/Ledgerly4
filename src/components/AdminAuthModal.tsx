@@ -16,7 +16,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   onClose,
   onSuccess,
   correctPin,
-  brandName = 'Invoiceify',
+  brandName = 'Billnest',
 }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
@@ -57,7 +57,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
     const validation = validateStrict(VerifyPinSchema, {
       pin: pin.trim(),
       customTargetPin: correctPin.trim(),
-      account: 'admin@invoiceify.app',
+      account: 'admin@billnest.app',
     });
 
     if (!validation.success) {
