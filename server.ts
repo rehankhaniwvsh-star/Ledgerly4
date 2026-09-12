@@ -122,15 +122,19 @@ async function startServer() {
 
   // Dynamic Sitemap XML generator and alias routes (100% compliant with Google Search Console)
   app.get(["/sitemap.xml", "/sitemap", "/sitemaps.xml", "/sitemap.html", "/site-map"], (req, res) => {
-    const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "localhost:3000";
+    const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "billsnest.vercel.app";
     let host = rawHost.split(",")[0].trim();
     if (host.endsWith(":443")) host = host.slice(0, -4);
     else if (host.endsWith(":80")) host = host.slice(0, -3);
 
     const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
-    // Force https for production / cloud domains to guarantee Google Search Console validity
-    const proto = isLocalhost ? "http" : "https";
-    const baseUrl = `${proto}://${host}`;
+    // Ensure Google Search Console receives https://billsnest.vercel.app as the canonical domain
+    let baseUrl = "https://billsnest.vercel.app";
+    if (isLocalhost) {
+      baseUrl = `http://${host}`;
+    } else if (host && !host.includes("run.app")) {
+      baseUrl = `https://${host}`;
+    }
     const today = new Date().toISOString().split("T")[0];
 
     // Canonical list of indexed pages for Billnest
@@ -303,15 +307,18 @@ ${urlsXml}
 
   // Serve Robots.txt for Googlebot and search crawlers
   app.get("/robots.txt", (req, res) => {
-    const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "localhost:3000";
+    const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "billsnest.vercel.app";
     let host = rawHost.split(",")[0].trim();
     if (host.endsWith(":443")) host = host.slice(0, -4);
     else if (host.endsWith(":80")) host = host.slice(0, -3);
 
     const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
-    // Force https for production / cloud domains to guarantee Google Search Console validity
-    const proto = isLocalhost ? "http" : "https";
-    const baseUrl = `${proto}://${host}`;
+    let baseUrl = "https://billsnest.vercel.app";
+    if (isLocalhost) {
+      baseUrl = `http://${host}`;
+    } else if (host && !host.includes("run.app")) {
+      baseUrl = `https://${host}`;
+    }
 
     const robotsTxt = `# Robots.txt for Googlebot and search crawlers
 User-agent: *
