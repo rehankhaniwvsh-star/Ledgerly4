@@ -16,6 +16,7 @@ import { DashboardModal } from './components/DashboardModal';
 import { EmailModal } from './components/EmailModal';
 import { CmsAdminModal } from './components/CmsAdminModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
+import { TermsPrivacyModal } from './components/TermsPrivacyModal';
 import { SplashEntranceAnimation } from './components/SplashEntranceAnimation';
 import { downloadInvoicePdf } from './utils/pdfExport';
 
@@ -76,6 +77,8 @@ export default function App() {
   const [cmsAdminOpen, setCmsAdminOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [adminAuthModalOpen, setAdminAuthModalOpen] = useState(false);
+  const [termsPrivacyModalOpen, setTermsPrivacyModalOpen] = useState(false);
+  const [termsPrivacyTab, setTermsPrivacyTab] = useState<'privacy' | 'terms'>('privacy');
 
   // Admin authentication state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
@@ -138,6 +141,54 @@ export default function App() {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [isAdminAuthenticated]);
+
+  // Sitemap and Deep-Link URL Router
+  useEffect(() => {
+    const handleRouteFromUrl = () => {
+      const path = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+
+      if (path === '/create' || path === '/studio') {
+        setCurrentView('studio');
+      } else if (path === '/dashboard') {
+        setDashboardOpen(true);
+      } else if (path === '/privacy') {
+        setTermsPrivacyTab('privacy');
+        setTermsPrivacyModalOpen(true);
+      } else if (path === '/terms') {
+        setTermsPrivacyTab('terms');
+        setTermsPrivacyModalOpen(true);
+      } else if (path === '/features' || path === '/templates') {
+        setCurrentView('landing');
+        setTimeout(() => {
+          document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else if (path === '/how-it-works') {
+        setCurrentView('landing');
+        setTimeout(() => {
+          document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else if (path === '/about') {
+        setCurrentView('landing');
+        setTimeout(() => {
+          document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else if (path === '/faq') {
+        setCurrentView('landing');
+        setTimeout(() => {
+          document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else if (path === '/pricing') {
+        setCurrentView('landing');
+        setTimeout(() => {
+          document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    };
+
+    handleRouteFromUrl();
+    window.addEventListener('popstate', handleRouteFromUrl);
+    return () => window.removeEventListener('popstate', handleRouteFromUrl);
+  }, []);
 
   // Synchronize browser tab title and Google Search Console meta tag with CMS brand settings
   useEffect(() => {
@@ -378,10 +429,28 @@ export default function App() {
             brand={cms.brand}
             onOpenCms={handleRequestOpenCms}
             onOpenGenerator={handleCreateNewInvoice}
+            onOpenDashboard={() => setDashboardOpen(true)}
+            onOpenPrivacy={() => {
+              setTermsPrivacyTab('privacy');
+              setTermsPrivacyModalOpen(true);
+            }}
+            onOpenTerms={() => {
+              setTermsPrivacyTab('terms');
+              setTermsPrivacyModalOpen(true);
+            }}
             isAdminAuthenticated={isAdminAuthenticated}
           />
         </>
       )}
+
+      {/* Terms of Service & Privacy Policy Modal */}
+      <TermsPrivacyModal
+        isOpen={termsPrivacyModalOpen}
+        onClose={() => setTermsPrivacyModalOpen(false)}
+        initialTab={termsPrivacyTab}
+        brandName={cms.brand?.brandName || 'Billnest'}
+        contactEmail={cms.brand?.contactEmail || 'hello@billnest.app'}
+      />
 
       {/* Live Invoices Dashboard Modal */}
       <DashboardModal

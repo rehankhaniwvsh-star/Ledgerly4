@@ -122,47 +122,145 @@ async function startServer() {
 
   // Dynamic Sitemap XML generator and alias routes (100% compliant with Google Search Console)
   app.get(["/sitemap.xml", "/sitemap", "/sitemaps.xml", "/sitemap.html", "/site-map"], (req, res) => {
-    const rawProto = (req.headers["x-forwarded-proto"] as string) || req.protocol || "https";
-    const proto = rawProto.split(",")[0].trim() || "https";
     const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "localhost:3000";
     const host = rawHost.split(",")[0].trim();
+    const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
+    // Force https for production / cloud domains to guarantee Google Search Console validity
+    const proto = isLocalhost ? "http" : "https";
     const baseUrl = `${proto}://${host}`;
     const today = new Date().toISOString().split("T")[0];
+
+    // Canonical list of indexed pages for Billnest
+    const SITEMAP_PAGES = [
+      {
+        path: "/",
+        priority: "1.0",
+        changefreq: "daily",
+        title: "Home — Online Invoicing & Fast Payments",
+      },
+      {
+        path: "/create",
+        priority: "0.9",
+        changefreq: "daily",
+        title: "Create Invoice — Online Invoice Studio & PDF Builder",
+      },
+      {
+        path: "/templates",
+        priority: "0.9",
+        changefreq: "weekly",
+        title: "Invoice Templates — Modern, Minimal & Classic Designs",
+      },
+      {
+        path: "/dashboard",
+        priority: "0.8",
+        changefreq: "daily",
+        title: "Invoices Dashboard — Real-time Payment & Client Tracking",
+      },
+      {
+        path: "/features",
+        priority: "0.8",
+        changefreq: "weekly",
+        title: "Features — Instant PDF Export, Payment Links & Bank Details",
+      },
+      {
+        path: "/how-it-works",
+        priority: "0.8",
+        changefreq: "monthly",
+        title: "How It Works — Step-by-Step Guide to Invoicing",
+      },
+      {
+        path: "/pricing",
+        priority: "0.8",
+        changefreq: "monthly",
+        title: "Free Invoicing — 100% Free Forever, No Hidden Subscriptions",
+      },
+      {
+        path: "/about",
+        priority: "0.7",
+        changefreq: "monthly",
+        title: "About Billnest — Built for Freelancers, Creators & Agencies",
+      },
+      {
+        path: "/faq",
+        priority: "0.7",
+        changefreq: "monthly",
+        title: "FAQ & Support — Invoicing Questions Answered",
+      },
+      {
+        path: "/privacy",
+        priority: "0.5",
+        changefreq: "monthly",
+        title: "Privacy Policy — Local Client Storage & Data Protection",
+      },
+      {
+        path: "/terms",
+        priority: "0.5",
+        changefreq: "monthly",
+        title: "Terms of Service — Transparent Commercial Usage Agreement",
+      },
+    ];
 
     // Check if user requested via browser expecting human-readable HTML representation on /sitemap
     if (req.path === "/sitemap" || req.path === "/sitemap.html" || req.path === "/site-map") {
       if (req.headers.accept && req.headers.accept.includes("text/html")) {
         res.setHeader("Content-Type", "text/html; charset=utf-8");
+        const tableRows = SITEMAP_PAGES.map(
+          (p) => `<tr>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #334155;">
+              <a href="${baseUrl}${p.path === "/" ? "/" : p.path}" style="color: #38bdf8; text-decoration: underline; font-family: monospace; font-size: 0.85rem;">${baseUrl}${p.path === "/" ? "/" : p.path}</a>
+              <div style="color: #94a3b8; font-size: 0.75rem; margin-top: 2px;">${p.title}</div>
+            </td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #334155; color: #cbd5e1; font-size: 0.85rem;">${today}</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #334155; color: #cbd5e1; font-size: 0.85rem;">${p.changefreq}</td>
+            <td style="padding: 10px 14px; border-bottom: 1px solid #334155; color: #f97316; font-weight: bold; font-size: 0.85rem;">${p.priority}</td>
+          </tr>`
+        ).join("");
+
         return res.status(200).send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Billnest — XML Sitemap</title>
+  <title>Billnest — XML Sitemap Index (${SITEMAP_PAGES.length} Pages)</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; }
-    .card { max-width: 680px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 1rem; padding: 2rem; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #090d16; color: #f8fafc; padding: 2rem 1rem; }
+    .card { max-width: 860px; margin: 0 auto; background: #111827; border: 1px solid #1f2937; border-radius: 1rem; padding: 2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
     h1 { font-size: 1.5rem; margin-top: 0; color: #f97316; }
     p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; }
-    .url-box { background: #0f172a; border: 1px solid #334155; padding: 1rem; border-radius: 0.5rem; font-family: monospace; font-size: 0.9rem; margin: 1rem 0; word-break: break-all; }
+    .stats { display: flex; gap: 1.5rem; margin: 1.25rem 0; padding: 1rem; background: #0d1322; border-radius: 0.5rem; border: 1px solid #1f2937; }
+    .stat-item { font-size: 0.85rem; color: #94a3b8; }
+    .stat-item strong { color: #fff; font-size: 1.1rem; display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: #0f172a; border-radius: 0.5rem; overflow: hidden; }
+    th { text-align: left; padding: 12px 14px; background: #1e293b; color: #f8fafc; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
     a.btn { display: inline-block; background: #f97316; color: #fff; padding: 0.6rem 1.2rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
     a.btn:hover { background: #ea580c; }
-    .xml-link { color: #38bdf8; text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>📄 Billnest XML Sitemap</h1>
-    <p>This is the official search-engine crawlable sitemap for Google Search Console and web indexers.</p>
-    <div class="url-box">
-      <strong>Canonical URL:</strong> <a href="${baseUrl}/" class="xml-link">${baseUrl}/</a><br>
-      <strong>Sitemap XML:</strong> <a href="${baseUrl}/sitemap.xml" class="xml-link">${baseUrl}/sitemap.xml</a><br>
-      <strong>Last Modified:</strong> ${today}<br>
-      <strong>Priority:</strong> 1.0 (Daily)
+    <h1>📄 Billnest XML Sitemap Index</h1>
+    <p>Official Google Search Console and web crawler sitemap indexing all key pages and tools.</p>
+    <div class="stats">
+      <div class="stat-item">Total Indexed URLs<strong>${SITEMAP_PAGES.length} Pages</strong></div>
+      <div class="stat-item">Standard<strong>sitemaps.org 0.9</strong></div>
+      <div class="stat-item">Crawler Status<strong>100% Crawlable</strong></div>
     </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Page URL &amp; Description</th>
+          <th>Last Modified</th>
+          <th>Frequency</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
     <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center;">
       <a href="/sitemap.xml" class="btn">View Raw XML Feed</a>
-      <a href="/" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem;">← Back to Home</a>
+      <a href="/" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem;">← Return to Home</a>
     </div>
   </div>
 </body>
@@ -172,15 +270,19 @@ async function startServer() {
 
     // Standard Google Search Console XML Sitemap specification with XSL styling for browser display
     // NOTE: URLs strictly match the requested domain and contain zero hash fragments.
+    const urlsXml = SITEMAP_PAGES.map(
+      (page) => `  <url>
+    <loc>${baseUrl}${page.path === "/" ? "/" : page.path}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`
+    ).join("\n");
+
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${baseUrl}/</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
+${urlsXml}
 </urlset>`;
 
     res.setHeader("Content-Type", "application/xml; charset=utf-8");

@@ -11,7 +11,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   testimonials,
 }) => {
   return (
-    <section className="py-24 border-t border-[var(--border)] bg-[var(--background)]">
+    <section id="testimonials" className="py-24 border-t border-[var(--border)] bg-[var(--background)]">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center max-w-xl mx-auto mb-16 space-y-3">
           <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 text-xs font-bold uppercase tracking-wider">

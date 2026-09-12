@@ -7,6 +7,9 @@ interface FooterProps {
   brand: BrandSettings;
   onOpenCms: () => void;
   onOpenGenerator: () => void;
+  onOpenDashboard?: () => void;
+  onOpenPrivacy?: () => void;
+  onOpenTerms?: () => void;
   isAdminAuthenticated?: boolean;
 }
 
@@ -14,6 +17,9 @@ export const Footer: React.FC<FooterProps> = ({
   brand,
   onOpenCms,
   onOpenGenerator,
+  onOpenDashboard,
+  onOpenPrivacy,
+  onOpenTerms,
   isAdminAuthenticated = false,
 }) => {
   return (
@@ -52,6 +58,21 @@ export const Footer: React.FC<FooterProps> = ({
                 </a>
               </li>
               <li>
+                <a href="#features" className="hover:text-[var(--foreground)] transition-colors">
+                  Invoice Templates
+                </a>
+              </li>
+              {onOpenDashboard && (
+                <li>
+                  <button
+                    onClick={onOpenDashboard}
+                    className="hover:text-[var(--foreground)] transition-colors text-left cursor-pointer"
+                  >
+                    Invoices Dashboard
+                  </button>
+                </li>
+              )}
+              <li>
                 <button
                   onClick={onOpenGenerator}
                   className="hover:text-orange-500 font-semibold transition-colors text-left cursor-pointer"
@@ -62,20 +83,50 @@ export const Footer: React.FC<FooterProps> = ({
             </ul>
           </div>
 
-          {/* Column 3: Company */}
+          {/* Column 3: Company & Legal */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--foreground)] mb-4">
-              Company
+              Company &amp; Legal
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm text-[var(--muted-foreground)]">
               <li>
-                <a href="#how-it-works" className="hover:text-[var(--foreground)] transition-colors">
-                  How It Works
+                <a href="#about" className="hover:text-[var(--foreground)] transition-colors">
+                  About Billnest
                 </a>
               </li>
               <li>
                 <a href="#faq" className="hover:text-[var(--foreground)] transition-colors">
-                  FAQ
+                  FAQ &amp; Support
+                </a>
+              </li>
+              {onOpenPrivacy && (
+                <li>
+                  <button
+                    onClick={onOpenPrivacy}
+                    className="hover:text-[var(--foreground)] transition-colors text-left cursor-pointer"
+                  >
+                    Privacy Policy
+                  </button>
+                </li>
+              )}
+              {onOpenTerms && (
+                <li>
+                  <button
+                    onClick={onOpenTerms}
+                    className="hover:text-[var(--foreground)] transition-colors text-left cursor-pointer"
+                  >
+                    Terms of Service
+                  </button>
+                </li>
+              )}
+              <li>
+                <a
+                  href="/sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-orange-500 transition-colors inline-flex items-center gap-1 font-mono text-[11px]"
+                >
+                  XML Sitemap
                 </a>
               </li>
               <li>
