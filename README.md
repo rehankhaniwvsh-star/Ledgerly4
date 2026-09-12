@@ -1,6 +1,6 @@
-# Invoiceify — Branded Invoice Generator & Management Studio
+# Billnest — Branded Invoice Generator & Management Studio
 
-**Invoiceify** is a high-performance, elegant, full-stack invoice generation and client management platform tailored for freelancers, agencies, and small businesses.
+**Billnest** is a high-performance, elegant, full-stack invoice generation and client management platform tailored for freelancers, agencies, and small businesses.
 
 ---
 
@@ -48,4 +48,4 @@
 
 ---
 
-© Invoiceify • Professional Branded Invoicing
+© Billnest • Professional Branded Invoicing

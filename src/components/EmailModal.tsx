@@ -89,11 +89,12 @@ export const EmailModal: React.FC<EmailModalProps> = ({
     try {
       const res = await fetch('/api/invoices/send-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(validation.data),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await res.json() : {};
 
       if (!res.ok || !data.success) {
         if (data.details && Array.isArray(data.details)) {

@@ -175,11 +175,12 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
       // Also persist to server endpoint protected with strict validation middleware
       const res = await fetch('/api/invoices/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ invoice: validation.data }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await res.json() : {};
       if (!res.ok || !data.success) {
         if (data.details && Array.isArray(data.details)) {
           setValidationErrors(data.details);

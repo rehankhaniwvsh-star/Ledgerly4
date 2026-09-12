@@ -1,6 +1,7 @@
-# Robots.txt for Invoiceify
+# Robots.txt for Billnest
 User-agent: *
 Allow: /
 
 # Google Search Console XML Sitemap Location
-Sitemap: https://invoiceify1.vercel.app/sitemap.xml
+Sitemap: https://ais-pre-szekk26t6bwtkzi4ui7hdg-557182007664.asia-southeast1.run.app/sitemap.xml
+

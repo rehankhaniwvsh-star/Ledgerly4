@@ -70,11 +70,12 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
       // Call server auth route protected with stricter rate limiting & exponential backoff
       const response = await fetch('/api/auth/verify-pin', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(validation.data),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json() : {};
 
       if (response.ok && data.success) {
         setAttemptCount(0);

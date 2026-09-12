@@ -123,7 +123,10 @@ async function startServer() {
   // Dynamic Sitemap XML generator and alias routes (100% compliant with Google Search Console)
   app.get(["/sitemap.xml", "/sitemap", "/sitemaps.xml", "/sitemap.html", "/site-map"], (req, res) => {
     const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "localhost:3000";
-    const host = rawHost.split(",")[0].trim();
+    let host = rawHost.split(",")[0].trim();
+    if (host.endsWith(":443")) host = host.slice(0, -4);
+    else if (host.endsWith(":80")) host = host.slice(0, -3);
+
     const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
     // Force https for production / cloud domains to guarantee Google Search Console validity
     const proto = isLocalhost ? "http" : "https";
@@ -300,10 +303,14 @@ ${urlsXml}
 
   // Serve Robots.txt for Googlebot and search crawlers
   app.get("/robots.txt", (req, res) => {
-    const rawProto = (req.headers["x-forwarded-proto"] as string) || req.protocol || "https";
-    const proto = rawProto.split(",")[0].trim() || "https";
     const rawHost = (req.headers["x-forwarded-host"] as string) || req.get("host") || "localhost:3000";
-    const host = rawHost.split(",")[0].trim();
+    let host = rawHost.split(",")[0].trim();
+    if (host.endsWith(":443")) host = host.slice(0, -4);
+    else if (host.endsWith(":80")) host = host.slice(0, -3);
+
+    const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
+    // Force https for production / cloud domains to guarantee Google Search Console validity
+    const proto = isLocalhost ? "http" : "https";
     const baseUrl = `${proto}://${host}`;
 
     const robotsTxt = `# Robots.txt for Googlebot and search crawlers
@@ -603,6 +610,15 @@ Current copy reference (if any): "${currentText || ""}".`;
   // logs full stack traces server-side, and returns clean generic errors to clients.
   // -------------------------------------------------------------
   app.use(globalErrorMiddleware);
+
+  // Guarantee that all unhandled /api/* calls return JSON 404 and NEVER fall through to HTML index.html
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({
+      success: false,
+      error: `API route ${req.method} ${req.path} not found`,
+      code: "API_ROUTE_NOT_FOUND",
+    });
+  });
 
   // -------------------------------------------------------------
   // 6. STATIC ASSET SERVING & SPA FALLBACK
