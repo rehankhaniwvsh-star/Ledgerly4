@@ -139,6 +139,19 @@ export interface InvoiceData {
   createdAt?: string;
 }
 
+export interface CustomerOnboardingAnswers {
+  businessName: string;
+  industry: string;
+  businessSize: string;
+  defaultCurrency: string;
+  invoiceVolume: string;
+  paymentTerms: string;
+  acceptedPayments: string[];
+  primaryGoal: string;
+  notesOrTaxInfo?: string;
+  completedAt?: string;
+}
+
 export interface UserProfile {
   id?: string;
   name: string;
@@ -146,5 +159,8 @@ export interface UserProfile {
   businessName?: string;
   role?: string;
   avatarUrl?: string;
+  provider?: 'google' | 'github' | 'email';
+  onboardingCompleted?: boolean;
+  onboardingAnswers?: CustomerOnboardingAnswers;
   createdAt?: string;
 }
