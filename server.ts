@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { rateLimiterService } from "./server/rateLimiter";
@@ -38,20 +39,58 @@ async function startServer() {
     next(err);
   });
 
-  // In-memory demo account store for auth verification
-  const demoUsers: Record<string, { email: string; passwordHash: string; name: string; createdAt: string }> = {
-    "admin@billnest.app": {
-      email: "admin@billnest.app",
-      passwordHash: "admin1234",
-      name: "Billnest Admin",
-      createdAt: new Date().toISOString(),
-    },
-    "user@example.com": {
-      email: "user@example.com",
-      passwordHash: "password123",
-      name: "Freelance Designer",
-      createdAt: new Date().toISOString(),
-    },
+  // Persistent user account store
+  interface StoredUser {
+    email: string;
+    passwordHash: string;
+    name: string;
+    businessName?: string;
+    role?: string;
+    createdAt: string;
+  }
+
+  const USERS_FILE = path.join(process.cwd(), "data", "users.json");
+  const loadUsers = (): Record<string, StoredUser> => {
+    try {
+      if (fs.existsSync(USERS_FILE)) {
+        const raw = fs.readFileSync(USERS_FILE, "utf-8");
+        return JSON.parse(raw);
+      }
+    } catch (err) {
+      console.warn("Could not load users file, using initial memory store", err);
+    }
+    return {
+      "admin@billnest.app": {
+        email: "admin@billnest.app",
+        passwordHash: "admin1234",
+        name: "Billnest Admin",
+        businessName: "Billnest HQ",
+        role: "agency",
+        createdAt: new Date().toISOString(),
+      },
+      "user@example.com": {
+        email: "user@example.com",
+        passwordHash: "password123",
+        name: "Freelance Designer",
+        businessName: "Nova Studio",
+        role: "freelancer",
+        createdAt: new Date().toISOString(),
+      },
+    };
+  };
+
+  const usersDB = loadUsers();
+
+  const saveUsers = () => {
+    try {
+      const dir = path.dirname(USERS_FILE);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(USERS_FILE, JSON.stringify(usersDB, null, 2), "utf-8");
+    } catch (err) {
+      console.warn("Could not persist users to file", err);
+    }
   };
 
   // Default Master Admin PIN (matches client default, configurable in CMS)
@@ -420,7 +459,7 @@ Current copy reference (if any): "${currentText || ""}".`;
     (req, res) => {
       const { email, password } = req.body;
       const normalizedEmail = email.toLowerCase().trim();
-      const user = demoUsers[normalizedEmail];
+      const user = usersDB[normalizedEmail];
 
       if (user && user.passwordHash === password) {
         rateLimiterService.recordAuthSuccess(req);
@@ -430,6 +469,8 @@ Current copy reference (if any): "${currentText || ""}".`;
           user: {
             email: user.email,
             name: user.name,
+            businessName: user.businessName || "Creative Studio",
+            role: user.role || "freelancer",
           },
           token: `user-token-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         });
@@ -441,7 +482,7 @@ Current copy reference (if any): "${currentText || ""}".`;
           error:
             failure.backoffDelayMs > 0
               ? `Invalid credentials for '${normalizedEmail}'. Backoff active: please wait ${retryWaitSec}s.`
-              : "Invalid email or password.",
+              : "Invalid email or password. Please verify your credentials or create a new account.",
           consecutiveFailures: failure.consecutiveFailures,
           backoffDelayMs: failure.backoffDelayMs,
           retryAfterSeconds: retryWaitSec,
@@ -457,33 +498,40 @@ Current copy reference (if any): "${currentText || ""}".`;
     authLimiter,
     validateBody(SignupSchema),
     (req, res) => {
-      const { email, password, name } = req.body;
+      const { email, password, name, businessName, role } = req.body;
       const normalizedEmail = email.toLowerCase().trim();
 
-      if (demoUsers[normalizedEmail]) {
+      if (usersDB[normalizedEmail]) {
         const failure = rateLimiterService.recordAuthFailure(req);
         return res.status(409).json({
           success: false,
-          error: "An account with this email address already exists.",
+          error: "An account with this email address already exists. Please sign in instead.",
           consecutiveFailures: failure.consecutiveFailures,
           backoffDelayMs: failure.backoffDelayMs,
         });
       }
 
-      demoUsers[normalizedEmail] = {
+      const newUser: StoredUser = {
         email: normalizedEmail,
         passwordHash: password,
-        name: name || "New User",
+        name: name?.trim() || "Member",
+        businessName: businessName?.trim() || "Creative Studio",
+        role: role || "freelancer",
         createdAt: new Date().toISOString(),
       };
+
+      usersDB[normalizedEmail] = newUser;
+      saveUsers();
 
       rateLimiterService.recordAuthSuccess(req);
       res.status(201).json({
         success: true,
         message: "Account created successfully",
         user: {
-          email: normalizedEmail,
-          name: name || "New User",
+          email: newUser.email,
+          name: newUser.name,
+          businessName: newUser.businessName,
+          role: newUser.role,
         },
         token: `user-token-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       });
@@ -636,6 +684,17 @@ Current copy reference (if any): "${currentText || ""}".`;
       appType: "spa",
     });
     app.use(vite.middlewares);
+    app.use("*", async (req, res, next) => {
+      try {
+        const url = req.originalUrl;
+        const indexPath = path.join(process.cwd(), "index.html");
+        let template = fs.readFileSync(indexPath, "utf-8");
+        template = await vite.transformIndexHtml(url, template);
+        res.status(200).set({ "Content-Type": "text/html" }).end(template);
+      } catch (e) {
+        next(e);
+      }
+    });
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));

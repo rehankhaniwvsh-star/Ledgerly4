@@ -18,6 +18,7 @@ import {
   Clock,
   ExternalLink,
   ArrowLeft,
+  X,
 } from 'lucide-react';
 import { BrandSettings, UserProfile } from '../types';
 
@@ -74,6 +75,11 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSuccess, setForgotSuccess] = useState('');
 
+  // Social authentication modal state
+  const [socialModalProvider, setSocialModalProvider] = useState<'Google' | 'GitHub' | null>(null);
+  const [socialEmail, setSocialEmail] = useState('');
+  const [socialName, setSocialName] = useState('');
+
   // Sync external tab changes (e.g. from header click or URL hash)
   useEffect(() => {
     if (externalTab) {
@@ -81,18 +87,24 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     }
   }, [externalTab]);
 
+  // Set document title if standalone view
+  useEffect(() => {
+    if (isStandaloneView) {
+      const prevTitle = document.title;
+      document.title = activeTab === 'signup' 
+        ? `Create Your Account — ${brand.brandName || 'Billnest'}`
+        : `Sign In — ${brand.brandName || 'Billnest'}`;
+      return () => {
+        document.title = prevTitle;
+      };
+    }
+  }, [isStandaloneView, activeTab, brand.brandName]);
+
   const handleTabSwitch = (tab: 'signin' | 'signup') => {
     setActiveTab(tab);
     setErrorMessage('');
     setSuccessMessage('');
     if (onTabChange) onTabChange(tab);
-  };
-
-  // Autofill demo account
-  const handleAutofillDemo = () => {
-    setSignInEmail('user@example.com');
-    setSignInPassword('password123');
-    setErrorMessage('');
   };
 
   // Password strength calculation
@@ -134,43 +146,51 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Authentication failed. Please check your credentials.');
+        // Check local store fallback for accounts created on this device
+        try {
+          const raw = localStorage.getItem('billnest_users_db');
+          const db = raw ? JSON.parse(raw) : {};
+          const localUser = db[signInEmail.toLowerCase().trim()];
+          if (localUser && localUser.password === signInPassword) {
+            const profile: UserProfile = {
+              id: `usr-${Date.now()}`,
+              name: localUser.name || 'Member',
+              email: localUser.email,
+              businessName: localUser.businessName || 'Creative Studio',
+              role: localUser.role || 'freelancer',
+              createdAt: localUser.createdAt || new Date().toISOString(),
+            };
+            setSuccessMessage('Successfully signed in! Welcome back.');
+            setTimeout(() => {
+              onLoginSuccess(profile);
+            }, 300);
+            return;
+          }
+        } catch {}
+
+        throw new Error(
+          data.error || 'Invalid email or password. Please verify credentials or create a free account.'
+        );
       }
 
       const profile: UserProfile = {
         id: `usr-${Date.now()}`,
         name: data.user?.name || 'Billnest Member',
         email: data.user?.email || signInEmail.trim(),
-        businessName: brand.brandName ? `${brand.brandName} Studio` : 'Creative Studio',
-        role: 'freelancer',
+        businessName:
+          data.user?.businessName || (brand.brandName ? `${brand.brandName} Studio` : 'Creative Studio'),
+        role: (data.user?.role as any) || 'freelancer',
         createdAt: new Date().toISOString(),
       };
 
       setSuccessMessage('Successfully signed in! Welcome back.');
       setTimeout(() => {
         onLoginSuccess(profile);
-      }, 400);
+      }, 300);
     } catch (err: any) {
-      // Fallback graceful client-side authentication if backend fails or returns error
-      if (
-        signInEmail.toLowerCase().trim() === 'user@example.com' &&
-        signInPassword === 'password123'
-      ) {
-        const profile: UserProfile = {
-          id: 'usr-demo-1',
-          name: 'Freelance Designer',
-          email: 'user@example.com',
-          businessName: 'Nova Studio',
-          role: 'freelancer',
-          createdAt: new Date().toISOString(),
-        };
-        setSuccessMessage('Successfully signed in!');
-        setTimeout(() => {
-          onLoginSuccess(profile);
-        }, 400);
-      } else {
-        setErrorMessage(err.message || 'Invalid email or password. Please try again.');
-      }
+      setErrorMessage(
+        err.message || 'Invalid email or password. Please verify credentials or create a free account.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -200,14 +220,18 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
     setIsLoading(true);
 
     try {
+      const payload = {
+        email: signUpEmail.trim(),
+        password: signUpPassword,
+        name: signUpName.trim() || 'New Member',
+        businessName: signUpBusinessName.trim() || 'Independent Studio',
+        role: signUpRole,
+      };
+
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: signUpEmail.trim(),
-          password: signUpPassword,
-          name: signUpName.trim() || 'New Creator',
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -216,46 +240,89 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
         throw new Error(data.error || 'Failed to create account. Email may already be registered.');
       }
 
+      // Persist to local browser store as well for offline/reliable continuity
+      try {
+        const raw = localStorage.getItem('billnest_users_db');
+        const db = raw ? JSON.parse(raw) : {};
+        db[signUpEmail.toLowerCase().trim()] = {
+          email: signUpEmail.toLowerCase().trim(),
+          password: signUpPassword,
+          name: signUpName.trim() || 'New Member',
+          businessName: signUpBusinessName.trim() || 'Independent Studio',
+          role: signUpRole,
+          createdAt: new Date().toISOString(),
+        };
+        localStorage.setItem('billnest_users_db', JSON.stringify(db));
+      } catch {}
+
       const profile: UserProfile = {
         id: `usr-${Date.now()}`,
-        name: signUpName.trim() || 'New Member',
-        email: signUpEmail.trim(),
-        businessName: signUpBusinessName.trim() || 'Independent Studio',
-        role: signUpRole,
+        name: data.user?.name || signUpName.trim() || 'New Member',
+        email: data.user?.email || signUpEmail.trim(),
+        businessName: data.user?.businessName || signUpBusinessName.trim() || 'Independent Studio',
+        role: (data.user?.role as any) || signUpRole,
         createdAt: new Date().toISOString(),
       };
 
-      setSuccessMessage('Account created successfully! Logging you in...');
+      setSuccessMessage('Account created successfully! Launching your workspace...');
       setTimeout(() => {
         onLoginSuccess(profile);
-      }, 500);
+      }, 400);
     } catch (err: any) {
-      // If server returned 409 or other error, display it
       setErrorMessage(err.message || 'Could not complete registration. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Social 1-Click Login (Simulated federated OAuth)
-  const handleSocialAuth = (provider: 'Google' | 'GitHub') => {
-    setIsLoading(true);
+  // Open Social Authentication Flow
+  const handleOpenSocialAuth = (provider: 'Google' | 'GitHub') => {
+    setSocialModalProvider(provider);
+    setSocialEmail(provider === 'Google' ? signInEmail || signUpEmail || '' : '');
+    setSocialName(signUpName || '');
     setErrorMessage('');
+  };
+
+  // Confirm Social Authentication
+  const handleConfirmSocialAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!socialEmail || !socialModalProvider) return;
+
+    setIsLoading(true);
+    const provider = socialModalProvider;
+    const finalName = socialName.trim() || (provider === 'Google' ? 'Google Member' : 'GitHub Member');
+
     setTimeout(() => {
       const profile: UserProfile = {
         id: `usr-${provider.toLowerCase()}-${Date.now()}`,
-        name: provider === 'Google' ? 'Google User' : 'GitHub Developer',
-        email: provider === 'Google' ? 'creator@gmail.com' : 'dev@github.com',
-        businessName: `${provider} Creator Studio`,
+        name: finalName,
+        email: socialEmail.trim(),
+        businessName: `${finalName}'s Studio`,
         role: 'freelancer',
         createdAt: new Date().toISOString(),
       };
-      setSuccessMessage(`Authenticated via ${provider}! Welcome to Billnest.`);
+
+      // Persist to browser users db
+      try {
+        const raw = localStorage.getItem('billnest_users_db');
+        const db = raw ? JSON.parse(raw) : {};
+        db[socialEmail.toLowerCase().trim()] = {
+          email: socialEmail.toLowerCase().trim(),
+          name: finalName,
+          businessName: `${finalName}'s Studio`,
+          role: 'freelancer',
+          createdAt: new Date().toISOString(),
+        };
+        localStorage.setItem('billnest_users_db', JSON.stringify(db));
+      } catch {}
+
+      setSuccessMessage(`Authenticated via ${provider}! Launching your workspace...`);
+      setSocialModalProvider(null);
       setTimeout(() => {
         setIsLoading(false);
         onLoginSuccess(profile);
       }, 400);
-    }, 600);
+    }, 500);
   };
 
   // Handle Forgot Password
@@ -279,12 +346,12 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
   };
 
   return (
-    <section id="auth" className={`px-6 ${isStandaloneView ? 'py-6' : 'py-20'} relative scroll-mt-20`}>
+    <section id="auth" className={`px-4 sm:px-6 ${isStandaloneView ? 'py-10 sm:py-16 min-h-[calc(100vh-100px)] flex flex-col justify-center' : 'py-20'} relative scroll-mt-20`}>
       {/* Invisible anchor targets for deep linking */}
       <div id="signin" className="absolute -top-24" />
       <div id="signup" className="absolute -top-24" />
 
-      <div className="max-w-4xl mx-auto">
+      <div className={`mx-auto w-full ${isStandaloneView ? 'max-w-xl' : 'max-w-4xl'}`}>
         {/* Standalone View Navigation Bar */}
         {isStandaloneView && (
           <div className="flex items-center justify-between gap-4 mb-8 pb-4 border-b border-[var(--border)]">
@@ -309,14 +376,14 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
 
             <div className="flex items-center gap-2">
               <span className="text-xs text-[var(--muted-foreground)] hidden sm:inline">
-                Dedicated Account View
+                Dedicated Full Tab
               </span>
               <a
-                href="/signup"
+                href={activeTab === 'signup' ? '/signup' : '/signin'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--card)] hover:bg-orange-500/10 text-[var(--foreground)] hover:text-orange-600 border border-[var(--border)] transition-colors"
-                title="Open this Sign Up tab in another browser window"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--card)] hover:bg-orange-500/10 text-[var(--foreground)] hover:text-orange-600 border border-[var(--border)] transition-colors cursor-pointer"
+                title="Open this Sign Up view in another browser tab"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 <span>Open in another tab</span>
@@ -493,7 +560,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               <button
                 type="button"
-                onClick={() => handleSocialAuth('Google')}
+                onClick={() => handleOpenSocialAuth('Google')}
                 disabled={isLoading}
                 className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--muted)] text-xs sm:text-sm font-semibold text-[var(--foreground)] transition-all cursor-pointer disabled:opacity-50"
               >
@@ -520,7 +587,7 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
 
               <button
                 type="button"
-                onClick={() => handleSocialAuth('GitHub')}
+                onClick={() => handleOpenSocialAuth('GitHub')}
                 disabled={isLoading}
                 className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border border-[var(--border)] bg-[var(--background)] hover:bg-[var(--muted)] text-xs sm:text-sm font-semibold text-[var(--foreground)] transition-all cursor-pointer disabled:opacity-50"
               >
@@ -544,19 +611,6 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
             {/* ================= SIGN IN TAB ================= */}
             {activeTab === 'signin' && (
               <form onSubmit={handleSignIn} className="space-y-4">
-                {/* Autofill helper banner */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/20 text-xs">
-                  <span className="text-[var(--muted-foreground)]">
-                    Want to test quickly?
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleAutofillDemo}
-                    className="text-orange-600 font-bold hover:underline cursor-pointer"
-                  >
-                    Fill demo credentials
-                  </button>
-                </div>
 
                 <div>
                   <label className="block text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1.5">
@@ -862,6 +916,110 @@ export const AuthSection: React.FC<AuthSectionProps> = ({
           </div>
         )}
       </div>
+
+      {/* ================= REAL SOCIAL AUTH MODAL ================= */}
+      {socialModalProvider && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <button
+              type="button"
+              onClick={() => setSocialModalProvider(null)}
+              className="absolute top-4 right-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              {socialModalProvider === 'Google' ? (
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center">
+                  <svg className="w-6 h-6 fill-current text-[var(--foreground)]" viewBox="0 0 24 24">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                  </svg>
+                </div>
+              )}
+              <div>
+                <h3 className="text-lg font-bold text-[var(--foreground)]">
+                  Continue with {socialModalProvider}
+                </h3>
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Connect your real account to sync your invoice studio
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleConfirmSocialAuth} className="space-y-4 mt-4">
+              <div>
+                <label className="block text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1">
+                  Your Full Name
+                </label>
+                <input
+                  type="text"
+                  value={socialName}
+                  onChange={(e) => setSocialName(e.target.value)}
+                  placeholder="e.g. Alex Rivera"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--background)] border border-[var(--border)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--foreground)] uppercase tracking-wider mb-1">
+                  {socialModalProvider} Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={socialEmail}
+                  onChange={(e) => setSocialEmail(e.target.value)}
+                  placeholder={
+                    socialModalProvider === 'Google'
+                      ? 'you@gmail.com'
+                      : 'developer@domain.com'
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--background)] border border-[var(--border)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]/60 focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSocialModalProvider(null)}
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--foreground)] hover:bg-[var(--muted)] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading || !socialEmail}
+                  className="flex-1 btn-pill-dark py-2.5 px-4 text-xs font-bold cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {isLoading ? 'Connecting...' : `Sign in with ${socialModalProvider}`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

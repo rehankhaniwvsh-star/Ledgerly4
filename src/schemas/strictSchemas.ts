@@ -69,6 +69,16 @@ export const SignupSchema = z
       .min(1, "Name cannot be empty")
       .max(100, "Name cannot exceed 100 characters")
       .optional(),
+    businessName: z
+      .string()
+      .trim()
+      .max(120, "Business name cannot exceed 120 characters")
+      .optional(),
+    role: z
+      .string()
+      .trim()
+      .max(50)
+      .optional(),
   })
   .strict();
 

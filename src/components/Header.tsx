@@ -103,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Sign In & Sign Up Navigation Tabs */}
           {!currentUser ? (
-            <div className="flex items-center gap-4 border-l border-[var(--border)] pl-4">
+            <div className="flex items-center gap-3 border-l border-[var(--border)] pl-4">
               <button
                 onClick={() => handleAuthClick('signin')}
                 className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors cursor-pointer"
@@ -112,12 +112,9 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 onClick={() => handleAuthClick('signup')}
-                className="text-sm font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1.5 cursor-pointer"
+                className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors cursor-pointer"
               >
-                <span>Sign Up</span>
-                <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-orange-500/10 text-orange-600 rounded-full">
-                  Tab
-                </span>
+                Sign Up
               </button>
             </div>
           ) : (
@@ -193,22 +190,22 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => handleAuthClick('signup')}
-                className="px-3.5 py-2 text-xs font-semibold rounded-full border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold rounded-full bg-orange-600 hover:bg-orange-700 text-white shadow-xs transition-all cursor-pointer"
               >
-                Sign Up
+                Sign Up Free
               </button>
               <a
                 href="/signup"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Open Sign Up section in another tab"
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-full border border-orange-500/30 bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 transition-all cursor-pointer"
+                title="Open full sign up page in new tab"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-orange-600 hover:border-orange-500/30 transition-all cursor-pointer"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline text-[11px]">In another tab</span>
+                <span className="hidden xl:inline text-[11px]">New Tab</span>
               </a>
             </div>
           )}

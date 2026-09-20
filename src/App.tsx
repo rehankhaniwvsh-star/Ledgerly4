@@ -96,9 +96,27 @@ export default function App() {
     setCurrentUser(user);
     try {
       localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
+      // If user provided a custom studio/business name, seamlessly brand their invoices
+      if (
+        user.businessName &&
+        user.businessName !== 'Independent Studio' &&
+        user.businessName !== 'Creative Studio' &&
+        user.businessName !== 'Freelancer'
+      ) {
+        setCms((prev) => ({
+          ...prev,
+          brand: {
+            ...prev.brand,
+            brandName: user.businessName,
+          },
+        }));
+      }
     } catch (err) {
       console.error('Failed to save user session:', err);
     }
+    // Transition straight to the Invoice Studio workspace with their new profile active
+    setCurrentView('studio');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleLogout = () => {
@@ -108,12 +126,16 @@ export default function App() {
     } catch (err) {
       console.error('Failed to clear user session:', err);
     }
+    setCurrentView('landing');
   };
 
   const handleOpenAuth = (tab: 'signin' | 'signup' = 'signin', asDedicatedView: boolean = true) => {
     setAuthSectionTab(tab);
     if (asDedicatedView) {
       setCurrentView('auth');
+      try {
+        window.history.pushState(null, '', tab === 'signup' ? '/signup' : '/signin');
+      } catch {}
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       if (currentView !== 'landing') {
@@ -472,7 +494,6 @@ export default function App() {
             currentUser={currentUser}
             onLoginSuccess={(user) => {
               handleLoginSuccess(user);
-              setCurrentView('landing');
             }}
             onLogout={handleLogout}
             onOpenDashboard={() => setDashboardOpen(true)}
