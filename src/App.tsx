@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { defaultCmsContent } from './data/defaultCmsContent';
 import { initialInvoices } from './data/initialInvoices';
-import { CmsContent, InvoiceData } from './types';
+import { CmsContent, InvoiceData, UserProfile } from './types';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { FeaturesSection } from './components/FeaturesSection';
@@ -9,6 +9,7 @@ import { AboutSection } from './components/AboutSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { FaqSection } from './components/FaqSection';
 import { TestimonialsSection } from './components/TestimonialsSection';
+import { AuthSection } from './components/AuthSection';
 import { CtaSection } from './components/CtaSection';
 import { Footer } from './components/Footer';
 import { InvoiceStudioView } from './components/InvoiceStudioView';
@@ -23,6 +24,7 @@ import { downloadInvoicePdf } from './utils/pdfExport';
 const LOCAL_STORAGE_CMS_KEY = 'billnest_cms_data_v1';
 const LOCAL_STORAGE_INVOICES_KEY = 'billnest_invoices_data_v1';
 const LOCAL_STORAGE_ADMIN_AUTH_KEY = 'billnest_admin_auth_v1';
+const LOCAL_STORAGE_USER_KEY = 'billnest_user_session_v1';
 
 export default function App() {
   const [cms, setCms] = useState<CmsContent>(() => {
@@ -68,7 +70,7 @@ export default function App() {
     return initialInvoices;
   });
 
-  const [currentView, setCurrentView] = useState<'landing' | 'studio'>('landing');
+  const [currentView, setCurrentView] = useState<'landing' | 'studio' | 'auth'>('landing');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     initialInvoices[0]?.id || 'inv-101'
   );
@@ -79,6 +81,52 @@ export default function App() {
   const [adminAuthModalOpen, setAdminAuthModalOpen] = useState(false);
   const [termsPrivacyModalOpen, setTermsPrivacyModalOpen] = useState(false);
   const [termsPrivacyTab, setTermsPrivacyTab] = useState<'privacy' | 'terms'>('privacy');
+
+  // User Authentication State
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return null;
+  });
+  const [authSectionTab, setAuthSectionTab] = useState<'signin' | 'signup'>('signin');
+
+  const handleLoginSuccess = (user: UserProfile) => {
+    setCurrentUser(user);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
+    } catch (err) {
+      console.error('Failed to save user session:', err);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+    } catch (err) {
+      console.error('Failed to clear user session:', err);
+    }
+  };
+
+  const handleOpenAuth = (tab: 'signin' | 'signup' = 'signin', asDedicatedView: boolean = true) => {
+    setAuthSectionTab(tab);
+    if (asDedicatedView) {
+      setCurrentView('auth');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      if (currentView !== 'landing') {
+        setCurrentView('landing');
+      }
+      setTimeout(() => {
+        const el = document.getElementById('auth');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
 
   // Admin authentication state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
@@ -151,6 +199,14 @@ export default function App() {
         setCurrentView('studio');
       } else if (path === '/dashboard') {
         setDashboardOpen(true);
+      } else if (path === '/signin' || path === '/login') {
+        setCurrentView('auth');
+        setAuthSectionTab('signin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (path === '/signup' || path === '/register' || path === '/auth') {
+        setCurrentView('auth');
+        setAuthSectionTab('signup');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (path === '/privacy') {
         setTermsPrivacyTab('privacy');
         setTermsPrivacyModalOpen(true);
@@ -181,6 +237,23 @@ export default function App() {
         setCurrentView('landing');
         setTimeout(() => {
           document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+
+      // Check hash
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#signin' || hash === '#signin-tab') {
+        setCurrentView('auth');
+        setAuthSectionTab('signin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (hash === '#signup' || hash === '#signup-tab') {
+        setCurrentView('auth');
+        setAuthSectionTab('signup');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (hash === '#auth') {
+        setCurrentView('landing');
+        setTimeout(() => {
+          document.getElementById('auth')?.scrollIntoView({ behavior: 'smooth' });
         }, 150);
       }
     };
@@ -276,11 +349,15 @@ export default function App() {
   };
 
   const handleCreateNewInvoice = () => {
+    const businessName = currentUser?.businessName || currentUser?.name || cms.brand.brandName || 'Billnest Studio';
+    const businessEmail = currentUser?.email || cms.brand.contactEmail || 'billing@billnest.app';
+    const businessLogoLetter = (currentUser?.businessName || currentUser?.name || cms.brand.logoLetter || 'B').charAt(0).toUpperCase();
+
     const newInv: InvoiceData = {
       id: `inv-${Date.now()}`,
-      businessName: cms.brand.brandName || 'Billnest Studio',
-      businessEmail: cms.brand.contactEmail || 'billing@billnest.app',
-      businessLogoLetter: cms.brand.logoLetter || 'B',
+      businessName,
+      businessEmail,
+      businessLogoLetter,
       clientName: 'New Client',
       clientEmail: 'client@example.com',
       invoiceNumber: `INV-00${Math.floor(50 + Math.random() * 45)}`,
@@ -367,6 +444,11 @@ export default function App() {
         isAdminOpen={cmsAdminOpen}
         isAdminAuthenticated={isAdminAuthenticated}
         onLockAdmin={handleLockAdmin}
+        currentUser={currentUser}
+        onOpenAuth={handleOpenAuth}
+        onLogout={handleLogout}
+        currentView={currentView}
+        onNavigateHome={() => setCurrentView('landing')}
       />
 
       {currentView === 'studio' ? (
@@ -382,6 +464,48 @@ export default function App() {
           onCreateNew={handleCreateNewInvoice}
           onOpenEmail={handleOpenEmailModal}
         />
+      ) : currentView === 'auth' ? (
+        /* Dedicated Standalone Sign Up / Sign In Page View Section */
+        <div className="min-h-[85vh] flex flex-col justify-between">
+          <AuthSection
+            brand={cms.brand}
+            currentUser={currentUser}
+            onLoginSuccess={(user) => {
+              handleLoginSuccess(user);
+              setCurrentView('landing');
+            }}
+            onLogout={handleLogout}
+            onOpenDashboard={() => setDashboardOpen(true)}
+            onOpenGenerator={handleCreateNewInvoice}
+            onOpenPrivacy={() => {
+              setTermsPrivacyTab('privacy');
+              setTermsPrivacyModalOpen(true);
+            }}
+            onOpenTerms={() => {
+              setTermsPrivacyTab('terms');
+              setTermsPrivacyModalOpen(true);
+            }}
+            activeTab={authSectionTab}
+            onTabChange={(tab) => setAuthSectionTab(tab)}
+            isStandaloneView={true}
+            onBackToLanding={() => setCurrentView('landing')}
+          />
+          <Footer
+            brand={cms.brand}
+            onOpenCms={handleRequestOpenCms}
+            onOpenGenerator={handleCreateNewInvoice}
+            onOpenDashboard={() => setDashboardOpen(true)}
+            onOpenPrivacy={() => {
+              setTermsPrivacyTab('privacy');
+              setTermsPrivacyModalOpen(true);
+            }}
+            onOpenTerms={() => {
+              setTermsPrivacyTab('terms');
+              setTermsPrivacyModalOpen(true);
+            }}
+            isAdminAuthenticated={isAdminAuthenticated}
+          />
+        </div>
       ) : (
         /* Landing Page View */
         <>
@@ -417,6 +541,26 @@ export default function App() {
           <TestimonialsSection
             testimonials={cms.testimonials}
             primaryColor={cms.brand.primaryColor}
+          />
+
+          {/* Dedicated Sign In & Sign Up Section */}
+          <AuthSection
+            brand={cms.brand}
+            currentUser={currentUser}
+            onLoginSuccess={handleLoginSuccess}
+            onLogout={handleLogout}
+            onOpenDashboard={() => setDashboardOpen(true)}
+            onOpenGenerator={handleCreateNewInvoice}
+            onOpenPrivacy={() => {
+              setTermsPrivacyTab('privacy');
+              setTermsPrivacyModalOpen(true);
+            }}
+            onOpenTerms={() => {
+              setTermsPrivacyTab('terms');
+              setTermsPrivacyModalOpen(true);
+            }}
+            activeTab={authSectionTab}
+            onTabChange={(tab) => setAuthSectionTab(tab)}
           />
 
           <CtaSection

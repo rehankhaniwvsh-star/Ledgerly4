@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrandSettings } from '../types';
-import { SlidersHorizontal, Sparkles, Lock, Unlock } from 'lucide-react';
+import { SlidersHorizontal, Sparkles, Lock, Unlock, ExternalLink } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
 interface FooterProps {
@@ -61,6 +61,27 @@ export const Footer: React.FC<FooterProps> = ({
                 <a href="#features" className="hover:text-[var(--foreground)] transition-colors">
                   Invoice Templates
                 </a>
+              </li>
+              <li>
+                <a href="#signin" className="hover:text-[var(--foreground)] transition-colors">
+                  Sign In
+                </a>
+              </li>
+              <li>
+                <div className="flex items-center gap-1.5">
+                  <a href="#signup" className="hover:text-[var(--foreground)] transition-colors">
+                    Create Account
+                  </a>
+                  <a
+                    href="/signup"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open Sign Up section in another tab"
+                    className="text-[var(--muted-foreground)] hover:text-orange-600 transition-colors inline-flex items-center"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </li>
               {onOpenDashboard && (
                 <li>

@@ -138,3 +138,13 @@ export interface InvoiceData {
   bankDetails?: BankDetails;
   createdAt?: string;
 }
+
+export interface UserProfile {
+  id?: string;
+  name: string;
+  email: string;
+  businessName?: string;
+  role?: string;
+  avatarUrl?: string;
+  createdAt?: string;
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { BrandSettings } from '../types';
-import { SlidersHorizontal, Sparkles, Menu, X, ArrowRight, Lock, Unlock, LogOut } from 'lucide-react';
+import { BrandSettings, UserProfile } from '../types';
+import { SlidersHorizontal, Sparkles, Menu, X, ArrowRight, Lock, Unlock, LogOut, User, CheckCircle2, ExternalLink } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { MorphingMascot } from './MorphingMascot';
 
@@ -12,6 +12,11 @@ interface HeaderProps {
   isAdminOpen: boolean;
   isAdminAuthenticated: boolean;
   onLockAdmin: () => void;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: (tab?: 'signin' | 'signup') => void;
+  onLogout?: () => void;
+  currentView?: 'landing' | 'studio' | 'auth';
+  onNavigateHome?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,15 +27,39 @@ export const Header: React.FC<HeaderProps> = ({
   isAdminOpen,
   isAdminAuthenticated,
   onLockAdmin,
+  currentUser,
+  onOpenAuth,
+  onLogout,
+  currentView,
+  onNavigateHome,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const showAdminPublicly = brand.showAdminButtonInHeader ?? false;
+
+  const handleAuthClick = (tab: 'signin' | 'signup') => {
+    if (onOpenAuth) {
+      onOpenAuth(tab);
+    } else {
+      const el = document.getElementById('auth');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (onNavigateHome) {
+      e.preventDefault();
+      onNavigateHome();
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-[var(--background)]/85 backdrop-blur-xl border-b border-[var(--border)] transition-all">
       <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
         {/* Brand Logo with Enchanted Receipt Icon & Tagline */}
-        <a href="#" className="cursor-pointer">
+        <a href="#" onClick={handleLogoClick} className="cursor-pointer">
           <BrandLogo
             brandName={brand.brandName || 'Billnest'}
             tagline={brand.tagline || 'Invoices, paid faster'}
@@ -40,21 +69,24 @@ export const Header: React.FC<HeaderProps> = ({
         </a>
 
         {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden md:flex items-center gap-6">
           <a
-            href="#features"
+            href={currentView === 'landing' ? '#features' : '/#features'}
+            onClick={() => onNavigateHome && onNavigateHome()}
             className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             Features
           </a>
           <a
-            href="#how-it-works"
+            href={currentView === 'landing' ? '#how-it-works' : '/#how-it-works'}
+            onClick={() => onNavigateHome && onNavigateHome()}
             className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             How it works
           </a>
           <a
-            href="#faq"
+            href={currentView === 'landing' ? '#faq' : '/#faq'}
+            onClick={() => onNavigateHome && onNavigateHome()}
             className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             FAQ
@@ -68,10 +100,119 @@ export const Header: React.FC<HeaderProps> = ({
               Live
             </span>
           </button>
+
+          {/* Sign In & Sign Up Navigation Tabs */}
+          {!currentUser ? (
+            <div className="flex items-center gap-4 border-l border-[var(--border)] pl-4">
+              <button
+                onClick={() => handleAuthClick('signin')}
+                className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors cursor-pointer"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => handleAuthClick('signup')}
+                className="text-sm font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Sign Up</span>
+                <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-orange-500/10 text-orange-600 rounded-full">
+                  Tab
+                </span>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => handleAuthClick('signin')}
+              className="text-sm font-medium text-emerald-600 flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer border-l border-[var(--border)] pl-4"
+              title="View Account"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Account</span>
+            </button>
+          )}
         </nav>
 
         {/* Action Buttons */}
         <div className="hidden sm:flex items-center gap-3">
+          {/* Active User Account Badge or Sign Up / In Another Tab */}
+          {currentUser ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="flex items-center gap-2 py-1 pl-1.5 pr-3 rounded-full bg-[var(--card)] border border-[var(--border)] hover:border-orange-500/30 transition-all cursor-pointer shadow-xs"
+              >
+                <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-black">
+                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <span className="text-xs font-semibold text-[var(--foreground)] max-w-[100px] truncate">
+                  {currentUser.name}
+                </span>
+              </button>
+
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-xl p-2 z-50 animate-in fade-in zoom-in-95">
+                  <div className="px-3 py-2 border-b border-[var(--border)] mb-1">
+                    <p className="text-xs font-bold text-[var(--foreground)] truncate">
+                      {currentUser.name}
+                    </p>
+                    <p className="text-[11px] text-[var(--muted-foreground)] truncate">
+                      {currentUser.email}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      onOpenDashboard();
+                    }}
+                    className="w-full text-left px-3 py-1.5 text-xs text-[var(--foreground)] hover:bg-[var(--muted)] rounded-lg transition-colors cursor-pointer"
+                  >
+                    Invoices Dashboard
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      handleAuthClick('signin');
+                    }}
+                    className="w-full text-left px-3 py-1.5 text-xs text-[var(--foreground)] hover:bg-[var(--muted)] rounded-lg transition-colors cursor-pointer"
+                  >
+                    Account Settings
+                  </button>
+                  {onLogout && (
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        onLogout();
+                      }}
+                      className="w-full text-left px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer mt-1 border-t border-[var(--border)] pt-2"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => handleAuthClick('signup')}
+                className="px-3.5 py-2 text-xs font-semibold rounded-full border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)] transition-all cursor-pointer"
+              >
+                Sign Up
+              </button>
+              <a
+                href="/signup"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open Sign Up section in another tab"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-full border border-orange-500/30 bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 transition-all cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span className="hidden xl:inline text-[11px]">In another tab</span>
+              </a>
+            </div>
+          )}
+
           {/* Admin Authenticated Badge & CMS Button */}
           {isAdminAuthenticated ? (
             <div className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/30 rounded-full p-1 pl-3 shadow-xs">
@@ -166,10 +307,70 @@ export const Header: React.FC<HeaderProps> = ({
           <a
             href="#faq"
             onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[var(--foreground)] py-1.5"
+            className="block text-sm font-medium text-[var(--muted-foreground)] py-1.5"
           >
             FAQ
           </a>
+
+          {/* Mobile Auth Controls */}
+          {currentUser ? (
+            <div className="py-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">
+                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[var(--foreground)] leading-none">{currentUser.name}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)] mt-0.5">{currentUser.email}</p>
+                </div>
+              </div>
+              {onLogout && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onLogout();
+                  }}
+                  className="text-xs font-semibold text-rose-600 hover:text-rose-700"
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2 pt-1">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleAuthClick('signin');
+                  }}
+                  className="py-2 text-center text-xs font-semibold rounded-xl border border-[var(--border)] text-[var(--foreground)]"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleAuthClick('signup');
+                  }}
+                  className="py-2 text-center text-xs font-semibold rounded-xl bg-orange-500 text-white font-bold"
+                >
+                  Sign Up
+                </button>
+              </div>
+              <a
+                href="/signup"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2 text-center text-xs font-semibold rounded-xl border border-orange-500/30 bg-orange-500/10 text-orange-600 flex items-center justify-center gap-1.5"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open Sign Up in another tab</span>
+              </a>
+            </div>
+          )}
+
           <div className="pt-2 border-t border-[var(--border)] flex flex-col gap-2">
             <button
               onClick={() => {
