@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { BrandSettings, UserProfile } from '../types';
-import { SlidersHorizontal, Sparkles, Menu, X, ArrowRight, Lock, Unlock, LogOut, User, CheckCircle2, ExternalLink } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { BrandSettings } from '../types';
+import { SlidersHorizontal, Sparkles, Menu, X, ArrowRight, Lock, Unlock, LogOut, User, ChevronDown, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { MorphingMascot } from './MorphingMascot';
+import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   brand: BrandSettings;
@@ -12,11 +13,7 @@ interface HeaderProps {
   isAdminOpen: boolean;
   isAdminAuthenticated: boolean;
   onLockAdmin: () => void;
-  currentUser?: UserProfile | null;
-  onOpenAuth?: (tab?: 'signin' | 'signup') => void;
-  onLogout?: () => void;
-  currentView?: 'landing' | 'studio' | 'auth';
-  onNavigateHome?: () => void;
+  onOpenMarketIntelligence?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,39 +24,31 @@ export const Header: React.FC<HeaderProps> = ({
   isAdminOpen,
   isAdminAuthenticated,
   onLockAdmin,
-  currentUser,
-  onOpenAuth,
-  onLogout,
-  currentView,
-  onNavigateHome,
+  onOpenMarketIntelligence,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+
+  const { currentUser, isAuthenticated, signOut, openAuthModal } = useAuth();
   const showAdminPublicly = brand.showAdminButtonInHeader ?? false;
 
-  const handleAuthClick = (tab: 'signin' | 'signup') => {
-    if (onOpenAuth) {
-      onOpenAuth(tab);
-    } else {
-      const el = document.getElementById('auth');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+  // Close user dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setUserDropdownOpen(false);
       }
-    }
-  };
-
-  const handleLogoClick = (e: React.MouseEvent) => {
-    if (onNavigateHome) {
-      e.preventDefault();
-      onNavigateHome();
-    }
-  };
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 bg-[var(--background)]/85 backdrop-blur-xl border-b border-[var(--border)] transition-all">
       <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
         {/* Brand Logo with Enchanted Receipt Icon & Tagline */}
-        <a href="#" onClick={handleLogoClick} className="cursor-pointer">
+        <a href="#" className="cursor-pointer">
           <BrandLogo
             brandName={brand.brandName || 'Billnest'}
             tagline={brand.tagline || 'Invoices, paid faster'}
@@ -69,28 +58,38 @@ export const Header: React.FC<HeaderProps> = ({
         </a>
 
         {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-7">
           <a
-            href={currentView === 'landing' ? '#features' : '/#features'}
-            onClick={() => onNavigateHome && onNavigateHome()}
+            href="#features"
             className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             Features
           </a>
           <a
-            href={currentView === 'landing' ? '#how-it-works' : '/#how-it-works'}
-            onClick={() => onNavigateHome && onNavigateHome()}
+            href="#how-it-works"
             className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             How it works
           </a>
           <a
-            href={currentView === 'landing' ? '#faq' : '/#faq'}
-            onClick={() => onNavigateHome && onNavigateHome()}
+            href="#faq"
             className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
           >
             FAQ
           </a>
+          {onOpenMarketIntelligence && (
+            <button
+              onClick={onOpenMarketIntelligence}
+              className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:opacity-85 flex items-center gap-1.5 cursor-pointer"
+              title="Real-time tax rates & freelance market research grounded with Google Search"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+              <span>Live Rates</span>
+              <span className="px-1.5 py-0.5 text-[9px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-300 rounded-full">
+                AI
+              </span>
+            </button>
+          )}
           <button
             onClick={onOpenDashboard}
             className="text-sm font-semibold text-[var(--primary)] hover:opacity-80 flex items-center gap-1.5 cursor-pointer"
@@ -100,114 +99,129 @@ export const Header: React.FC<HeaderProps> = ({
               Live
             </span>
           </button>
-
-          {/* Sign In & Sign Up Navigation Tabs */}
-          {!currentUser ? (
-            <div className="flex items-center gap-3 border-l border-[var(--border)] pl-4">
-              <button
-                onClick={() => handleAuthClick('signin')}
-                className="text-sm font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors cursor-pointer"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => handleAuthClick('signup')}
-                className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors cursor-pointer"
-              >
-                Sign Up
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => handleAuthClick('signin')}
-              className="text-sm font-medium text-emerald-600 flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer border-l border-[var(--border)] pl-4"
-              title="View Account"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Account</span>
-            </button>
-          )}
         </nav>
 
         {/* Action Buttons */}
         <div className="hidden sm:flex items-center gap-3">
-          {/* Active User Account Badge or Sign Up / In Another Tab */}
-          {currentUser ? (
-            <div className="relative">
+          {/* User Account State / Sign In Button */}
+          {isAuthenticated && currentUser ? (
+            <div className="relative" ref={userDropdownRef}>
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2 py-1 pl-1.5 pr-3 rounded-full bg-[var(--card)] border border-[var(--border)] hover:border-orange-500/30 transition-all cursor-pointer shadow-xs"
+                className="flex items-center gap-2 p-1 pl-2.5 pr-2 bg-[var(--card)] hover:bg-[var(--muted)] border border-[var(--border)] rounded-full text-xs font-semibold text-[var(--foreground)] transition-all cursor-pointer shadow-xs"
+                title="Account Settings"
               >
-                <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-black">
-                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
-                </div>
-                <span className="text-xs font-semibold text-[var(--foreground)] max-w-[100px] truncate">
-                  {currentUser.name}
+                {/* User avatar or monogram */}
+                {currentUser.avatarUrl ? (
+                  <img
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.name}
+                    className="w-6 h-6 rounded-full object-cover border border-zinc-200"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-bold text-[11px] flex items-center justify-center">
+                    {currentUser.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="max-w-[100px] truncate text-[11px] font-bold">
+                  {currentUser.name.split(' ')[0]}
                 </span>
+                {currentUser.provider === 'google' ? (
+                  <span className="w-3.5 h-3.5 flex items-center justify-center" title="Google Connected">
+                    <svg className="w-3 h-3" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.15z" />
+                      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z" />
+                      <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.16 0 9.94 0 12s.45 3.84 1.24 5.42l4.04-3.15z" />
+                      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
+                    </svg>
+                  </span>
+                ) : null}
+                <ChevronDown className={`w-3.5 h-3.5 text-[var(--muted-foreground)] transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
+              {/* Account Dropdown Menu */}
               {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-xl p-2 z-50 animate-in fade-in zoom-in-95">
-                  <div className="px-3 py-2 border-b border-[var(--border)] mb-1">
-                    <p className="text-xs font-bold text-[var(--foreground)] truncate">
-                      {currentUser.name}
-                    </p>
-                    <p className="text-[11px] text-[var(--muted-foreground)] truncate">
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl p-2 z-50 animate-fadeIn">
+                  <div className="p-3 border-b border-zinc-100 dark:border-zinc-800 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100 truncate">
+                        {currentUser.name}
+                      </span>
+                      <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Active
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-zinc-500 font-mono truncate">
                       {currentUser.email}
-                    </p>
+                    </div>
+                    <div className="text-[10px] text-zinc-400 flex items-center gap-1 pt-0.5">
+                      <span>Auth:</span>
+                      <span className="font-semibold capitalize text-zinc-700 dark:text-zinc-300">
+                        {currentUser.provider === 'google' ? 'Google Account' : 'Email & Password'}
+                      </span>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      setUserDropdownOpen(false);
-                      onOpenDashboard();
-                    }}
-                    className="w-full text-left px-3 py-1.5 text-xs text-[var(--foreground)] hover:bg-[var(--muted)] rounded-lg transition-colors cursor-pointer"
-                  >
-                    Invoices Dashboard
-                  </button>
-                  <button
-                    onClick={() => {
-                      setUserDropdownOpen(false);
-                      handleAuthClick('signin');
-                    }}
-                    className="w-full text-left px-3 py-1.5 text-xs text-[var(--foreground)] hover:bg-[var(--muted)] rounded-lg transition-colors cursor-pointer"
-                  >
-                    Account Settings
-                  </button>
-                  {onLogout && (
+
+                  <div className="py-1">
                     <button
                       onClick={() => {
                         setUserDropdownOpen(false);
-                        onLogout();
+                        onOpenDashboard();
                       }}
-                      className="w-full text-left px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-500/10 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer mt-1 border-t border-[var(--border)] pt-2"
+                      className="w-full px-3 py-2 text-left text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5 text-orange-500" />
+                      <span>Open Invoices Dashboard</span>
+                    </button>
+
+                    {onOpenMarketIntelligence && (
+                      <button
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          onOpenMarketIntelligence();
+                        }}
+                        className="w-full px-3 py-2 text-left text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg flex items-center gap-2 cursor-pointer transition-colors"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                        <span>Live Market &amp; Tax Research</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        openAuthModal('signin');
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs font-semibold text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <User className="w-3.5 h-3.5 text-blue-500" />
+                      <span>Switch / Link Account</span>
+                    </button>
+                  </div>
+
+                  <div className="pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        signOut();
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg flex items-center gap-2 cursor-pointer transition-colors"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>Sign Out</span>
                     </button>
-                  )}
+                  </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleAuthClick('signup')}
-                className="px-4 py-2 text-xs font-semibold rounded-full bg-orange-600 hover:bg-orange-700 text-white shadow-xs transition-all cursor-pointer"
-              >
-                Sign Up Free
-              </button>
-              <a
-                href="/signup"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Open full sign up page in new tab"
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-full border border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-orange-600 hover:border-orange-500/30 transition-all cursor-pointer"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline text-[11px]">New Tab</span>
-              </a>
-            </div>
+            <button
+              onClick={() => openAuthModal('signin')}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-full bg-white text-zinc-800 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 shadow-xs cursor-pointer transition-all active:scale-[0.98]"
+            >
+              <User className="w-3.5 h-3.5 text-orange-600" />
+              <span>Sign In</span>
+            </button>
           )}
 
           {/* Admin Authenticated Badge & CMS Button */}
@@ -304,71 +318,73 @@ export const Header: React.FC<HeaderProps> = ({
           <a
             href="#faq"
             onClick={() => setMobileMenuOpen(false)}
-            className="block text-sm font-medium text-[var(--muted-foreground)] py-1.5"
+            className="block text-sm font-medium text-[var(--foreground)] py-1.5"
           >
             FAQ
           </a>
-
-          {/* Mobile Auth Controls */}
-          {currentUser ? (
-            <div className="py-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border)] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">
-                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-[var(--foreground)] leading-none">{currentUser.name}</p>
-                  <p className="text-[10px] text-[var(--muted-foreground)] mt-0.5">{currentUser.email}</p>
-                </div>
-              </div>
-              {onLogout && (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onLogout();
-                  }}
-                  className="text-xs font-semibold text-rose-600 hover:text-rose-700"
-                >
-                  Sign Out
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2 pt-1">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleAuthClick('signin');
-                  }}
-                  className="py-2 text-center text-xs font-semibold rounded-xl border border-[var(--border)] text-[var(--foreground)]"
-                >
-                  Sign In
-                </button>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleAuthClick('signup');
-                  }}
-                  className="py-2 text-center text-xs font-semibold rounded-xl bg-orange-500 text-white font-bold"
-                >
-                  Sign Up
-                </button>
-              </div>
-              <a
-                href="/signup"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-2 text-center text-xs font-semibold rounded-xl border border-orange-500/30 bg-orange-500/10 text-orange-600 flex items-center justify-center gap-1.5"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Open Sign Up in another tab</span>
-              </a>
-            </div>
-          )}
-
           <div className="pt-2 border-t border-[var(--border)] flex flex-col gap-2">
+            {isAuthenticated && currentUser ? (
+              <div className="p-3 bg-[var(--muted)]/50 rounded-xl border border-[var(--border)] space-y-2">
+                <div className="flex items-center gap-2.5">
+                  {currentUser.avatarUrl ? (
+                    <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-8 h-8 rounded-full" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-orange-600 text-white font-bold flex items-center justify-center text-xs">
+                      {currentUser.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="overflow-hidden">
+                    <div className="text-xs font-bold text-[var(--foreground)] truncate">{currentUser.name}</div>
+                    <div className="text-[11px] text-[var(--muted-foreground)] truncate font-mono">{currentUser.email}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenDashboard();
+                    }}
+                    className="flex-1 py-1.5 px-2.5 bg-[var(--card)] border border-[var(--border)] text-xs font-semibold rounded-lg text-center"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut();
+                    }}
+                    className="py-1.5 px-2.5 bg-rose-50 text-rose-600 border border-rose-200 text-xs font-semibold rounded-lg"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  openAuthModal('signin');
+                }}
+                className="w-full py-2.5 bg-white text-zinc-900 border border-zinc-200 text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs"
+              >
+                <User className="w-4 h-4 text-orange-600" />
+                <span>Sign In / Create Account</span>
+              </button>
+            )}
+
+            {onOpenMarketIntelligence && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenMarketIntelligence();
+                }}
+                className="w-full py-2.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 text-xs font-bold rounded-xl flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4 text-blue-500" />
+                <span>Live Tax &amp; Rates Intelligence (Google AI)</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

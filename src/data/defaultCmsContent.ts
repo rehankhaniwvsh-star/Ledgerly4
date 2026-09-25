@@ -12,6 +12,15 @@ export const defaultCmsContent: CmsContent = {
     googleSiteVerification: 'googleacb1159f81828443',
     adminPin: '1234',
     showAdminButtonInHeader: false,
+    defaultBankDetails: {
+      bankName: 'HDFC Bank Ltd',
+      accountName: 'Uzafa Shop',
+      accountNumber: '50200084729103',
+      routingCode: 'HDFC0001234',
+      iban: 'IN50HDFC00012345020008472',
+      upiId: 'uzafa.shop@okhdfcbank',
+      paymentInstructions: 'Scan UPI QR code or pay to UPI ID for instant 0% fee settlement.',
+    },
   },
   hero: {
     eyebrow: 'Free · No card required',

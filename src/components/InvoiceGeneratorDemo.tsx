@@ -19,9 +19,13 @@ import {
   CheckCircle2,
   AlertCircle,
   Landmark,
+  QrCode,
+  Smartphone,
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { UpiPaymentModal } from './UpiPaymentModal';
+import { UpiInvoiceWidget } from './UpiInvoiceWidget';
 
 interface InvoiceGeneratorDemoProps {
   brand: BrandSettings;
@@ -48,6 +52,7 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(isFullscreenInitially);
   const [validationError, setValidationError] = useState<string>('');
   const [validationDetails, setValidationDetails] = useState<ValidationErrorDetail[]>([]);
+  const [upiModalOpen, setUpiModalOpen] = useState(false);
 
   const printableRef = useRef<HTMLDivElement>(null);
 
@@ -230,6 +235,16 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
             >
               <Download className="w-3.5 h-3.5 text-emerald-500 btn-icon-hover-bounce" />
               <span>{downloadingPdf ? 'Generating PDF...' : 'Download PDF'}</span>
+            </button>
+
+            {/* Pay via UPI Action Button */}
+            <button
+              onClick={() => setUpiModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white shadow-xs cursor-pointer transition-all"
+              title="Pay with Google Pay, PhonePe, Paytm, or BHIM"
+            >
+              <QrCode className="w-3.5 h-3.5 btn-icon-hover-bounce" />
+              <span>Pay via UPI</span>
             </button>
 
             <button
@@ -577,11 +592,33 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
               </div>
             </div>
 
+            {/* UPI Payment Widget */}
+            {invoice.bankDetails?.upiId && (
+              <UpiInvoiceWidget
+                upiId={invoice.bankDetails.upiId}
+                payeeName={invoice.businessName || brand.brandName}
+                amount={grandTotal}
+                currency={invoice.currency}
+                invoiceNumber={invoice.invoiceNumber}
+                onOpenUpiModal={() => setUpiModalOpen(true)}
+              />
+            )}
+
             {/* Bank Details Card */}
             <div className="bg-[var(--muted)]/40 border border-[var(--border)] rounded-lg p-4 text-xs space-y-3">
-              <div className="flex items-center gap-2 font-bold text-[var(--foreground)]">
-                <Landmark className="w-4 h-4 text-orange-500" />
-                <span className="text-xs uppercase tracking-wide">Bank & Remittance Details</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 font-bold text-[var(--foreground)]">
+                  <Landmark className="w-4 h-4 text-orange-500" />
+                  <span className="text-xs uppercase tracking-wide">Bank & Remittance Details</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setUpiModalOpen(true)}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-orange-500/10 hover:bg-orange-500/20 px-2 py-0.5 rounded cursor-pointer transition-colors"
+                >
+                  <QrCode className="w-3 h-3" />
+                  <span>Test UPI QR</span>
+                </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 <div>
@@ -783,6 +820,36 @@ export const InvoiceGeneratorDemo: React.FC<InvoiceGeneratorDemoProps> = ({
           </div>
         </div>
       </div>
+
+      {/* UPI Payment Modal */}
+      <UpiPaymentModal
+        isOpen={upiModalOpen}
+        onClose={() => setUpiModalOpen(false)}
+        upiId={invoice.bankDetails?.upiId || ''}
+        payeeName={invoice.businessName || brand.brandName}
+        amount={grandTotal}
+        currency={invoice.currency}
+        invoiceNumber={invoice.invoiceNumber}
+        onUpdateUpiId={(newUpiId) => {
+          const updated: InvoiceData = {
+            ...invoice,
+            bankDetails: {
+              ...(invoice.bankDetails || {}),
+              upiId: newUpiId,
+            },
+          };
+          setInvoice(updated);
+          onSaveInvoice(updated);
+        }}
+        onMarkAsPaid={() => {
+          const updated: InvoiceData = {
+            ...invoice,
+            status: 'Paid',
+          };
+          setInvoice(updated);
+          onSaveInvoice(updated);
+        }}
+      />
     </div>
   );
 };

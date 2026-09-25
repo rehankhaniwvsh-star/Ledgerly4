@@ -19,7 +19,11 @@ import {
   Eye,
   Maximize2,
   Sparkles,
+  User,
+  LogOut,
+  ShieldCheck,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardModalProps {
   isOpen: boolean;
@@ -33,6 +37,7 @@ interface DashboardModalProps {
   onDuplicateInvoice: (invoice: InvoiceData) => void;
   onDownloadPdf: (invoice: InvoiceData) => void;
   onEmailInvoice: (invoice: InvoiceData) => void;
+  onOpenMarketIntelligence?: () => void;
 }
 
 export const DashboardModal: React.FC<DashboardModalProps> = ({
@@ -47,9 +52,12 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({
   onDuplicateInvoice,
   onDownloadPdf,
   onEmailInvoice,
+  onOpenMarketIntelligence,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'All' | 'Paid' | 'Sent' | 'Draft' | 'Overdue'>('All');
+
+  const { currentUser, isAuthenticated, signOut, openAuthModal } = useAuth();
 
   if (!isOpen) return null;
 
@@ -137,6 +145,52 @@ export const DashboardModal: React.FC<DashboardModalProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Active User Account Badge */}
+            {isAuthenticated && currentUser ? (
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[var(--card)] border border-[var(--border)] rounded-full text-xs">
+                {currentUser.avatarUrl ? (
+                  <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-5 h-5 rounded-full object-cover" />
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-orange-600 text-white font-bold text-[10px] flex items-center justify-center">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                )}
+                <span className="font-bold text-[var(--foreground)] truncate max-w-[120px]">
+                  {currentUser.name}
+                </span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 font-semibold border border-emerald-500/20">
+                  {currentUser.provider === 'google' ? 'Google' : 'Email'}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="ml-1 text-[var(--muted-foreground)] hover:text-rose-500 cursor-pointer transition-colors"
+                  title="Sign out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => openAuthModal('signin')}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full bg-white text-zinc-900 border border-zinc-200 hover:bg-zinc-50 cursor-pointer shadow-xs"
+              >
+                <User className="w-3.5 h-3.5 text-orange-600" />
+                <span>Sign In</span>
+              </button>
+            )}
+
+            {onOpenMarketIntelligence && (
+              <button
+                onClick={onOpenMarketIntelligence}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 cursor-pointer transition-all shadow-xs"
+                title="Search live tax rates and freelance benchmarks with Gemini 3.5 Flash Search Grounding"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                <span className="hidden md:inline">Live Tax &amp; Rates</span>
+                <span className="md:hidden">Rates AI</span>
+              </button>
+            )}
+
             <button
               onClick={onCreateNewInvoice}
               className="btn-shader-primary inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-[var(--radius)] cursor-pointer"

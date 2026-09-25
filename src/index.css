@@ -568,3 +568,77 @@
     width: 100%;
   }
 }
+
+/* ========================================================
+   SHADCN SIGN-IN COMPONENT ANIMATIONS & UTILITIES
+   ======================================================== */
+
+.font-geist {
+  font-family: var(--font-sans);
+}
+
+@keyframes elementFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(24px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes testimonialFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-element {
+  animation: elementFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-right {
+  animation: slideFromRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-testimonial {
+  animation: testimonialFloat 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+.animate-delay-600 { animation-delay: 600ms; }
+.animate-delay-700 { animation-delay: 700ms; }
+.animate-delay-800 { animation-delay: 800ms; }
+.animate-delay-900 { animation-delay: 900ms; }
+.animate-delay-1000 { animation-delay: 1000ms; }
+.animate-delay-1200 { animation-delay: 1200ms; }
+.animate-delay-1400 { animation-delay: 1400ms; }
+
+.custom-checkbox {
+  accent-color: var(--primary);
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+}
+

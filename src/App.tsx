@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { defaultCmsContent } from './data/defaultCmsContent';
 import { initialInvoices } from './data/initialInvoices';
-import { CmsContent, InvoiceData, UserProfile, CustomerOnboardingAnswers } from './types';
+import { CmsContent, InvoiceData } from './types';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
 import { FeaturesSection } from './components/FeaturesSection';
@@ -9,25 +9,38 @@ import { AboutSection } from './components/AboutSection';
 import { HowItWorksSection } from './components/HowItWorksSection';
 import { FaqSection } from './components/FaqSection';
 import { TestimonialsSection } from './components/TestimonialsSection';
-import { AuthSection } from './components/AuthSection';
 import { CtaSection } from './components/CtaSection';
 import { Footer } from './components/Footer';
 import { InvoiceStudioView } from './components/InvoiceStudioView';
-import { CustomerOnboardingSection } from './components/CustomerOnboardingSection';
 import { DashboardModal } from './components/DashboardModal';
 import { EmailModal } from './components/EmailModal';
 import { CmsAdminModal } from './components/CmsAdminModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { TermsPrivacyModal } from './components/TermsPrivacyModal';
 import { SplashEntranceAnimation } from './components/SplashEntranceAnimation';
+import { AuthWhiteScreenModal } from './components/AuthWhiteScreenModal';
+import { LiveMarketIntelligenceModal } from './components/LiveMarketIntelligenceModal';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import {
+  saveInvoiceToFirestore,
+  deleteInvoiceFromFirestore,
+  subscribeToUserInvoices,
+} from './services/firestoreService';
 import { downloadInvoicePdf } from './utils/pdfExport';
 
 const LOCAL_STORAGE_CMS_KEY = 'billnest_cms_data_v1';
 const LOCAL_STORAGE_INVOICES_KEY = 'billnest_invoices_data_v1';
 const LOCAL_STORAGE_ADMIN_AUTH_KEY = 'billnest_admin_auth_v1';
-const LOCAL_STORAGE_USER_KEY = 'billnest_user_session_v1';
 
-export default function App() {
+function AppContent() {
+  const {
+    currentUser,
+    isAuthenticated,
+    isAuthModalOpen,
+    openAuthModal,
+    closeAuthModal,
+  } = useAuth();
+
   const [cms, setCms] = useState<CmsContent>(() => {
     try {
       const saved =
@@ -35,7 +48,6 @@ export default function App() {
         localStorage.getItem('invoiceify_cms_data_v1') ||
         localStorage.getItem('ledgerly_cms_data_v1');
       if (saved) {
-        // Universal clean up of legacy brand name in all stored strings
         const cleansedJson = saved
           .replace(/Invoiceify/g, 'Billnest')
           .replace(/invoiceify/g, 'billnest')
@@ -71,7 +83,7 @@ export default function App() {
     return initialInvoices;
   });
 
-  const [currentView, setCurrentView] = useState<'landing' | 'studio' | 'auth' | 'onboarding'>('landing');
+  const [currentView, setCurrentView] = useState<'landing' | 'studio'>('landing');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
     initialInvoices[0]?.id || 'inv-101'
   );
@@ -82,150 +94,7 @@ export default function App() {
   const [adminAuthModalOpen, setAdminAuthModalOpen] = useState(false);
   const [termsPrivacyModalOpen, setTermsPrivacyModalOpen] = useState(false);
   const [termsPrivacyTab, setTermsPrivacyTab] = useState<'privacy' | 'terms'>('privacy');
-
-  // User Authentication State
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_USER_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return null;
-  });
-  const [authSectionTab, setAuthSectionTab] = useState<'signin' | 'signup'>('signin');
-
-  const handleLoginSuccess = (user: UserProfile, isNewUser: boolean = false) => {
-    setCurrentUser(user);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
-      // If user provided a custom studio/business name, seamlessly brand their invoices
-      if (
-        user.businessName &&
-        user.businessName !== 'Independent Studio' &&
-        user.businessName !== 'Creative Studio' &&
-        user.businessName !== 'Freelancer'
-      ) {
-        setCms((prev) => ({
-          ...prev,
-          brand: {
-            ...prev.brand,
-            brandName: user.businessName,
-          },
-        }));
-      }
-    } catch (err) {
-      console.error('Failed to save user session:', err);
-    }
-
-    // Direct new users or users with uncompleted questionnaire to Customer Onboarding Section
-    if (isNewUser || user.onboardingCompleted === false) {
-      setCurrentView('onboarding');
-      try {
-        window.history.pushState(null, '', '/onboarding');
-      } catch {}
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      // Transition straight to the Invoice Studio workspace with their new profile active
-      setCurrentView('studio');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const handleOnboardingComplete = (answers: CustomerOnboardingAnswers) => {
-    if (currentUser) {
-      const updatedUser: UserProfile = {
-        ...currentUser,
-        businessName: answers.businessName || currentUser.businessName,
-        onboardingCompleted: true,
-        onboardingAnswers: answers,
-      };
-      setCurrentUser(updatedUser);
-      try {
-        localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(updatedUser));
-        localStorage.setItem(`billnest_questionnaire_${updatedUser.email}`, JSON.stringify(answers));
-      } catch {}
-    }
-
-    // Brand the CMS from the customer's questionnaire answers
-    if (answers.businessName) {
-      setCms((prev) => ({
-        ...prev,
-        brand: {
-          ...prev.brand,
-          brandName: answers.businessName,
-        },
-      }));
-    }
-
-    // Apply currency, business name, and payment terms to first/active invoice
-    setInvoices((prev) =>
-      prev.map((inv, idx) => {
-        if (idx === 0) {
-          return {
-            ...inv,
-            businessName: answers.businessName || inv.businessName,
-            currency: answers.defaultCurrency || inv.currency,
-            notes: `Payment Terms: ${answers.paymentTerms}. Thank you for your business!`,
-          };
-        }
-        return inv;
-      })
-    );
-
-    setCurrentView('studio');
-    try {
-      window.history.pushState(null, '', '/studio');
-    } catch {}
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleOnboardingSkip = () => {
-    if (currentUser) {
-      const updatedUser: UserProfile = {
-        ...currentUser,
-        onboardingCompleted: true,
-      };
-      setCurrentUser(updatedUser);
-      try {
-        localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(updatedUser));
-      } catch {}
-    }
-    setCurrentView('studio');
-    try {
-      window.history.pushState(null, '', '/studio');
-    } catch {}
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    try {
-      localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
-    } catch (err) {
-      console.error('Failed to clear user session:', err);
-    }
-    setCurrentView('landing');
-  };
-
-  const handleOpenAuth = (tab: 'signin' | 'signup' = 'signin', asDedicatedView: boolean = true) => {
-    setAuthSectionTab(tab);
-    if (asDedicatedView) {
-      setCurrentView('auth');
-      try {
-        window.history.pushState(null, '', tab === 'signup' ? '/signup' : '/signin');
-      } catch {}
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      if (currentView !== 'landing') {
-        setCurrentView('landing');
-      }
-      setTimeout(() => {
-        const el = document.getElementById('auth');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    }
-  };
+  const [marketIntelligenceOpen, setMarketIntelligenceOpen] = useState(false);
 
   // Admin authentication state
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
@@ -235,6 +104,34 @@ export default function App() {
       return false;
     }
   });
+
+  // Prompt login system on initial website visit if not already logged in
+  useEffect(() => {
+    if (!isAuthenticated) {
+      openAuthModal('signin');
+    }
+  }, []);
+
+  // Real-time Firestore synchronization for authenticated user's invoices
+  useEffect(() => {
+    if (currentUser?.id) {
+      const unsubscribe = subscribeToUserInvoices(currentUser.id, (remoteInvoices) => {
+        if (remoteInvoices && remoteInvoices.length > 0) {
+          setInvoices(remoteInvoices);
+          try {
+            localStorage.setItem(LOCAL_STORAGE_INVOICES_KEY, JSON.stringify(remoteInvoices));
+          } catch {}
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [currentUser?.id]);
+
+  // When auth succeeds, automatically open the Dashboard!
+  const handleAuthSuccessRedirectDashboard = () => {
+    closeAuthModal();
+    setDashboardOpen(true);
+  };
 
   // Handle CMS open request with security PIN protection
   const handleRequestOpenCms = () => {
@@ -274,6 +171,14 @@ export default function App() {
     const handleHashChange = () => {
       if (window.location.hash === '#admin') {
         handleRequestOpenCms();
+      } else if (window.location.hash === '#login') {
+        openAuthModal('signin');
+      } else if (window.location.hash === '#signup') {
+        openAuthModal('signup');
+      } else if (window.location.hash === '#dashboard') {
+        setDashboardOpen(true);
+      } else if (window.location.hash === '#rates' || window.location.hash === '#tax') {
+        setMarketIntelligenceOpen(true);
       }
     };
 
@@ -281,6 +186,10 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     if (window.location.hash === '#admin') {
       handleRequestOpenCms();
+    } else if (window.location.hash === '#login') {
+      openAuthModal('signin');
+    } else if (window.location.hash === '#signup') {
+      openAuthModal('signup');
     }
 
     return () => {
@@ -294,21 +203,16 @@ export default function App() {
     const handleRouteFromUrl = () => {
       const path = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
 
-      if (path === '/create' || path === '/studio') {
+      if (path === '/login') {
+        openAuthModal('signin');
+      } else if (path === '/signup') {
+        openAuthModal('signup');
+      } else if (path === '/rates' || path === '/tax-intelligence') {
+        setMarketIntelligenceOpen(true);
+      } else if (path === '/create' || path === '/studio') {
         setCurrentView('studio');
       } else if (path === '/dashboard') {
         setDashboardOpen(true);
-      } else if (path === '/signin' || path === '/login') {
-        setCurrentView('auth');
-        setAuthSectionTab('signin');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (path === '/signup' || path === '/register' || path === '/auth') {
-        setCurrentView('auth');
-        setAuthSectionTab('signup');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (path === '/onboarding' || path === '/setup') {
-        setCurrentView('onboarding');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (path === '/privacy') {
         setTermsPrivacyTab('privacy');
         setTermsPrivacyModalOpen(true);
@@ -341,23 +245,6 @@ export default function App() {
           document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
         }, 150);
       }
-
-      // Check hash
-      const hash = window.location.hash.toLowerCase();
-      if (hash === '#signin' || hash === '#signin-tab') {
-        setCurrentView('auth');
-        setAuthSectionTab('signin');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (hash === '#signup' || hash === '#signup-tab') {
-        setCurrentView('auth');
-        setAuthSectionTab('signup');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (hash === '#auth') {
-        setCurrentView('landing');
-        setTimeout(() => {
-          document.getElementById('auth')?.scrollIntoView({ behavior: 'smooth' });
-        }, 150);
-      }
     };
 
     handleRouteFromUrl();
@@ -369,11 +256,10 @@ export default function App() {
   useEffect(() => {
     if (cms.brand?.brandName) {
       document.title = `${cms.brand.brandName} — ${
-        cms.brand.tagline || 'Branded invoicing for freelancers and agencies'
+        cms.brand.tagline || 'Invoices, paid faster'
       }`;
     }
 
-    // Dynamic Google Search Console meta tag injection
     if (cms.brand?.googleSiteVerification) {
       let meta = document.querySelector('meta[name="google-site-verification"]');
       if (!meta) {
@@ -385,13 +271,18 @@ export default function App() {
     }
   }, [cms.brand]);
 
-  // Persist invoices to localStorage
-  const saveInvoicesToStorage = (updatedList: InvoiceData[]) => {
+  // Persist invoices to localStorage and Firestore
+  const saveInvoicesToStorage = (updatedList: InvoiceData[], changedInvoice?: InvoiceData) => {
     setInvoices(updatedList);
     try {
       localStorage.setItem(LOCAL_STORAGE_INVOICES_KEY, JSON.stringify(updatedList));
     } catch (err) {
       console.error('Failed to save invoices to localStorage:', err);
+    }
+    if (currentUser?.id && changedInvoice) {
+      saveInvoiceToFirestore(currentUser.id, changedInvoice).catch((e) =>
+        console.warn('Firestore invoice sync error:', e)
+      );
     }
   };
 
@@ -406,15 +297,20 @@ export default function App() {
     } else {
       updatedList = [updatedInvoice, ...invoices];
     }
-    saveInvoicesToStorage(updatedList);
+    saveInvoicesToStorage(updatedList, updatedInvoice);
     setSelectedInvoiceId(updatedInvoice.id || updatedInvoice.invoiceNumber);
   };
 
   const handleUpdateInvoiceStatus = (id: string, newStatus: InvoiceData['status']) => {
-    const updatedList = invoices.map((inv) =>
-      inv.id === id || inv.invoiceNumber === id ? { ...inv, status: newStatus } : inv
-    );
-    saveInvoicesToStorage(updatedList);
+    let updatedTarget: InvoiceData | undefined;
+    const updatedList = invoices.map((inv) => {
+      if (inv.id === id || inv.invoiceNumber === id) {
+        updatedTarget = { ...inv, status: newStatus };
+        return updatedTarget;
+      }
+      return inv;
+    });
+    saveInvoicesToStorage(updatedList, updatedTarget);
   };
 
   const handleDeleteInvoice = (id: string) => {
@@ -422,6 +318,11 @@ export default function App() {
       (inv) => inv.id !== id && inv.invoiceNumber !== id
     );
     saveInvoicesToStorage(updatedList);
+    if (currentUser?.id) {
+      deleteInvoiceFromFirestore(currentUser.id, id).catch((e) =>
+        console.warn('Firestore invoice delete error:', e)
+      );
+    }
     if (updatedList.length > 0) {
       setSelectedInvoiceId(updatedList[0].id || updatedList[0].invoiceNumber);
     } else {
@@ -439,7 +340,7 @@ export default function App() {
       issueDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
     };
-    saveInvoicesToStorage([newInvoice, ...invoices]);
+    saveInvoicesToStorage([newInvoice, ...invoices], newInvoice);
     setSelectedInvoiceId(newInvoice.id);
     setCurrentView('studio');
   };
@@ -451,15 +352,14 @@ export default function App() {
   };
 
   const handleCreateNewInvoice = () => {
-    const businessName = currentUser?.businessName || currentUser?.name || cms.brand.brandName || 'Billnest Studio';
+    const businessTitle = currentUser?.companyName || currentUser?.name || cms.brand.brandName || 'Billnest Studio';
     const businessEmail = currentUser?.email || cms.brand.contactEmail || 'billing@billnest.app';
-    const businessLogoLetter = (currentUser?.businessName || currentUser?.name || cms.brand.logoLetter || 'B').charAt(0).toUpperCase();
 
     const newInv: InvoiceData = {
       id: `inv-${Date.now()}`,
-      businessName,
-      businessEmail,
-      businessLogoLetter,
+      businessName: businessTitle,
+      businessEmail: businessEmail,
+      businessLogoLetter: cms.brand.logoLetter || 'B',
       clientName: 'New Client',
       clientEmail: 'client@example.com',
       invoiceNumber: `INV-00${Math.floor(50 + Math.random() * 45)}`,
@@ -474,7 +374,7 @@ export default function App() {
       notes: 'Thank you for your business.',
       bankDetails: cms.brand.defaultBankDetails || {
         bankName: 'HDFC Bank Ltd',
-        accountName: cms.brand.brandName || 'Billnest Studio',
+        accountName: businessTitle,
         accountNumber: '50200084729103',
         routingCode: 'HDFC0001234',
         iban: 'IN50HDFC00012345020008472',
@@ -486,7 +386,7 @@ export default function App() {
       ],
     };
 
-    saveInvoicesToStorage([newInv, ...invoices]);
+    saveInvoicesToStorage([newInv, ...invoices], newInv);
     setSelectedInvoiceId(newInv.id);
     setDashboardOpen(false);
     setCurrentView('studio');
@@ -535,6 +435,11 @@ export default function App() {
       <SplashEntranceAnimation
         brandName={cms.brand.brandName || 'Billnest'}
         tagline={cms.brand.tagline || 'Invoices, paid faster'}
+        onComplete={() => {
+          if (!isAuthenticated) {
+            openAuthModal('signin');
+          }
+        }}
       />
 
       {/* Universal Top Header Bar */}
@@ -546,11 +451,7 @@ export default function App() {
         isAdminOpen={cmsAdminOpen}
         isAdminAuthenticated={isAdminAuthenticated}
         onLockAdmin={handleLockAdmin}
-        currentUser={currentUser}
-        onOpenAuth={handleOpenAuth}
-        onLogout={handleLogout}
-        currentView={currentView}
-        onNavigateHome={() => setCurrentView('landing')}
+        onOpenMarketIntelligence={() => setMarketIntelligenceOpen(true)}
       />
 
       {currentView === 'studio' ? (
@@ -566,78 +467,6 @@ export default function App() {
           onCreateNew={handleCreateNewInvoice}
           onOpenEmail={handleOpenEmailModal}
         />
-      ) : currentView === 'onboarding' ? (
-        /* New Section After Signup Asking Questions to Customer */
-        <div className="min-h-[85vh] flex flex-col justify-between">
-          <CustomerOnboardingSection
-            user={
-              currentUser || {
-                name: 'Valued Customer',
-                email: 'studio@billnest.app',
-                businessName: cms.brand?.brandName || 'My Studio',
-              }
-            }
-            brand={cms.brand}
-            onComplete={handleOnboardingComplete}
-            onSkip={handleOnboardingSkip}
-          />
-          <Footer
-            brand={cms.brand}
-            onOpenCms={handleRequestOpenCms}
-            onOpenGenerator={handleCreateNewInvoice}
-            onOpenDashboard={() => setDashboardOpen(true)}
-            onOpenPrivacy={() => {
-              setTermsPrivacyTab('privacy');
-              setTermsPrivacyModalOpen(true);
-            }}
-            onOpenTerms={() => {
-              setTermsPrivacyTab('terms');
-              setTermsPrivacyModalOpen(true);
-            }}
-            isAdminAuthenticated={isAdminAuthenticated}
-          />
-        </div>
-      ) : currentView === 'auth' ? (
-        /* Dedicated Standalone Sign Up / Sign In Page View Section */
-        <div className="min-h-[85vh] flex flex-col justify-between">
-          <AuthSection
-            brand={cms.brand}
-            currentUser={currentUser}
-            onLoginSuccess={(user, isNewUser) => {
-              handleLoginSuccess(user, isNewUser);
-            }}
-            onLogout={handleLogout}
-            onOpenDashboard={() => setDashboardOpen(true)}
-            onOpenGenerator={handleCreateNewInvoice}
-            onOpenPrivacy={() => {
-              setTermsPrivacyTab('privacy');
-              setTermsPrivacyModalOpen(true);
-            }}
-            onOpenTerms={() => {
-              setTermsPrivacyTab('terms');
-              setTermsPrivacyModalOpen(true);
-            }}
-            activeTab={authSectionTab}
-            onTabChange={(tab) => setAuthSectionTab(tab)}
-            isStandaloneView={true}
-            onBackToLanding={() => setCurrentView('landing')}
-          />
-          <Footer
-            brand={cms.brand}
-            onOpenCms={handleRequestOpenCms}
-            onOpenGenerator={handleCreateNewInvoice}
-            onOpenDashboard={() => setDashboardOpen(true)}
-            onOpenPrivacy={() => {
-              setTermsPrivacyTab('privacy');
-              setTermsPrivacyModalOpen(true);
-            }}
-            onOpenTerms={() => {
-              setTermsPrivacyTab('terms');
-              setTermsPrivacyModalOpen(true);
-            }}
-            isAdminAuthenticated={isAdminAuthenticated}
-          />
-        </div>
       ) : (
         /* Landing Page View */
         <>
@@ -675,26 +504,6 @@ export default function App() {
             primaryColor={cms.brand.primaryColor}
           />
 
-          {/* Dedicated Sign In & Sign Up Section */}
-          <AuthSection
-            brand={cms.brand}
-            currentUser={currentUser}
-            onLoginSuccess={(user, isNewUser) => handleLoginSuccess(user, isNewUser)}
-            onLogout={handleLogout}
-            onOpenDashboard={() => setDashboardOpen(true)}
-            onOpenGenerator={handleCreateNewInvoice}
-            onOpenPrivacy={() => {
-              setTermsPrivacyTab('privacy');
-              setTermsPrivacyModalOpen(true);
-            }}
-            onOpenTerms={() => {
-              setTermsPrivacyTab('terms');
-              setTermsPrivacyModalOpen(true);
-            }}
-            activeTab={authSectionTab}
-            onTabChange={(tab) => setAuthSectionTab(tab)}
-          />
-
           <CtaSection
             cta={cms.cta}
             brand={cms.brand}
@@ -719,6 +528,23 @@ export default function App() {
         </>
       )}
 
+      {/* Account Sign-In and Sign-Up System (White Screen View / Modal) */}
+      <AuthWhiteScreenModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
+        onSuccessRedirectDashboard={handleAuthSuccessRedirectDashboard}
+        brandName={cms.brand?.brandName || 'Billnest'}
+        tagline={cms.brand?.tagline || 'Invoices, paid faster'}
+        logoLetter={cms.brand?.logoLetter || 'B'}
+      />
+
+      {/* Live Market Rates & Tax Intelligence (Google Search Grounding via Gemini 3.5 Flash) */}
+      <LiveMarketIntelligenceModal
+        isOpen={marketIntelligenceOpen}
+        onClose={() => setMarketIntelligenceOpen(false)}
+        currencySymbol={activeInvoice?.currency || '₹'}
+      />
+
       {/* Terms of Service & Privacy Policy Modal */}
       <TermsPrivacyModal
         isOpen={termsPrivacyModalOpen}
@@ -741,6 +567,7 @@ export default function App() {
         onDuplicateInvoice={handleDuplicateInvoice}
         onDownloadPdf={handleDownloadPdf}
         onEmailInvoice={handleOpenEmailModal}
+        onOpenMarketIntelligence={() => setMarketIntelligenceOpen(true)}
       />
 
       {/* Email Invoice Share Modal */}
@@ -771,5 +598,13 @@ export default function App() {
         onLockAdmin={handleLockAdmin}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

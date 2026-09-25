@@ -41,6 +41,8 @@ import {
   Timer,
   Clock,
   CheckCircle2,
+  QrCode,
+  Smartphone,
 } from 'lucide-react';
 import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
 import {
@@ -942,6 +944,121 @@ export const CmsAdminModal: React.FC<CmsAdminModalProps> = ({
                       }
                       className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
                     />
+                  </div>
+
+                  {/* Default UPI & Payment Settings */}
+                  <div className="sm:col-span-2 pt-4 border-t border-[var(--border)] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h5 className="text-xs font-bold text-[var(--foreground)] flex items-center gap-1.5">
+                        <QrCode className="w-3.5 h-3.5 text-orange-600" />
+                        Default UPI Payment & Bank Details
+                      </h5>
+                      <span className="text-[10px] bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded font-bold">
+                        0% Fee Instant Pay
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-[var(--muted-foreground)] leading-relaxed">
+                      Connect your UPI ID (Google Pay, PhonePe, Paytm, BHIM, or any bank UPI address) to automatically generate real-time scannable QR codes on your invoices.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
+                          Default UPI ID (VPA)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. uzafa.shop@okhdfcbank or business@upi"
+                          value={formData.brand.defaultBankDetails?.upiId || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              brand: {
+                                ...formData.brand,
+                                defaultBankDetails: {
+                                  ...(formData.brand.defaultBankDetails || {}),
+                                  upiId: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-mono text-[var(--foreground)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
+                          Beneficiary / Payee Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Uzafa Shop or Billnest Studio"
+                          value={formData.brand.defaultBankDetails?.accountName || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              brand: {
+                                ...formData.brand,
+                                defaultBankDetails: {
+                                  ...(formData.brand.defaultBankDetails || {}),
+                                  accountName: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
+                          Bank Name (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. HDFC Bank / State Bank of India"
+                          value={formData.brand.defaultBankDetails?.bankName || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              brand: {
+                                ...formData.brand,
+                                defaultBankDetails: {
+                                  ...(formData.brand.defaultBankDetails || {}),
+                                  bankName: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-[var(--muted-foreground)] block mb-1">
+                          Account Number (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 50200084729103"
+                          value={formData.brand.defaultBankDetails?.accountNumber || ''}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              brand: {
+                                ...formData.brand,
+                                defaultBankDetails: {
+                                  ...(formData.brand.defaultBankDetails || {}),
+                                  accountNumber: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs font-mono text-[var(--foreground)]"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Google Search Console & SEO Section */}

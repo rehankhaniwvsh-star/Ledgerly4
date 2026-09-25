@@ -110,6 +110,18 @@ export interface CmsContent {
   lastUpdated: string;
 }
 
+export interface UserAccount {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl?: string;
+  provider: 'google' | 'email';
+  createdAt: string;
+  lastLoginAt: string;
+  companyName?: string;
+  password?: string;
+}
+
 export interface InvoiceItem {
   id: string;
   description: string;
@@ -136,31 +148,5 @@ export interface InvoiceData {
   themeColor?: string;
   templateStyle?: 'Classic' | 'Modern' | 'Minimal';
   bankDetails?: BankDetails;
-  createdAt?: string;
-}
-
-export interface CustomerOnboardingAnswers {
-  businessName: string;
-  industry: string;
-  businessSize: string;
-  defaultCurrency: string;
-  invoiceVolume: string;
-  paymentTerms: string;
-  acceptedPayments: string[];
-  primaryGoal: string;
-  notesOrTaxInfo?: string;
-  completedAt?: string;
-}
-
-export interface UserProfile {
-  id?: string;
-  name: string;
-  email: string;
-  businessName?: string;
-  role?: string;
-  avatarUrl?: string;
-  provider?: 'google' | 'github' | 'email';
-  onboardingCompleted?: boolean;
-  onboardingAnswers?: CustomerOnboardingAnswers;
   createdAt?: string;
 }

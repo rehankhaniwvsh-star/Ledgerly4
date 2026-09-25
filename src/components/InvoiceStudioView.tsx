@@ -21,11 +21,15 @@ import {
   Landmark,
   Building2,
   CreditCard,
+  QrCode,
+  Smartphone,
 } from 'lucide-react';
 import { downloadInvoicePdf } from '../utils/pdfExport';
 import { BrandLogo, ReceiptLogoIcon } from './BrandLogo';
 import { MorphingMascot } from './MorphingMascot';
 import { InvoiceSchema, validateStrict, ValidationErrorDetail } from '../schemas/strictSchemas';
+import { UpiPaymentModal } from './UpiPaymentModal';
+import { UpiInvoiceWidget } from './UpiInvoiceWidget';
 
 interface InvoiceStudioViewProps {
   brand: BrandSettings;
@@ -93,6 +97,7 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
   const [isClientViewMode, setIsClientViewMode] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrorDetail[]>([]);
   const [generalError, setGeneralError] = useState<string>('');
+  const [upiModalOpen, setUpiModalOpen] = useState(false);
 
   // Sync state when selected invoice ID changes or external list updates
   useEffect(() => {
@@ -319,6 +324,15 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             </div>
 
             {/* Action Buttons */}
+            <button
+              onClick={() => setUpiModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold bg-gradient-to-r from-orange-600 via-amber-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-sm cursor-pointer transition-all"
+              title="Pay with Google Pay, PhonePe, Paytm, CRED, or BHIM"
+            >
+              <QrCode className="w-3.5 h-3.5 btn-icon-hover-bounce" />
+              <span>Pay via UPI</span>
+            </button>
+
             <button
               onClick={handleShareLink}
               className="btn-shader-secondary inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer"
@@ -789,24 +803,47 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
                   </div>
 
                   <div>
-                    <label className="font-medium text-[var(--muted-foreground)] block mb-1 text-[11px]">
-                      UPI ID / Payment Link (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={invoice.bankDetails?.upiId || ''}
-                      onChange={(e) =>
-                        setInvoice({
-                          ...invoice,
-                          bankDetails: {
-                            ...invoice.bankDetails,
-                            upiId: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)]"
-                      placeholder="e.g. business@upi or link"
-                    />
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="font-medium text-[var(--muted-foreground)] text-[11px]">
+                        UPI ID / Quick Pay (Google Pay, PhonePe, Paytm)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setUpiModalOpen(true)}
+                        className="text-[10px] font-bold text-orange-600 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <QrCode className="w-3 h-3" />
+                        <span>Preview UPI QR</span>
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={invoice.bankDetails?.upiId || ''}
+                        onChange={(e) =>
+                          setInvoice({
+                            ...invoice,
+                            bankDetails: {
+                              ...invoice.bankDetails,
+                              upiId: e.target.value,
+                            },
+                          })
+                        }
+                        className="flex-1 p-2 bg-[var(--background)] border border-[var(--border)] rounded text-xs text-[var(--foreground)] font-mono"
+                        placeholder="e.g. uzafa.shop@okhdfcbank"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setUpiModalOpen(true)}
+                        className="px-2.5 py-1.5 text-[11px] font-bold bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 border border-orange-500/20 rounded transition-colors cursor-pointer shrink-0"
+                        title="Open UPI Payment QR Code"
+                      >
+                        QR Code
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-[var(--muted-foreground)] mt-1">
+                      Enables real-time scannable QR code on invoice and 0% fee instant mobile payment.
+                    </p>
                   </div>
 
                   <div className="sm:col-span-2">
@@ -999,6 +1036,34 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
             </div>
           </div>
 
+          {/* UPI Instant Payment Card on Invoice Document */}
+          {invoice.bankDetails?.upiId ? (
+            <UpiInvoiceWidget
+              upiId={invoice.bankDetails.upiId}
+              payeeName={invoice.businessName || brand.brandName}
+              amount={grandTotal}
+              currency={invoice.currency}
+              invoiceNumber={invoice.invoiceNumber}
+              onOpenUpiModal={() => setUpiModalOpen(true)}
+            />
+          ) : (
+            !isClientViewMode && (
+              <div className="border border-dashed border-orange-500/30 bg-orange-500/5 rounded-lg p-3 text-xs flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-[var(--muted-foreground)]">
+                  <QrCode className="w-4 h-4 text-orange-600 shrink-0" />
+                  <span>Accept 0% fee payments via Google Pay, PhonePe, and Paytm with UPI.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setUpiModalOpen(true)}
+                  className="px-2.5 py-1 text-[11px] font-bold bg-orange-600 hover:bg-orange-700 text-white rounded transition-colors cursor-pointer shrink-0"
+                >
+                  Enable UPI QR
+                </button>
+              </div>
+            )
+          )}
+
           {/* Bank & Payment Details Card on Invoice Document */}
           {invoice.bankDetails && (invoice.bankDetails.bankName || invoice.bankDetails.accountNumber || invoice.bankDetails.accountName || invoice.bankDetails.routingCode || invoice.bankDetails.upiId) && (
             <div className="bg-gradient-to-br from-amber-500/5 to-orange-500/5 border border-orange-500/20 rounded-lg p-4 text-xs space-y-3">
@@ -1116,6 +1181,33 @@ export const InvoiceStudioView: React.FC<InvoiceStudioViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* UPI Payment Modal */}
+      <UpiPaymentModal
+        isOpen={upiModalOpen}
+        onClose={() => setUpiModalOpen(false)}
+        upiId={invoice.bankDetails?.upiId || ''}
+        payeeName={invoice.businessName || brand.brandName}
+        amount={grandTotal}
+        currency={invoice.currency}
+        invoiceNumber={invoice.invoiceNumber}
+        onUpdateUpiId={(newUpiId) => {
+          const updated: InvoiceData = {
+            ...invoice,
+            bankDetails: {
+              ...(invoice.bankDetails || {}),
+              upiId: newUpiId,
+            },
+          };
+          setInvoice(updated);
+          onSaveInvoice(updated);
+          showToast(`UPI ID updated to ${newUpiId}`);
+        }}
+        onMarkAsPaid={() => {
+          handleStatusChange('Paid');
+          showToast('Invoice marked as Paid via UPI!');
+        }}
+      />
     </div>
   );
 };

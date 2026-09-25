@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny all unmatched paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email'])
+        && data.uid is string && data.uid == request.auth.uid
+        && data.email is string && data.email.size() <= 256;
+    }
+
+    function isValidInvoice(data) {
+      return data.keys().hasAll(['userId', 'invoiceNumber', 'clientName', 'status'])
+        && data.userId is string && data.userId == request.auth.uid
+        && data.invoiceNumber is string && data.invoiceNumber.size() <= 64
+        && data.clientName is string && data.clientName.size() <= 120
+        && data.status is string && data.status in ['Draft', 'Sent', 'Paid', 'Overdue'];
+    }
+
+    // User Profile Document
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false; // PII Protection: do not allow unbounded listing of user accounts
+      allow create: if isValidId(userId) && isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if isValidId(userId) && isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow delete: if isValidId(userId) && isOwner(userId);
+
+      // Invoices subcollection owned by the user
+      match /invoices/{invoiceId} {
+        allow get: if isValidId(userId) && isOwner(userId) && isValidId(invoiceId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId) && isOwner(userId) && isValidId(invoiceId)
+          && isValidInvoice(request.resource.data);
+        allow update: if isValidId(userId) && isOwner(userId) && isValidId(invoiceId)
+          && isValidInvoice(request.resource.data)
+          && request.resource.data.userId == resource.data.userId;
+        allow delete: if isValidId(userId) && isOwner(userId) && isValidId(invoiceId);
+      }
+    }
+  }
+}

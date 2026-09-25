@@ -20,12 +20,12 @@ export const initialInvoices: InvoiceData[] = [
     notes: 'Thank you for choosing Nova Studio for your branding project!',
     bankDetails: {
       bankName: 'HDFC Bank Ltd',
-      accountName: 'Billnest Studio Private Limited',
+      accountName: 'Uzafa Shop',
       accountNumber: '50200084729103',
       routingCode: 'HDFC0001234',
       iban: 'IN50HDFC00012345020008472',
-      upiId: 'billnest@hdfcbank',
-      paymentInstructions: 'Please include Invoice #INV-2026-001 in payment reference.',
+      upiId: 'uzafa.shop@okhdfcbank',
+      paymentInstructions: 'Scan UPI QR code or pay to UPI ID for instant 0% fee settlement.',
     },
     items: [
       { id: 'item-1', description: 'Brand Identity & Guidelines', quantity: 1, rate: 25000 },

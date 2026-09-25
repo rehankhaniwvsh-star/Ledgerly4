@@ -1,7 +1,8 @@
 import jsPDF from 'jspdf';
 import { InvoiceData } from '../types';
+import { buildUpiUri, generateUpiQrDataUrl } from './upi';
 
-export const downloadInvoicePdf = (invoice: InvoiceData, brandName: string) => {
+export const downloadInvoicePdf = async (invoice: InvoiceData, brandName: string) => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -151,9 +152,11 @@ export const downloadInvoicePdf = (invoice: InvoiceData, brandName: string) => {
   const bank = invoice.bankDetails;
   if (bank && (bank.bankName || bank.accountNumber || bank.accountName || bank.routingCode || bank.iban || bank.upiId || bank.paymentInstructions)) {
     y += 10;
+    const hasUpi = !!bank.upiId;
+    const boxHeight = hasUpi ? 30 : 26;
     doc.setFillColor(248, 247, 245);
     doc.setDrawColor(230, 225, 218);
-    doc.roundedRect(15, y, 180, 26, 2, 2, 'FD');
+    doc.roundedRect(15, y, 180, boxHeight, 2, 2, 'FD');
 
     doc.setFontSize(8.5);
     doc.setFont('helvetica', 'bold');
@@ -172,7 +175,7 @@ export const downloadInvoicePdf = (invoice: InvoiceData, brandName: string) => {
     let line2 = [];
     if (bank.routingCode) line2.push(`Routing/IFSC: ${bank.routingCode}`);
     if (bank.iban) line2.push(`IBAN: ${bank.iban}`);
-    if (bank.upiId) line2.push(`UPI / Payment ID: ${bank.upiId}`);
+    if (bank.upiId) line2.push(`UPI ID: ${bank.upiId}`);
 
     doc.text(line1.join('  •  ') || 'Direct Bank Wire Transfer', 19, y + 11);
     if (line2.length > 0) {
@@ -182,6 +185,29 @@ export const downloadInvoicePdf = (invoice: InvoiceData, brandName: string) => {
       doc.setFontSize(7.5);
       doc.setTextColor(120, 115, 110);
       doc.text(`Instructions: ${bank.paymentInstructions}`, 19, y + 21);
+    }
+
+    // Embed scannable UPI QR code if UPI ID is present
+    if (hasUpi && bank.upiId) {
+      try {
+        const upiUri = buildUpiUri({
+          upiId: bank.upiId,
+          payeeName: invoice.businessName || brandName || 'Merchant',
+          amount: grandTotal,
+          currency: invoice.currency,
+          invoiceNumber: invoice.invoiceNumber,
+        });
+        const qrData = await generateUpiQrDataUrl(upiUri, 180);
+        if (qrData) {
+          doc.addImage(qrData, 'PNG', 167, y + 3, 23, 23);
+          doc.setFontSize(5.5);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(200, 80, 20);
+          doc.text('SCAN TO PAY (UPI)', 178.5, y + 28, { align: 'center' });
+        }
+      } catch (err) {
+        console.warn('Could not render UPI QR on PDF:', err);
+      }
     }
   }
 

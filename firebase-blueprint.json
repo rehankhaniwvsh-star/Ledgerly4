@@ -1,0 +1,148 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile document storing identity details",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user identifier",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "Primary email address of the account user",
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Full name or display title of the user",
+          "maxLength": 120
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "Avatar image URL or DiceBear avatar uri",
+          "maxLength": 1000
+        },
+        "companyName": {
+          "type": "string",
+          "description": "Company, studio, or freelancing agency name",
+          "maxLength": 120
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Account registration timestamp",
+          "maxLength": 64
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "Most recent login timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Persisted invoice record belonging to an authenticated user",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the user who owns this invoice",
+          "maxLength": 128
+        },
+        "invoiceNumber": {
+          "type": "string",
+          "description": "Unique invoice tracking code such as INV-0042",
+          "maxLength": 64
+        },
+        "clientName": {
+          "type": "string",
+          "description": "Client or company name being billed",
+          "maxLength": 120
+        },
+        "clientEmail": {
+          "type": "string",
+          "description": "Client email address for billing and delivery",
+          "maxLength": 256
+        },
+        "businessName": {
+          "type": "string",
+          "description": "Issuing company or freelancer name",
+          "maxLength": 120
+        },
+        "businessEmail": {
+          "type": "string",
+          "description": "Issuing company billing email",
+          "maxLength": 256
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency symbol or ISO code",
+          "maxLength": 16
+        },
+        "issueDate": {
+          "type": "string",
+          "description": "ISO date of invoice issuance",
+          "maxLength": 32
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "ISO payment due date",
+          "maxLength": 32
+        },
+        "status": {
+          "type": "string",
+          "description": "Lifecycle status of the invoice",
+          "enum": ["Draft", "Sent", "Paid", "Overdue"]
+        },
+        "taxRate": {
+          "type": "number",
+          "description": "Tax percentage applied to items"
+        },
+        "discountAmount": {
+          "type": "number",
+          "description": "Monetary discount applied to subtotal"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Payment instructions and thank you remarks",
+          "maxLength": 2000
+        },
+        "themeColor": {
+          "type": "string",
+          "description": "Hex color code for invoice branding",
+          "maxLength": 32
+        },
+        "templateStyle": {
+          "type": "string",
+          "description": "Selected layout template style",
+          "maxLength": 32
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp",
+          "maxLength": 64
+        }
+      },
+      "required": ["userId", "invoiceNumber", "clientName", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document keyed by user authentication UID"
+    },
+    "/users/{userId}/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Collection of invoices owned by the specified user"
+    }
+  }
+}
